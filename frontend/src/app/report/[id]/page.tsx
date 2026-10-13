@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckSquare, ClipboardList, Info, MapPin, MessageSquareText, Plus, Printer, Receipt, Square, Footprints } from "lucide-react";
+import { BrainCircuit, CheckSquare, ClipboardList, Info, MapPin, MessageSquareText, Plus, Printer, Receipt, Square, Footprints } from "lucide-react";
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { AskPanel } from "@/components/report/AskPanel";
@@ -223,6 +223,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
                 ))}
               </div>
             )}
+            {r.ml_check && <MlCheck check={r.ml_check} />}
           </section>
 
           {r.record_of_rights && (
@@ -289,6 +290,39 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
 
       <p className="mt-8 border-t border-line pt-4 text-xs text-muted">{t("disclaimer")}</p>
       <p className="hidden text-xs text-muted print:block">{lang === "bn" ? "জমিচেক" : "JomiCheck"} · {report.verify_url}</p>
+    </div>
+  );
+}
+
+function MlCheck({ check }: { check: NonNullable<VerificationResult["ml_check"]> }) {
+  const { lang, num } = useLang();
+  const bn = lang === "bn";
+  const { checked, unusual } = check;
+  const text =
+    checked === 0
+      ? bn
+        ? "গত ১০ বছরে এই দাগে স্কোর করার মতো কোনো বিক্রয় হস্তান্তর নেই।"
+        : "No sale transfers on this plot in the last 10 years to score."
+      : unusual === 0
+        ? bn
+          ? `${num(checked)}টি হস্তান্তর পরীক্ষা করা হয়েছে, কোনো অস্বাভাবিক ধরন পাওয়া যায়নি।`
+          : `${num(checked)} transfer${checked > 1 ? "s" : ""} checked, no unusual pattern found.`
+        : bn
+          ? `${num(checked)}টি হস্তান্তরের মধ্যে ${num(unusual)}টি অস্বাভাবিক। বিস্তারিত উপরের ফলাফলে দেখুন।`
+          : `${num(unusual)} of ${num(checked)} transfers look unusual. See the findings above.`;
+  return (
+    <div
+      className={`mt-3 flex items-start gap-3 rounded-lg border bg-white px-4 py-3 text-sm ${
+        unusual ? "border-medium/40" : "border-line"
+      }`}
+    >
+      <BrainCircuit className={`mt-0.5 size-5 shrink-0 ${unusual ? "text-medium" : "text-brand-700"}`} />
+      <p>
+        <span className="font-semibold">
+          {bn ? "মেশিন লার্নিং যাচাই" : "Machine learning check"} ({check.model}):
+        </span>{" "}
+        <span className="text-muted">{text}</span>
+      </p>
     </div>
   );
 }

@@ -128,6 +128,7 @@ export type VerificationResult = {
   lineage: LineageStep[];
   timeline: TimelineEvent[];
   notes: Bi[];
+  ml_check?: { model: string; checked: number; unusual: number };
   summary: Bi;
   documents: Bi[];
   next_steps: Bi[];

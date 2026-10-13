@@ -83,6 +83,13 @@ class DemoScenarioTests(TestCase):
         self.assertNotIn("KHATIAN_MISMATCH", {f["code"] for f in result["flags"]})
         self.assertTrue(result["notes"])
 
+    def test_ml_check_summary(self):
+        clean = run_case(next(c for c in DEMO_CASES if c["key"] == "clean"))["ml_check"]
+        self.assertGreaterEqual(clean["checked"], 1)
+        self.assertEqual(clean["unusual"], 0)
+        broker = run_case(next(c for c in DEMO_CASES if c["key"] == "ml_broker"))["ml_check"]
+        self.assertGreaterEqual(broker["unusual"], 1)
+
     def test_concurrent_buyer_interest(self):
         case = next(c for c in DEMO_CASES if c["key"] == "clean")
         run_case(case, buyer_token="buyer-a")

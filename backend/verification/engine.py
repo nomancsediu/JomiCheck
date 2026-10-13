@@ -94,6 +94,7 @@ class Verifier:
         self.buyer_token = (buyer_token or "").strip()
 
         self.flags: list[Flag] = []
+        self.ml_check = {"model": "Isolation Forest", "checked": 0, "unusual": 0}
         self.notes: list[dict] = []
 
         self.khatians = sorted(
@@ -359,6 +360,7 @@ class Verifier:
             "lineage": lineage,
             "timeline": self._timeline(),
             "notes": self.notes,
+            "ml_check": self.ml_check,
             **guidance.build(rendered, role, level),
         }
 
@@ -455,6 +457,7 @@ class Verifier:
         if person and role in ("owner", "heir", "deed_buyer"):
             transfers.append(proposed_transfer(person, self.plot, self.area, today))
         unusual = sorted((r for r in anomaly_model.score(transfers) if r["is_anomaly"]), key=lambda r: r["score"])
+        self.ml_check.update(checked=len(transfers), unusual=len(unusual))
         if not unusual:
             return
 
@@ -467,7 +470,7 @@ class Verifier:
         if rule_flags:
             # The rules already explain this pattern; the model only adds supporting evidence.
             for f in rule_flags:
-                f.evidence.extend(f"ML model also marks as unusual — {line}" for line in evidence)
+                f.evidence.extend(f"ML model also marks as unusual: {line}" for line in evidence)
             return
 
         top = unusual[0]["transfer"]
