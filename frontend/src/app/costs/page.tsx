@@ -197,7 +197,7 @@ export default function CostsPage({ searchParams }: { searchParams: Promise<{ ar
   const initialRate = sp.rate ? String(Math.round(Number(sp.rate) / 100)) : "";
 
   return (
-    <div className="mx-auto max-w-6xl space-y-12 px-4 py-10 sm:px-6">
+    <div className="page-x space-y-12 py-10">
       <section>
         <div className="mb-6 flex items-center gap-3">
           <span className="flex size-11 items-center justify-center rounded-lg bg-brand-50 text-brand-700">

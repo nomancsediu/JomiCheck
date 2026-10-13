@@ -148,7 +148,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
   const created = new Date(report.created_at);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <div className="page-x py-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-mono text-xs text-muted">

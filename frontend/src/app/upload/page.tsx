@@ -99,7 +99,7 @@ export default function UploadPage() {
   const f = doc?.fields;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <div className="page-x py-10">
       <div className="flex items-center gap-3">
         <span className="flex size-11 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
           <ScanText className="size-6" />

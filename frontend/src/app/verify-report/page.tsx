@@ -14,7 +14,7 @@ export default function VerifyReportForm() {
   const cls = "w-full rounded-md border border-line bg-white px-3 py-2.5 font-mono text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100";
 
   return (
-    <div className="mx-auto max-w-xl px-4 py-14 sm:px-6">
+    <div className="page-x py-14 *:mx-auto *:max-w-xl">
       <div className="flex items-center gap-3">
         <span className="flex size-11 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
           <QrCode className="size-6" />

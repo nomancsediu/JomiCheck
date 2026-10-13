@@ -50,7 +50,7 @@ export default function VerifyReportResult({
   const facts = check.facts;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+    <div className="page-x py-12 *:mx-auto *:max-w-3xl">
       <div className={`rounded-xl border-2 bg-white p-6 ${ok ? "border-low" : "border-high"}`}>
         <div className="flex items-start gap-4">
           {ok ? <ShieldCheck className="size-12 shrink-0 text-low" /> : <ShieldAlert className="size-12 shrink-0 text-high" />}

@@ -53,7 +53,7 @@ export function SiteHeader() {
 
   return (
     <header className="no-print sticky top-0 z-30 border-b border-line bg-white">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 sm:px-6">
+      <div className="page-x flex h-16 items-center gap-6">
         <Link href="/" className="flex items-center gap-3">
           <Logo />
           <span className="leading-tight">
@@ -98,7 +98,7 @@ export function SiteHeader() {
           </Link>
         </div>
       </div>
-      <nav className="flex gap-1 overflow-x-auto border-t border-line px-4 py-2 md:hidden">
+      <nav className="page-x flex gap-1 overflow-x-auto border-t border-line py-2 md:hidden">
         {links.map((l) => (
           <Link key={l.href} href={l.href} className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm text-ink hover:bg-paper">
             {l.label}

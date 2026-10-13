@@ -27,6 +27,16 @@
   --color-high-bg: #fcebea;
 }
 
+@utility page-x {
+  padding-inline: 1rem;
+  @variant sm {
+    padding-inline: 2rem;
+  }
+  @variant lg {
+    padding-inline: 80px;
+  }
+}
+
 html {
   background: var(--color-paper);
   color: var(--color-ink);

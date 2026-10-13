@@ -138,7 +138,7 @@ export default function VerifyPage() {
   const canSubmit = form.mouza && form.dag.trim() && form.seller.trim() && areaNum > 0 && !loading;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+    <div className="page-x py-10">
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <section className="rounded-xl border border-line bg-white">
           <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line px-6 py-5">
