@@ -36,13 +36,13 @@ UNIT_ALIASES = {
 
 _BN_TO_ASCII = str.maketrans("০১২৩৪৫৬৭৮৯", "0123456789")
 
-PROMPT = """You are reading a scanned Bangladeshi land document (khatian / porcha / mutation khatian / deed).
+PROMPT = """You are reading a scanned Bangladeshi land document (khatian / porcha / mutation khatian / deed / land tax receipt).
 Extract the fields below and reply with ONLY one JSON object, no markdown, no explanation.
 Write every number with English digits (convert Bangla digits). Use null when a field is not visible.
 Do not guess: copy names exactly as written, in the script they are written in.
 
 {
-  "document_type": "khatian" | "mutation_khatian" | "deed" | "other",
+  "document_type": "khatian" | "mutation_khatian" | "deed" | "tax_receipt" | "other",
   "survey": "CS" | "SA" | "RS" | "BS" | "NAMJARI" | null,
   "district": string | null,
   "upazila": string | null,
@@ -53,8 +53,16 @@ Do not guess: copy names exactly as written, in the script they are written in.
   "owners": [{"name": string, "father_name": string | null, "share": string | null}],
   "plots": [{"dag_no": string, "land_class": string | null, "area": string | null,
              "area_unit": "acre" | "decimal" | "katha" | "bigha" | "ojutangsho" | null}],
+  "deed": {"deed_no": string | null, "registration_date": string | null, "sub_registry_office": string | null,
+           "sellers": [string], "buyers": [string], "price_bdt": string | null} | null,
+  "tax_receipt": {"holding_no": string | null, "paid_upto_year": string | null, "owner_name": string | null} | null,
   "warnings": [string]
 }
+
+For a deed fill "deed" (sellers are the donors/transferors, buyers the recipients) and list the sold land in "plots".
+Copy dates exactly as written on the document (e.g. 14-06-2015); do not reorder them.
+For a land development tax receipt (dakhila) fill "tax_receipt"; "paid_upto_year" is the last year the tax covers.
+Leave "deed" and "tax_receipt" null for other documents.
 
 Put anything unclear, damaged or hard to read in "warnings"."""
 
@@ -180,6 +188,24 @@ def normalise(raw: dict) -> dict:
         "share": _clean(o.get("share")),
     } for o in raw.get("owners") or [] if (o.get("name") or "").strip()]
 
+    deed = raw.get("deed") or None
+    if deed:
+        deed = {
+            "deed_no": _clean(deed.get("deed_no")),
+            "registration_date": _clean(deed.get("registration_date")),
+            "sub_registry_office": (deed.get("sub_registry_office") or "").strip(),
+            "sellers": [str(n).strip() for n in deed.get("sellers") or [] if str(n).strip()],
+            "buyers": [str(n).strip() for n in deed.get("buyers") or [] if str(n).strip()],
+            "price_bdt": re.sub(r"[^\d]", "", _clean(deed.get("price_bdt"))),
+        }
+    tax = raw.get("tax_receipt") or None
+    if tax:
+        tax = {
+            "holding_no": _clean(tax.get("holding_no")),
+            "paid_upto_year": _clean(tax.get("paid_upto_year")),
+            "owner_name": (tax.get("owner_name") or "").strip(),
+        }
+
     fields = {
         "document_type": raw.get("document_type") or "other",
         "survey": raw.get("survey"),
@@ -191,6 +217,8 @@ def normalise(raw: dict) -> dict:
         "mutation_case_no": _clean(raw.get("mutation_case_no")),
         "owners": owners,
         "plots": plots,
+        "deed": deed,
+        "tax_receipt": tax,
         "warnings": [str(w) for w in raw.get("warnings") or []],
     }
     location = match_location(fields)

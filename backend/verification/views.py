@@ -26,7 +26,7 @@ def verify_plot(request):
     try:
         result = verify(
             data["mouza_id"], data["dag_no"], data["seller_name"], data["area_acre"],
-            data["khatian_no"], data["buyer_token"],
+            data["khatian_no"], data["buyer_token"], data["documents"],
         )
     except PlotNotFound:
         return Response(

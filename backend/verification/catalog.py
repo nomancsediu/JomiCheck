@@ -39,6 +39,18 @@ RULES = {
         "question_en": "The recorded owner has died. Who are all the legal heirs, and do you have a succession certificate?",
         "question_bn": "রেকর্ডভুক্ত মালিক মারা গেছেন। সকল বৈধ ওয়ারিশ কারা, এবং ওয়ারিশ সনদ আছে কি?",
     },
+    "DOCUMENT_MISMATCH": {
+        "tier": CRITICAL, "points": 40,
+        "law": "Land Crime Prevention and Remedy Act 2023, s.5 (land forgery); Penal Code 1860, ss.467, 471",
+        "title_en": "Uploaded document does not match the official record",
+        "title_bn": "আপলোড করা ডকুমেন্ট সরকারি রেকর্ডের সাথে মেলে না",
+        "explain_en": "{count} mismatch(es) were found between the uploaded documents and the records they claim to copy: {details}",
+        "explain_bn": "আপলোড করা ডকুমেন্ট ও রেকর্ডের মধ্যে {count_bn}টি অমিল পাওয়া গেছে: {details_bn}",
+        "action_en": "Treat the document as possibly forged. Collect certified copies yourself from the AC Land office and the Sub-Registry Office; never rely on copies supplied by the seller.",
+        "action_bn": "ডকুমেন্টটি জাল হতে পারে ধরে নিন। এসি ল্যান্ড অফিস ও সাব-রেজিস্ট্রি অফিস থেকে নিজে সার্টিফায়েড কপি তুলুন; বিক্রেতার দেওয়া কপির উপর নির্ভর করবেন না।",
+        "question_en": "Your papers do not match the government record. Will you come with me to the land office to collect certified copies?",
+        "question_bn": "আপনার কাগজ সরকারি রেকর্ডের সাথে মিলছে না। আমার সাথে ভূমি অফিসে গিয়ে সার্টিফায়েড কপি তুলবেন কি?",
+    },
     "DOUBLE_SELLING": {
         "tier": CRITICAL, "points": 35,
         "law": "Land Crime Prevention and Remedy Act 2023; Transfer of Property Act 1882",

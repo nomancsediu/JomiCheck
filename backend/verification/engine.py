@@ -14,6 +14,7 @@ from django.utils import timezone
 
 from anomaly import model as anomaly_model
 from anomaly.features import deed_transfer, proposed_transfer
+from documents.crosscheck import check_documents
 from land import models as m
 from land.units import share_to_ana
 
@@ -86,8 +87,10 @@ class PlotNotFound(Exception):
 
 class Verifier:
     def __init__(self, plot: m.Plot, seller_name: str, area_acre: Decimal,
-                 khatian_no: str = "", buyer_token: str = ""):
+                 khatian_no: str = "", buyer_token: str = "", documents: list[dict] | None = None):
         self.plot = plot
+        self.documents = documents or []
+        self.document_check = None
         self.seller_name = seller_name.strip()
         self.area = Decimal(area_acre)
         self.khatian_no = (khatian_no or "").strip()
@@ -330,6 +333,7 @@ class Verifier:
         self._anomaly_rule(person, role)
         self._tax_rule()
         self._khatian_input_rule()
+        self._document_rule()
         self._intent_rule()
 
         rendered = sorted((f.render() for f in self.flags), key=lambda f: -f["points"])
@@ -361,6 +365,7 @@ class Verifier:
             "timeline": self._timeline(),
             "notes": self.notes,
             "ml_check": self.ml_check,
+            "document_check": self.document_check,
             **guidance.build(rendered, role, level),
         }
 
@@ -501,6 +506,17 @@ class Verifier:
                 "bn": f"আপনি {old.survey} খতিয়ান {bn_num(old.khatian_no)} দিয়েছেন। সর্বশেষ রেকর্ড {self.latest.survey} খতিয়ান {bn_num(self.latest.khatian_no)}।",
             })
 
+    def _document_rule(self):
+        if not self.documents:
+            return
+        self.document_check = check_documents(self.plot.mouza_id, self.documents, self.plot.dag_no)
+        problems = [c for d in self.document_check["documents"] for c in d["checks"] if c["severity"] == "critical"]
+        if problems:
+            self._add(
+                "DOCUMENT_MISMATCH", evidence=[c["en"] for c in problems], count=len(problems),
+                details=" ".join(c["en"] for c in problems), details_bn=" ".join(c["bn"] for c in problems),
+            )
+
     def _intent_rule(self):
         since = timezone.now() - timedelta(days=INTENT_WINDOW_DAYS)
         others = (self.plot.purchase_intents.filter(created_at__gte=since)
@@ -633,6 +649,7 @@ def find_plot(mouza_id: int, dag_no: str) -> m.Plot:
         raise PlotNotFound(f"Dag {dag_no} not found in this mouza") from exc
 
 
-def verify(mouza_id: int, dag_no: str, seller_name: str, area_acre, khatian_no: str = "", buyer_token: str = "") -> dict:
+def verify(mouza_id: int, dag_no: str, seller_name: str, area_acre, khatian_no: str = "", buyer_token: str = "",
+           documents: list[dict] | None = None) -> dict:
     plot = find_plot(mouza_id, dag_no)
-    return Verifier(plot, seller_name, Decimal(str(area_acre)), khatian_no, buyer_token).run()
+    return Verifier(plot, seller_name, Decimal(str(area_acre)), khatian_no, buyer_token, documents).run()

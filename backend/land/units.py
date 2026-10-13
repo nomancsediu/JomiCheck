@@ -3,6 +3,7 @@
 A whole holding is 16 ana; 1 ana = 20 gonda, 1 gonda = 4 kora, 1 kora = 3 kranti,
 so one whole is 3840 kranti.
 """
+import re
 from decimal import Decimal
 from fractions import Fraction
 
@@ -36,3 +37,15 @@ def share_to_ana(share) -> dict:
     if not exact:
         en, bn = f"≈ {en}", f"≈ {bn}"
     return {"en": en, "bn": bn, "exact": exact}
+
+
+def ana_to_share(text: str) -> Fraction | None:
+    """Parse ana-gonda-kora-kranti text (Bangla or English, e.g. "৫ আনা ১০ গণ্ডা") into a share; None if absent."""
+    text = text.translate(str.maketrans("০১২৩৪৫৬৭৮৯", "0123456789")).lower()
+    total, found = Fraction(0), False
+    for en, bn, size in _UNITS:
+        match = re.search(rf"(\d+(?:\.\d+)?)\s*(?:{en}|{bn})", text)
+        if match:
+            total += Fraction(match.group(1)) * size
+            found = True
+    return total / KRANTI_PER_WHOLE if found else None

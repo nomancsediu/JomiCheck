@@ -1,32 +1,70 @@
 "use client";
 
-import { AlertTriangle, CheckCircle2, FileImage, Loader2, ScanText, Search, Upload, XCircle } from "lucide-react";
+import { AlertTriangle, CheckCircle2, FileImage, Loader2, ScanText, Search, Upload, X, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { api, buyerToken, type ExtractedDocument } from "@/lib/api";
+import { DocumentCheckCard } from "@/components/report/DocumentCheckCard";
+import { api, buyerToken, type DocumentCheck, type DocumentFields, type ExtractedDocument } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 
-const SAMPLES = [
-  { file: "/samples/khatian-rampur-101.png", bn: "নামজারি খতিয়ান · দাগ ১০১", en: "Mutation khatian · Dag 101" },
-  { file: "/samples/khatian-rampur-118.png", bn: "বিএস খতিয়ান · দাগ ১১৮", en: "BS khatian · Dag 118" },
-  { file: "/samples/khatian-rampur-125.png", bn: "খতিয়ান · দাগ ১২৫", en: "Khatian · Dag 125" },
+const SAMPLE_SETS = [
+  {
+    files: ["khatian-rampur-101.png", "deed-rampur-101.png"],
+    bn: "আসল কাগজ · দাগ ১০১ (খতিয়ান ও দলিল)",
+    en: "Genuine papers · Dag 101 (khatian and deed)",
+  },
+  {
+    files: ["khatian-rampur-118-forged.png"],
+    bn: "জাল খতিয়ান · দাগ ১১৮",
+    en: "Forged khatian · Dag 118",
+  },
+  {
+    files: ["khatian-rampur-125.png", "deed-rampur-125-forged.png", "dakhila-rampur-125-forged.png"],
+    bn: "জাল দলিল ও দাখিলা · দাগ ১২৫",
+    en: "Forged deed and dakhila · Dag 125",
+  },
 ];
 
+const MAX_DOCS = 5;
 const ACCEPT = "image/jpeg,image/png,image/webp,application/pdf";
 const cls = "w-full rounded-md border border-line bg-white px-3 py-2 text-sm outline-none focus:border-brand-500";
+
+type Item = {
+  id: string;
+  file: File;
+  preview: string | null;
+  status: "idle" | "reading" | "done" | "error";
+  result?: ExtractedDocument;
+  error?: string;
+};
+
+const isKhatian = (f: DocumentFields) => f.document_type === "khatian" || f.document_type === "mutation_khatian";
+
+/** Pre-fill the form: a deed's buyer is the person now claiming the land, otherwise the khatian owner. */
+function prefill(docs: DocumentFields[]) {
+  const khatian = docs.find(isKhatian);
+  const deed = docs.find((d) => d.document_type === "deed" && d.deed);
+  const plot =
+    deed?.plots.find((p) => p.found) ?? khatian?.plots.find((p) => p.found) ?? docs.flatMap((d) => d.plots)[0];
+  return {
+    seller: deed?.deed?.buyers[0] ?? khatian?.owners[0]?.name ?? "",
+    dag: plot?.dag_no ?? "",
+    khatian: khatian?.khatian_no ?? "",
+    area: plot?.area_acre ?? "",
+  };
+}
 
 export default function UploadPage() {
   const { lang, num, pick, t } = useLang();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [items, setItems] = useState<Item[]>([]);
   const [dragging, setDragging] = useState(false);
   const [reading, setReading] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [doc, setDoc] = useState<ExtractedDocument | null>(null);
+  const [check, setCheck] = useState<DocumentCheck | null>(null);
   const [form, setForm] = useState({ dag: "", khatian: "", seller: "", area: "" });
   const [elapsed, setElapsed] = useState(0);
 
@@ -38,56 +76,84 @@ export default function UploadPage() {
   }, [reading]);
 
   const bn = lang === "bn";
+  const done = items.filter((i) => i.status === "done" && i.result);
+  const docs = done.map((i) => i.result!.fields);
+  const location = done.find((i) => i.result!.location)?.result!.location ?? null;
+  const unread = items.some((i) => i.status === "idle" || i.status === "error");
 
-  function choose(f: File | undefined) {
-    if (!f) return;
-    if (preview) URL.revokeObjectURL(preview);
-    setFile(f);
-    setPreview(f.type.startsWith("image/") ? URL.createObjectURL(f) : null);
-    setDoc(null);
+  function add(files: File[], replace = false) {
+    if (replace) items.forEach((i) => i.preview && URL.revokeObjectURL(i.preview));
+    const fresh = files.map((file) => ({
+      id: `${file.name}-${file.size}-${Math.random()}`,
+      file,
+      preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : null,
+      status: "idle" as const,
+    }));
+    setItems((prev) => [...(replace ? [] : prev), ...fresh].slice(0, MAX_DOCS));
+    setCheck(null);
     setError(null);
   }
 
-  async function loadSample(path: string) {
-    const blob = await fetch(path).then((r) => r.blob());
-    choose(new File([blob], path.split("/").pop() ?? "sample.png", { type: blob.type || "image/png" }));
+  function remove(id: string) {
+    setItems((prev) => prev.filter((i) => i.id !== id));
+    setCheck(null);
   }
 
-  async function read() {
-    if (!file) return;
+  async function loadSet(files: string[]) {
+    const loaded = await Promise.all(
+      files.map(async (name) => {
+        const blob = await fetch(`/samples/${name}`).then((r) => r.blob());
+        return new File([blob], name, { type: blob.type || "image/png" });
+      }),
+    );
+    add(loaded, true);
+  }
+
+  async function readAll() {
     setElapsed(0);
     setReading(true);
     setError(null);
-    try {
-      const result = await api.extractDocument(file, lang);
-      setDoc(result);
-      const plot = result.fields.plots.find((p) => p.found) ?? result.fields.plots[0];
-      setForm({
-        dag: plot?.dag_no ?? "",
-        khatian: result.fields.khatian_no,
-        seller: result.fields.owners[0]?.name ?? "",
-        area: plot?.area_acre ?? "",
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("error_generic"));
-    } finally {
-      setReading(false);
+    const results: ExtractedDocument[] = done.map((i) => i.result!);
+    for (const item of items) {
+      if (item.status === "done") continue;
+      setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: "reading", error: undefined } : i)));
+      try {
+        const result = await api.extractDocument(item.file, lang);
+        results.push(result);
+        setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: "done", result } : i)));
+      } catch (err) {
+        const message = err instanceof Error ? err.message : t("error_generic");
+        setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: "error", error: message } : i)));
+      }
     }
+    const fields = results.map((r) => r.fields);
+    const next = prefill(fields);
+    setForm(next);
+    const loc = results.find((r) => r.location)?.location;
+    if (loc && fields.length) {
+      try {
+        setCheck(await api.checkDocuments(loc.mouza_id, fields, next.dag || undefined));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : t("error_generic"));
+      }
+    }
+    setReading(false);
   }
 
   async function verify(e: React.FormEvent) {
     e.preventDefault();
-    if (!doc?.location) return;
+    if (!location) return;
     setVerifying(true);
     setError(null);
     try {
       const report = await api.verify({
-        mouza_id: doc.location.mouza_id,
+        mouza_id: location.mouza_id,
         dag_no: form.dag.trim(),
         seller_name: form.seller.trim(),
         area_acre: form.area,
         khatian_no: form.khatian.trim(),
         buyer_token: buyerToken(),
+        documents: docs,
       });
       router.push(`/report/${report.id}`);
     } catch (err) {
@@ -96,7 +162,19 @@ export default function UploadPage() {
     }
   }
 
-  const f = doc?.fields;
+  function summary(f: DocumentFields) {
+    if (f.document_type === "deed" && f.deed) {
+      const parties = `${f.deed.sellers.join(", ")} → ${f.deed.buyers.join(", ")}`;
+      return `${bn ? "দলিল" : "Deed"} ${num(f.deed.deed_no)} · ${parties}`;
+    }
+    if (f.document_type === "tax_receipt" && f.tax_receipt) {
+      return `${bn ? "হোল্ডিং" : "Holding"} ${num(f.tax_receipt.holding_no)} · ${bn ? "পরিশোধ" : "paid to"} ${num(f.tax_receipt.paid_upto_year)}`;
+    }
+    const owners = f.owners.map((o) => o.name).join(", ");
+    return `${f.survey ?? ""} ${bn ? "খতিয়ান" : "khatian"} ${num(f.khatian_no)}${owners ? ` · ${owners}` : ""}`.trim();
+  }
+
+  const owners = docs.find(isKhatian)?.owners ?? [];
 
   return (
     <div className="page-x py-10">
@@ -105,17 +183,19 @@ export default function UploadPage() {
           <ScanText className="size-6" />
         </span>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{bn ? "খতিয়ান বা পর্চা আপলোড করুন" : "Upload a khatian or porcha"}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {bn ? "ডকুমেন্ট আপলোড ও জাল কাগজ শনাক্ত" : "Upload documents and detect forgeries"}
+          </h1>
           <p className="text-sm text-muted">
             {bn
-              ? "AI (Gemma) ছবি পড়ে মৌজা, খতিয়ান, দাগ ও মালিকের তথ্য বের করবে। যাচাইয়ের আগে আপনি সব তথ্য ঠিক করে নিতে পারবেন।"
-              : "AI (Gemma) reads the image and extracts mouza, khatian, dag and owner details. You can correct everything before verifying."}
+              ? "খতিয়ান, দলিল ও খাজনার দাখিলা একসাথে দিন। AI (Gemma) প্রতিটি পড়বে, আর জমিচেক সরকারি রেকর্ডের সাথে মিলিয়ে দেখাবে কোন কাগজ জাল হতে পারে।"
+              : "Add the khatian, deed and land tax receipt together. AI (Gemma) reads each one and JomiCheck compares them with the official record to show which papers may be forged."}
           </p>
         </div>
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <section className="space-y-4">
+      <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <section className="min-w-0 space-y-4">
           <div
             onDragOver={(e) => {
               e.preventDefault();
@@ -125,26 +205,42 @@ export default function UploadPage() {
             onDrop={(e) => {
               e.preventDefault();
               setDragging(false);
-              choose(e.dataTransfer.files[0]);
+              add(Array.from(e.dataTransfer.files));
             }}
             onClick={() => inputRef.current?.click()}
-            className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-white px-6 py-10 text-center transition-colors ${
+            className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed bg-white px-6 py-8 text-center transition-colors ${
               dragging ? "border-brand-600 bg-brand-50" : "border-line hover:border-brand-500"
             }`}
           >
             <Upload className="size-8 text-brand-700" />
-            <p className="mt-3 font-medium">{bn ? "ফাইল টেনে আনুন বা ক্লিক করুন" : "Drop a file here or click to choose"}</p>
-            <p className="mt-1 text-xs text-muted">JPG, PNG, WEBP, PDF · {bn ? "সর্বোচ্চ ৮ MB" : "max 8 MB"}</p>
-            <input ref={inputRef} type="file" accept={ACCEPT} className="hidden" onChange={(e) => choose(e.target.files?.[0])} />
+            <p className="mt-3 font-medium">
+              {bn ? "ফাইল টেনে আনুন বা ক্লিক করুন" : "Drop files here or click to choose"}
+            </p>
+            <p className="mt-1 text-xs text-muted">
+              {bn ? `খতিয়ান, দলিল, দাখিলা · সর্বোচ্চ ${num(MAX_DOCS)}টি · JPG, PNG, PDF` : `Khatian, deed, dakhila · up to ${MAX_DOCS} · JPG, PNG, PDF`}
+            </p>
+            <input
+              ref={inputRef}
+              type="file"
+              accept={ACCEPT}
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                add(Array.from(e.target.files ?? []));
+                e.target.value = "";
+              }}
+            />
           </div>
 
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted">{bn ? "নমুনা ডকুমেন্ট (কাল্পনিক)" : "Sample documents (synthetic)"}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+              {bn ? "নমুনা কাগজের সেট (কাল্পনিক)" : "Sample document sets (synthetic)"}
+            </p>
             <div className="mt-2 flex flex-wrap gap-2">
-              {SAMPLES.map((s) => (
+              {SAMPLE_SETS.map((s) => (
                 <button
-                  key={s.file}
-                  onClick={() => loadSample(s.file)}
+                  key={s.en}
+                  onClick={() => loadSet(s.files)}
                   className="inline-flex items-center gap-1.5 rounded-md border border-line bg-white px-3 py-1.5 text-xs font-medium hover:border-brand-500"
                 >
                   <FileImage className="size-3.5 text-brand-700" /> {bn ? s.bn : s.en}
@@ -153,27 +249,61 @@ export default function UploadPage() {
             </div>
           </div>
 
-          {file && (
-            <div className="rounded-xl border border-line bg-white p-3">
-              {preview ? (
-                // eslint-disable-next-line @next/next/no-img-element -- local object URL preview
-                <img src={preview} alt={file.name} className="max-h-[28rem] w-full rounded-md object-contain" />
-              ) : (
-                <p className="py-6 text-center text-sm text-muted">{file.name}</p>
+          {items.length > 0 && (
+            <div className="space-y-2">
+              {items.map((item) => (
+                <div key={item.id} className="flex items-center gap-3 rounded-lg border border-line bg-white p-2.5">
+                  {item.preview ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- local object URL preview
+                    <img src={item.preview} alt="" className="size-14 shrink-0 rounded border border-line object-cover object-top" />
+                  ) : (
+                    <span className="flex size-14 shrink-0 items-center justify-center rounded border border-line text-xs text-muted">
+                      PDF
+                    </span>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{item.file.name}</p>
+                    <p className="truncate text-xs text-muted">
+                      {item.status === "reading" && (bn ? "AI পড়ছে…" : "AI is reading…")}
+                      {item.status === "idle" && (bn ? "পড়া হয়নি" : "Not read yet")}
+                      {item.status === "error" && <span className="text-high">{item.error}</span>}
+                      {item.status === "done" && item.result && summary(item.result.fields)}
+                    </p>
+                  </div>
+                  {item.status === "reading" ? (
+                    <Loader2 className="size-4 shrink-0 animate-spin text-brand-700" />
+                  ) : item.status === "done" ? (
+                    <CheckCircle2 className="size-4 shrink-0 text-low" />
+                  ) : null}
+                  <button
+                    onClick={() => remove(item.id)}
+                    disabled={reading}
+                    aria-label={bn ? "সরান" : "Remove"}
+                    className="rounded p-1 text-muted hover:bg-paper hover:text-ink disabled:opacity-40"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+              ))}
+              {unread && (
+                <button
+                  onClick={readAll}
+                  disabled={reading}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand-700 py-2.5 font-semibold text-white hover:bg-brand-800 disabled:opacity-60"
+                >
+                  {reading ? <Loader2 className="size-4 animate-spin" /> : <ScanText className="size-4" />}
+                  {reading
+                    ? `${bn ? "AI পড়ছে…" : "AI is reading…"} ${num(elapsed)}s`
+                    : bn
+                      ? "পড়ুন ও রেকর্ডের সাথে মেলান"
+                      : "Read and compare with records"}
+                </button>
               )}
-              <button
-                onClick={read}
-                disabled={reading}
-                className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand-700 py-2.5 font-semibold text-white hover:bg-brand-800 disabled:opacity-60"
-              >
-                {reading ? <Loader2 className="size-4 animate-spin" /> : <ScanText className="size-4" />}
-                {reading ? `${bn ? "AI পড়ছে…" : "AI is reading…"} ${num(elapsed)}s` : bn ? "তথ্য বের করুন" : "Extract details"}
-              </button>
               {reading && (
-                <p className="mt-2 text-center text-xs text-muted">
+                <p className="text-center text-xs text-muted">
                   {bn
-                    ? "Gemma প্রতিটি ঘর মিলিয়ে পড়ছে; সাধারণত ১০–১৫ সেকেন্ড লাগে।"
-                    : "Gemma checks every column before answering; this usually takes 10–15 seconds."}
+                    ? "প্রতিটি কাগজ পড়তে সাধারণত ১০ থেকে ২০ সেকেন্ড লাগে।"
+                    : "Each document usually takes 10 to 20 seconds."}
                 </p>
               )}
             </div>
@@ -186,37 +316,22 @@ export default function UploadPage() {
           </p>
         </section>
 
-        <section className="rounded-xl border border-line bg-white p-5">
+        <section className="min-w-0 space-y-5 rounded-xl border border-line bg-white p-5">
           {error && (
-            <p className="mb-4 flex gap-2 rounded-md bg-high-bg px-3 py-2.5 text-sm text-high">
+            <p className="flex gap-2 rounded-md bg-high-bg px-3 py-2.5 text-sm text-high">
               <XCircle className="mt-0.5 size-4 shrink-0" /> {error}
             </p>
           )}
-          {!f ? (
-            <p className="py-20 text-center text-sm text-muted">{bn ? "বের করা তথ্য এখানে দেখা যাবে।" : "Extracted details will appear here."}</p>
+          {docs.length === 0 ? (
+            <p className="py-20 text-center text-sm text-muted">
+              {bn ? "কাগজ পড়ার পর মিলিয়ে দেখার ফল এখানে দেখা যাবে।" : "The comparison result will appear here after reading."}
+            </p>
           ) : (
-            <div className="space-y-5">
-              <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
-                {[
-                  [bn ? "ডকুমেন্ট" : "Document", [f.survey, f.document_type].filter(Boolean).join(" · ")],
-                  [t("district"), f.district],
-                  [t("upazila"), f.upazila],
-                  [t("mouza"), `${f.mouza}${f.jl_no ? ` · JL ${num(f.jl_no)}` : ""}`],
-                  [t("ks_mutation_case"), f.mutation_case_no],
-                ]
-                  .filter(([, v]) => v)
-                  .map(([k, v]) => (
-                    <div key={k} className="flex justify-between gap-2 border-b border-dashed border-line py-1">
-                      <span className="text-muted">{k}</span>
-                      <span className="text-right font-medium">{v}</span>
-                    </div>
-                  ))}
-              </div>
-
-              {doc.location ? (
+            <>
+              {location ? (
                 <p className="flex items-center gap-2 rounded-md bg-low-bg px-3 py-2 text-sm text-low">
                   <CheckCircle2 className="size-4 shrink-0" />
-                  {bn ? "রেকর্ডে মৌজা পাওয়া গেছে:" : "Mouza found in records:"} {pick(doc.location.mouza)} (JL {num(doc.location.jl_no)})
+                  {bn ? "রেকর্ডে মৌজা পাওয়া গেছে:" : "Mouza found in records:"} {pick(location.mouza)} (JL {num(location.jl_no)})
                 </p>
               ) : (
                 <p className="flex items-center gap-2 rounded-md bg-medium-bg px-3 py-2 text-sm text-medium">
@@ -228,22 +343,22 @@ export default function UploadPage() {
                 </p>
               )}
 
-              {f.warnings.length > 0 && (
-                <ul className="space-y-1 rounded-md border border-medium/30 bg-medium-bg px-3 py-2 text-xs text-medium">
-                  {f.warnings.map((w) => (
-                    <li key={w}>• {w}</li>
-                  ))}
-                </ul>
+              {check && (
+                <div>
+                  <h2 className="mb-2 font-semibold">{bn ? "কাগজ বনাম সরকারি রেকর্ড" : "Papers versus official record"}</h2>
+                  <DocumentCheckCard check={check} names={done.map((i) => i.file.name)} />
+                </div>
               )}
 
-              <form onSubmit={verify} className="space-y-3">
+              <form onSubmit={verify} className="space-y-3 border-t border-line pt-5">
+                <h2 className="font-semibold">{bn ? "পুরো যাচাই চালান" : "Run the full verification"}</h2>
                 <label className="block text-sm font-medium">
                   {t("seller_name")}
                   <input className={`${cls} mt-1.5`} value={form.seller} onChange={(e) => setForm({ ...form, seller: e.target.value })} required />
                 </label>
-                {f.owners.length > 1 && (
+                {owners.length > 1 && (
                   <div className="flex flex-wrap gap-1.5">
-                    {f.owners.map((o) => (
+                    {owners.map((o) => (
                       <button
                         type="button"
                         key={o.name}
@@ -256,7 +371,7 @@ export default function UploadPage() {
                     ))}
                   </div>
                 )}
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <label className="block text-sm font-medium">
                     {t("dag_no")}
                     <input className={`${cls} mt-1.5 font-mono`} value={form.dag} onChange={(e) => setForm({ ...form, dag: e.target.value })} required />
@@ -270,21 +385,15 @@ export default function UploadPage() {
                     <input className={`${cls} mt-1.5 font-mono`} type="number" min="0.0001" step="0.0001" value={form.area} onChange={(e) => setForm({ ...form, area: e.target.value })} required />
                   </label>
                 </div>
-                {f.plots.length > 0 && (
-                  <p className="text-xs text-muted">
-                    {bn ? "ডকুমেন্টে দাগ:" : "Dags on document:"}{" "}
-                    {f.plots.map((p) => `${num(p.dag_no)}${p.found === false ? (bn ? " (রেকর্ডে নেই)" : " (not in records)") : ""}`).join(", ")}
-                  </p>
-                )}
                 <button
-                  disabled={!doc.location || verifying}
+                  disabled={!location || verifying || reading}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand-700 py-2.5 font-semibold text-white hover:bg-brand-800 disabled:opacity-50"
                 >
                   {verifying ? <Loader2 className="size-4 animate-spin" /> : <Search className="size-4" />}
-                  {bn ? "এই তথ্য দিয়ে যাচাই করুন" : "Verify with these details"}
+                  {bn ? "এই তথ্য ও কাগজ দিয়ে যাচাই করুন" : "Verify with these details and papers"}
                 </button>
               </form>
-            </div>
+            </>
           )}
         </section>
       </div>
