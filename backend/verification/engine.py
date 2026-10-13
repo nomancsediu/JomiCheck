@@ -12,6 +12,8 @@ from fractions import Fraction
 
 from django.utils import timezone
 
+from anomaly import model as anomaly_model
+from anomaly.features import deed_transfer, proposed_transfer
 from land import models as m
 from land.units import share_to_ana
 
@@ -324,6 +326,7 @@ class Verifier:
         self._encumbrance_rules()
         lineage = self._lineage_rule()
         self._transaction_pattern_rules()
+        self._anomaly_rule(person, role)
         self._tax_rule()
         self._khatian_input_rule()
         self._intent_rule()
@@ -443,6 +446,38 @@ class Verifier:
             self._add("PRICE_BELOW_RATE",
                       evidence=[f"Deed {d.deed_no}: BDT {d.price_bdt:,} vs mouza value BDT {int(rate * d.area_acre):,}" for d in low],
                       deeds=", ".join(d.deed_no for d in low))
+
+    def _anomaly_rule(self, person, role):
+        today = timezone.localdate()
+        cutoff = today - timedelta(days=365 * LOW_PRICE_LOOKBACK_YEARS)
+        transfers = [deed_transfer(d) for d in self.deeds
+                     if d.deed_type == m.Deed.DeedType.SALE and d.registration_date >= cutoff]
+        if person and role in ("owner", "heir", "deed_buyer"):
+            transfers.append(proposed_transfer(person, self.plot, self.area, today))
+        unusual = sorted((r for r in anomaly_model.score(transfers) if r["is_anomaly"]), key=lambda r: r["score"])
+        if not unusual:
+            return
+
+        def describe(r, lang):
+            reasons = "; ".join(x[lang] for x in r["reasons"])
+            return reasons or ("several factors together" if lang == "en" else "কয়েকটি বিষয় একসাথে")
+
+        evidence = [f"{r['transfer'].label}: {describe(r, 'en')} (anomaly score {r['score']})" for r in unusual]
+        rule_flags = [f for f in self.flags if f.code in ("RAPID_TRANSFERS", "PRICE_BELOW_RATE")]
+        if rule_flags:
+            # The rules already explain this pattern; the model only adds supporting evidence.
+            for f in rule_flags:
+                f.evidence.extend(f"ML model also marks as unusual — {line}" for line in evidence)
+            return
+
+        top = unusual[0]["transfer"]
+        is_proposed = top.label == "Proposed sale"
+        self._add(
+            "TRANSFER_ANOMALY", evidence=evidence,
+            label="proposed sale" if is_proposed else top.label.lower(),
+            label_bn="প্রস্তাবিত বিক্রি" if is_proposed else top.label.replace("Deed", "দলিল"),
+            reasons=describe(unusual[0], "en"), reasons_bn=describe(unusual[0], "bn"),
+        )
 
     def _tax_rule(self):
         tax = getattr(self.plot, "tax_record", None)

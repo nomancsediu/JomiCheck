@@ -171,6 +171,18 @@ RULES = {
         "question_en": "Why has this plot changed hands so many times recently?",
         "question_bn": "সম্প্রতি এই জমি এতবার হাতবদল হলো কেন?",
     },
+    "TRANSFER_ANOMALY": {
+        "tier": MAJOR, "points": 20,
+        "law": "Statistical fraud indicator — Isolation Forest model (LandTech P3)",
+        "title_en": "Unusual transfer pattern (machine learning)",
+        "title_bn": "অস্বাভাবিক লেনদেনের ধরন (মেশিন লার্নিং)",
+        "explain_en": "The anomaly model rates the {label} as unusual compared with normal land transfers: {reasons}. No single rule was broken, but this combination is typical of land brokers reselling quickly or of sham transfers.",
+        "explain_bn": "স্বাভাবিক জমি লেনদেনের তুলনায় মডেল {label_bn}কে অস্বাভাবিক বলছে: {reasons_bn}। কোনো একক নিয়ম ভাঙেনি, কিন্তু এই সমন্বয় দ্রুত পুনঃবিক্রিকারী দালাল বা সাজানো হস্তান্তরের ক্ষেত্রে বেশি দেখা যায়।",
+        "action_en": "Ask how and when the seller acquired the land, check the earlier deeds and mutation, and make sure the seller is not acting for someone else.",
+        "action_bn": "বিক্রেতা কীভাবে ও কবে জমিটি পেয়েছেন জিজ্ঞেস করুন, আগের দলিল ও নামজারি যাচাই করুন, এবং বিক্রেতা অন্য কারো হয়ে বিক্রি করছেন না তা নিশ্চিত হন।",
+        "question_en": "When and from whom did you buy this land, and why are you selling it so soon?",
+        "question_bn": "আপনি কবে ও কার কাছ থেকে জমিটি কিনেছেন, আর এত তাড়াতাড়ি বিক্রি করছেন কেন?",
+    },
     "MUTATION_MISSING": {
         "tier": MAJOR, "points": 20,
         "law": "Registration Act 1908, s.52A; mutation (namjari) rules",

@@ -15,6 +15,8 @@ from sklearn.metrics import precision_recall_fscore_support
 from . import synth
 from .features import FEATURES, Transfer
 
+BN_DIGITS = str.maketrans("0123456789", "০১২৩৪৫৬৭৮৯")
+
 ARTIFACT_DIR = Path(__file__).resolve().parent / "artifacts"
 MODEL_PATH = ARTIFACT_DIR / "transfer_iforest.joblib"
 METRICS_PATH = ARTIFACT_DIR / "metrics.json"
@@ -81,15 +83,16 @@ def _reasons(t: Transfer, vec: list[float], bundle: dict) -> list[dict]:
         direction = DIRECTIONS.get(name)
         if direction == -1 and vec[i] < bundle["p02"][i] or direction == 1 and vec[i] > bundle["p98"][i]:
             out.append(name)
+    bn = lambda v: str(v).translate(BN_DIGITS)
     texts = {
         "price_ratio": (f"price was {t.price_ratio:.0%} of the mouza value",
-                        f"দাম মৌজা মূল্যের {t.price_ratio:.0%}"),
+                        f"দাম মৌজা মূল্যের {bn(f'{t.price_ratio:.0%}')}"),
         "log_holding_days": (f"seller had held the land for only {t.holding_days} days",
-                             f"বিক্রেতা মাত্র {t.holding_days} দিন জমির মালিক ছিলেন"),
+                             f"বিক্রেতা মাত্র {bn(t.holding_days)} দিন জমির মালিক ছিলেন"),
         "plot_transfers_365": (f"{t.plot_transfers_365} sales of this dag within a year",
-                               f"এক বছরে এই দাগে {t.plot_transfers_365}টি বিক্রি"),
+                               f"এক বছরে এই দাগে {bn(t.plot_transfers_365)}টি বিক্রি"),
         "seller_plots_365": (f"seller sold {t.seller_plots_365} different dags within a year",
-                             f"বিক্রেতা এক বছরে {t.seller_plots_365}টি ভিন্ন দাগ বিক্রি করেছেন"),
+                             f"বিক্রেতা এক বছরে {bn(t.seller_plots_365)}টি ভিন্ন দাগ বিক্রি করেছেন"),
     }
     return [{"feature": n, "en": texts[n][0], "bn": texts[n][1]} for n in out]
 
