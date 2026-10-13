@@ -60,6 +60,17 @@ class DemoScenarioTests(TestCase):
         result = run_case(case, seller_name="মোঃ জামাল হোসেন")
         self.assertEqual(result["seller"]["role"], "owner")
 
+    def test_record_of_rights_has_khatian_columns(self):
+        case = next(c for c in DEMO_CASES if c["key"] == "clean")
+        ror = run_case(case)["record_of_rights"]
+        self.assertEqual(ror["survey"], "NAMJARI")
+        self.assertTrue(ror["mutation_case_no"])
+        self.assertEqual(ror["dag_no"], case["dag_no"])
+        owner = ror["owners"][0]
+        self.assertEqual(owner["serial"], 1)
+        self.assertEqual(owner["father"]["en"], "Kashem Hossain")
+        self.assertEqual(owner["share_ana"]["en"], "16 ana")
+
     def test_wrong_khatian_number_is_flagged(self):
         case = next(c for c in DEMO_CASES if c["key"] == "clean")
         codes = {f["code"] for f in run_case(case, khatian_no="9999")["flags"]}

@@ -13,6 +13,7 @@ from fractions import Fraction
 from django.utils import timezone
 
 from land import models as m
+from land.units import share_to_ana
 
 from . import faraiz, guidance
 from .catalog import (
@@ -26,6 +27,13 @@ LOW_PRICE_RATIO = Decimal("0.5")
 LOW_PRICE_LOOKBACK_YEARS = 10
 INTENT_WINDOW_DAYS = 30
 AREA_TOLERANCE = Decimal("0.0001")
+
+LAND_CLASS_BN = {
+    "agricultural": "কৃষি (নাল)",
+    "homestead": "বসতভিটা (ভিটি)",
+    "commercial": "বাণিজ্যিক",
+    "pond": "ডোবা / পুকুর",
+}
 
 
 class _SafeDict(dict):
@@ -470,7 +478,9 @@ class Verifier:
         mz = p.mouza
         return {
             "id": p.id, "dag_no": p.dag_no, "area_acre": _acre(p.area_acre),
-            "land_class": p.get_land_class_display(), "mouza_rate_per_acre": p.mouza_rate_per_acre,
+            "land_class": p.get_land_class_display(),
+            "land_class_bn": LAND_CLASS_BN.get(p.land_class, p.get_land_class_display()),
+            "mouza_rate_per_acre": p.mouza_rate_per_acre,
             "mouza": {"en": mz.name_en, "bn": mz.name_bn, "jl_no": mz.jl_no},
             "upazila": {"en": mz.upazila.name_en, "bn": mz.upazila.name_bn},
             "district": {"en": mz.upazila.district.name_en, "bn": mz.upazila.district.name_bn},
@@ -479,16 +489,30 @@ class Verifier:
     def _record_info(self):
         if not self.latest:
             return None
+        mutation = (
+            m.Mutation.objects.filter(resulting_khatian=self.latest).order_by("-application_date").first()
+            if self.latest.survey == m.Khatian.Survey.NAMJARI else None
+        )
         return {
             "survey": self.latest.survey, "khatian_no": self.latest.khatian_no,
             "record_year": self.latest.record_year,
+            "mutation_case_no": mutation.case_no if mutation else None,
+            "dag_no": self.plot.dag_no,
+            "land_class": {"en": self.plot.get_land_class_display(),
+                           "bn": LAND_CLASS_BN.get(self.plot.land_class, self.plot.get_land_class_display())},
+            "plot_area_acre": _acre(self.plot.area_acre),
             "owners": [{
+                "serial": i,
                 "name": {"en": ko.person.name_en, "bn": ko.person.name_bn},
+                "father": {"en": ko.person.father_name_en, "bn": ko.person.father_name_bn}
+                if ko.person.father_name_en else None,
                 "share": _acre(ko.share),
+                "share_ana": share_to_ana(ko.share),
                 "area_acre": _acre(ko.share * self.plot.area_acre),
                 "is_deceased": ko.person.is_deceased, "is_minor": ko.person.is_minor,
                 "is_government": ko.person.is_government,
-            } for ko in self.latest_owners],
+                "death_year": ko.person.date_of_death.year if ko.person.date_of_death else None,
+            } for i, ko in enumerate(self.latest_owners, start=1)],
         }
 
     def _timeline(self):
