@@ -1,0 +1,12 @@
+[Unit]
+Description=JomiCheck Django API (gunicorn)
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/opt/jomicheck/backend
+ExecStart=/opt/jomicheck/.venv/bin/gunicorn config.wsgi:application --bind 127.0.0.1:8000 --workers 2 --threads 4 --timeout 150
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
