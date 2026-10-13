@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckSquare, ClipboardList, Info, MapPin, MessageSquareText, Plus, Printer, Square, Footprints } from "lucide-react";
+import { CheckSquare, ClipboardList, Info, MapPin, MessageSquareText, Plus, Printer, Receipt, Square, Footprints } from "lucide-react";
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { AskPanel } from "@/components/report/AskPanel";
@@ -165,6 +165,12 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           >
             <Printer className="size-4" /> {t("print")}
           </button>
+          <Link
+            href={`/costs?area=${encodeURIComponent(r.input.area_acre)}&rate=${r.plot.mouza_rate_per_acre}`}
+            className="inline-flex items-center gap-2 rounded-md border border-line bg-white px-4 py-2 text-sm font-medium hover:border-brand-500"
+          >
+            <Receipt className="size-4" /> {t("estimate_cost")}
+          </Link>
           <Link
             href="/verify"
             className="inline-flex items-center gap-2 rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800"

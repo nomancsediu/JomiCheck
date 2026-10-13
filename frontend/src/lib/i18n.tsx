@@ -117,6 +117,7 @@ const dict = {
   generated: { bn: "তৈরি", en: "Generated" },
   print: { bn: "প্রিন্ট / PDF", en: "Print / PDF" },
   new_check: { bn: "নতুন যাচাই", en: "New check" },
+  estimate_cost: { bn: "খরচ হিসাব", en: "Estimate cost" },
   disclaimer: {
     bn: "জমিচেক সিদ্ধান্ত গ্রহণে সহায়ক একটি ঝুঁকি-যাচাই টুল; এটি সরকারি যাচাই বা আইনি পরামর্শের বিকল্প নয়। এই প্রোটোটাইপের সকল তথ্য কৃত্রিম (সিনথেটিক)।",
     en: "JomiCheck is a decision-support and risk-screening tool, not official verification or legal advice. All data in this prototype is synthetic.",
