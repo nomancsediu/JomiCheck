@@ -19,31 +19,29 @@ export function SiteFooter() {
   const bn = lang === "bn";
 
   return (
-    <footer className="no-print mt-20 border-t border-line bg-white">
-      <div className="page-x flex flex-col items-center gap-5 py-10 text-center">
-        <Link href="/" className="flex flex-col items-center gap-2">
-          <Logo size={40} />
-          <span className="leading-tight">
-            <span className="block text-lg font-bold tracking-tight text-brand-800">JomiCheck</span>
-            <span className="block text-xs text-muted">{t("brand_tagline")}</span>
-          </span>
-        </Link>
-        <a
-          href={REPO_URL}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 rounded-md border border-line px-4 py-2 text-sm font-medium text-ink hover:border-brand-500 hover:text-brand-700"
-        >
-          <GitHubIcon />
-          {bn ? "GitHub-এ সোর্স কোড" : "Source code on GitHub"}
-        </a>
-      </div>
-      <div className="page-x flex flex-col items-center gap-2 border-t border-line py-6 text-center">
+    <footer className="no-print mt-16 border-t border-line bg-white">
+      <div className="page-x flex flex-col items-center gap-2 py-5 text-center">
+        <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-2">
+            <Logo size={26} />
+            <span className="font-bold tracking-tight text-brand-800">JomiCheck</span>
+          </Link>
+          <span className="h-4 w-px bg-line" />
+          <a
+            href={REPO_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-brand-700"
+          >
+            <GitHubIcon />
+            GitHub
+          </a>
+        </div>
         <p className="text-sm text-muted">
-          © {bn ? "২০২৬" : "2026"} JomiCheck · {bn ? "তৈরি করেছে" : "Built by"}{" "}
+          © {bn ? "২০২৬" : "2026"} · {bn ? "তৈরি করেছে" : "Built by"}{" "}
           <span className="font-semibold text-brand-800">Team Semicolons</span>
         </p>
-        <p className="max-w-3xl text-xs text-muted">{t("disclaimer")}</p>
+        <p className="max-w-3xl text-xs text-muted/80">{t("disclaimer")}</p>
       </div>
     </footer>
   );
