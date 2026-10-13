@@ -19,7 +19,6 @@ const dict = {
   nav_costs: { bn: "খরচ ও একক", en: "Costs & units" },
   nav_upload: { bn: "ডকুমেন্ট আপলোড", en: "Upload document" },
   upload_cta: { bn: "খতিয়ানের ছবি থেকে পূরণ করুন", en: "Fill from a khatian photo" },
-  nav_registry: { bn: "রেকর্ড প্যানেল", en: "Records panel" },
   start_verification: { bn: "যাচাই শুরু করুন", en: "Start verification" },
 
   hero_title: { bn: "জমি কেনার আগে, একজন অভিজ্ঞ আইনজীবীর মতো যাচাই করুন", en: "Before you buy land, check it the way an experienced lawyer would" },

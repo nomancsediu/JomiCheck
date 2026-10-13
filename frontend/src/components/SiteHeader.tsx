@@ -5,9 +5,6 @@ import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 import { Logo } from "./Logo";
 import { useLang } from "@/lib/i18n";
-import { API_URL } from "@/lib/api";
-
-const ADMIN_URL = API_URL.replace(/\/api\/?$/, "/admin/");
 
 function useLinks() {
   const { t } = useLang();
@@ -62,21 +59,13 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <nav className="ml-4 hidden items-center gap-1 md:flex">
+        <nav className="ml-auto hidden items-center gap-1 md:flex">
           <Suspense fallback={<NavLinks withActive={false} />}>
             <NavLinks withActive />
           </Suspense>
-          <a
-            href={ADMIN_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-md px-3 py-2 text-sm font-medium text-muted hover:bg-paper hover:text-ink"
-          >
-            {t("nav_registry")}
-          </a>
         </nav>
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-3 md:ml-2">
           <div className="flex rounded-md border border-line p-0.5 text-sm" role="group" aria-label="Language">
             {(["bn", "en"] as const).map((l) => (
               <button
@@ -90,12 +79,6 @@ export function SiteHeader() {
               </button>
             ))}
           </div>
-          <Link
-            href="/verify"
-            className="hidden rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 sm:block"
-          >
-            {t("start_verification")}
-          </Link>
         </div>
       </div>
       <nav className="page-x flex gap-1 overflow-x-auto border-t border-line py-2 md:hidden">
