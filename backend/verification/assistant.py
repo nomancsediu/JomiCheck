@@ -145,7 +145,8 @@ def llm_configured() -> bool:
     return bool(settings.LLM_API_URL and settings.LLM_MODEL)
 
 
-def chat(system: str, user: str, image_data_url: str | None = None, temperature: float = 0.2) -> str:
+def chat(system: str, user: str, image_data_url: str | None = None, temperature: float = 0.2,
+         timeout: int | None = None) -> str:
     """Call the configured OpenAI-compatible chat endpoint and return the reply text."""
     if settings.LLM_MODEL.lower().startswith("gemma"):
         # Gemma on the Gemini API rejects system instructions, so they go in the user turn.
@@ -162,9 +163,14 @@ def chat(system: str, user: str, image_data_url: str | None = None, temperature:
         settings.LLM_API_URL.rstrip("/") + "/chat/completions", data=body, method="POST",
         headers={"Content-Type": "application/json", "Authorization": f"Bearer {settings.LLM_API_KEY}"},
     )
-    with urllib.request.urlopen(req, timeout=settings.LLM_TIMEOUT) as resp:
+    with urllib.request.urlopen(req, timeout=timeout or settings.LLM_TIMEOUT) as resp:
         data = json.loads(resp.read().decode("utf-8"))
-    return data["choices"][0]["message"]["content"].strip()
+    return strip_reasoning(data["choices"][0]["message"]["content"])
+
+
+def strip_reasoning(text: str) -> str:
+    """Gemma 4 can prepend its reasoning, closed by </thought> (or </think>); keep only the final answer."""
+    return re.split(r"</(?:thought|think)>", text)[-1].strip()
 
 
 def answer(question: str, result: dict, lang: str = "bn") -> dict:

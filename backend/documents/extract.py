@@ -16,6 +16,8 @@ from land.models import Mouza, Plot
 from verification.assistant import chat
 
 MAX_BYTES = 8 * 1024 * 1024
+# Gemma 4 reasons before answering; reading one page takes about a minute on the hosted API.
+EXTRACT_TIMEOUT = 120
 MAX_SIDE = 2000
 IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 PDF_TYPE = "application/pdf"
@@ -186,5 +188,5 @@ def extract(data: bytes, content_type: str) -> dict:
     if len(data) > MAX_BYTES:
         raise ExtractionError("The file is larger than 8 MB.", "ফাইলটি ৮ MB-এর বেশি।")
     image = to_image_data_url(data, content_type)
-    reply = chat(PROMPT, "Read this document.", image_data_url=image, temperature=0)
+    reply = chat(PROMPT, "Read this document.", image_data_url=image, temperature=0, timeout=EXTRACT_TIMEOUT)
     return normalise(parse_json(reply))

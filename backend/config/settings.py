@@ -3,6 +3,7 @@ Django settings for the JomiCheck backend.
 """
 
 import os
+import sys
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +21,8 @@ def _load_env_file(path: Path) -> None:
         os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
 
 
-_load_env_file(BASE_DIR / ".env")
+if sys.argv[1:2] != ["test"]:  # tests must not call a real LLM or depend on a local key
+    _load_env_file(BASE_DIR / ".env")
 
 SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",

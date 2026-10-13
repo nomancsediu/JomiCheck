@@ -27,6 +27,13 @@ class AssistantTests(SimpleTestCase):
         self.assertIn("Never invent records", sent["messages"][0]["content"])
         self.assertEqual(out, {"answer": "নামজারি হলো...", "source": "llm", "model": "gemma-4-26b-it"})
 
+    @override_settings(LLM_API_URL="https://example.test/v1", LLM_API_KEY="k", LLM_MODEL="gemma-4-26b-a4b-it")
+    def test_reasoning_is_removed(self):
+        reply = "<thought>* Role: assistant? Yes. {draft}</thought>নামজারি হলো খতিয়ানে নাম তোলা।"
+        with mock.patch("urllib.request.urlopen", return_value=_reply(reply)):
+            out = assistant.answer("নামজারি কী?", RESULT, "bn")
+        self.assertEqual(out["answer"], "নামজারি হলো খতিয়ানে নাম তোলা।")
+
     @override_settings(LLM_API_URL="https://example.test/v1", LLM_API_KEY="k", LLM_MODEL="other-model")
     def test_other_models_get_system_message(self):
         with mock.patch("urllib.request.urlopen", return_value=_reply("ok")) as urlopen:
