@@ -273,7 +273,8 @@ export function buyerToken(): string {
   const key = "jomicheck_buyer_token";
   let token = window.localStorage.getItem(key);
   if (!token) {
-    token = crypto.randomUUID();
+    // crypto.randomUUID only exists on HTTPS or localhost; getRandomValues works over plain HTTP too
+    token = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
     window.localStorage.setItem(key, token);
   }
   return token;
