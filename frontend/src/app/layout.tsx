@@ -31,8 +31,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="bn" className={`${plex.variable} ${plexMono.variable} ${bengali.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">
+    <html
+      lang="bn"
+      className={`${plex.variable} ${plexMono.variable} ${bengali.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
+      <body className="flex min-h-full flex-col" suppressHydrationWarning>
         <LangProvider>
           <SiteHeader />
           <main className="flex-1">{children}</main>
