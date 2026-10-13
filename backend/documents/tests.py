@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 
 from land.seed import seed
 
-from .extract import parse_json
+from .extract import _to_acre, parse_json
 
 LLM = dict(LLM_API_URL="https://example.test/v1", LLM_API_KEY="k", LLM_MODEL="gemma-4-26b-it")
 
@@ -33,6 +33,15 @@ class ParseJsonTests(TestCase):
     def test_strips_code_fences(self):
         self.assertEqual(parse_json('```json\n{"a": 1}\n```'), {"a": 1})
 
+    def test_bangla_area_units(self):
+        self.assertEqual(_to_acre("৩৩", "শতাংশ"), "0.33")
+        self.assertEqual(_to_acre("৩৩", "শতংশ"), "0.33")
+        self.assertEqual(_to_acre("1.5", "একর"), "1.5")
+        self.assertEqual(_to_acre("2", None), "2")
+        self.assertEqual(_to_acre("৩৩ শতাংশ", "decimal"), "0.33")
+        self.assertEqual(_to_acre("10 katha", None), "0.1653")
+        self.assertIsNone(_to_acre("unclear", "acre"))
+
 
 @override_settings(**LLM)
 class ExtractApiTests(TestCase):
@@ -47,7 +56,9 @@ class ExtractApiTests(TestCase):
         with mock.patch("documents.extract.chat", return_value=json.dumps(MODEL_REPLY, ensure_ascii=False)) as chat:
             res = self.post(_png())
         self.assertEqual(res.status_code, 200)
-        self.assertTrue(chat.call_args.kwargs["image_data_url"].startswith("data:image/jpeg;base64,"))
+        image, mime = chat.call_args.kwargs["image"]
+        self.assertEqual((image[:2], mime), (b"\xff\xd8", "image/jpeg"))
+        self.assertTrue(chat.call_args.kwargs["json_output"])
         body = res.json()
         self.assertEqual(body["fields"]["khatian_no"], "1021")
         self.assertEqual(body["fields"]["plots"][0], {"dag_no": "101", "land_class": "ভিটি", "area_acre": "0.33", "found": True})

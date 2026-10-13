@@ -36,7 +36,7 @@ Problem statement: **P5 — Citizen Pre-Purchase Verification**, with **P3 — F
 | Document upload | Upload a khatian or porcha photo/PDF; Gemma reads mouza, JL, khatian, dag, owners and area into editable fields, matches them to records and starts verification. Files are processed in memory and not stored |
 | Unit converter | Decimal (shotok), katha, bigha, acre, ojutangsho, square feet, square metre, hectare |
 | Integrity | SHA-256 seal + QR code; `/verify-report` shows whether a copy matches the registry |
-| Assistant | "Ask about this report" in Bangla/English — built-in legal glossary offline, or any OpenAI-compatible LLM grounded only on the report facts |
+| Assistant | "Ask about this report" in Bangla/English — built-in legal glossary offline, or Gemma (or any OpenAI-compatible LLM) grounded only on the report facts |
 | Records panel | Django admin over all synthetic land records |
 
 ### Risk scoring
@@ -122,7 +122,7 @@ Open http://localhost:3000.
 
 ### AI assistant (Gemma via Google AI Studio)
 
-The "Ask about this report" assistant uses Google's open **Gemma** model through the Google AI Studio (Gemini API) OpenAI-compatible endpoint.
+The "Ask about this report" assistant uses Google's open **Gemma** model from Google AI Studio, called with the official `google-genai` SDK. Requests use minimal thinking, and document reading asks for JSON output with the image sent before the prompt, so a khatian is read in about 10 seconds and a question is answered in about 8. Temporary overload (503) and rate-limit (429) errors are retried with backoff.
 
 ```bash
 cd backend
@@ -229,7 +229,7 @@ The rule catalog (`backend/verification/catalog.py`) cites the Registration Act 
 
 ## Open-source libraries
 
-Django (BSD-3), Django REST Framework (BSD-3), django-cors-headers (MIT), qrcode (BSD), RapidFuzz (MIT), Pillow (MIT-CMU), pypdfium2 (Apache-2.0/BSD-3), scikit-learn (BSD-3), NumPy (BSD-3), joblib (BSD-3), Next.js (MIT), React (MIT), Tailwind CSS (MIT), lucide-react (ISC), IBM Plex and Noto Sans Bengali fonts (SIL OFL 1.1).
+Django (BSD-3), Django REST Framework (BSD-3), django-cors-headers (MIT), qrcode (BSD), RapidFuzz (MIT), Pillow (MIT-CMU), google-genai (Apache-2.0), pypdfium2 (Apache-2.0/BSD-3), scikit-learn (BSD-3), NumPy (BSD-3), joblib (BSD-3), Next.js (MIT), React (MIT), Tailwind CSS (MIT), lucide-react (ISC), IBM Plex and Noto Sans Bengali fonts (SIL OFL 1.1).
 
 ## Changes since Round 1
 

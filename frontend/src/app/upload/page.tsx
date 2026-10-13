@@ -172,8 +172,8 @@ export default function UploadPage() {
               {reading && (
                 <p className="mt-2 text-center text-xs text-muted">
                   {bn
-                    ? "Gemma প্রতিটি ঘর মিলিয়ে পড়ছে; এক মিনিট পর্যন্ত লাগতে পারে।"
-                    : "Gemma checks every column before answering; this can take up to a minute."}
+                    ? "Gemma প্রতিটি ঘর মিলিয়ে পড়ছে; সাধারণত ১০–১৫ সেকেন্ড লাগে।"
+                    : "Gemma checks every column before answering; this usually takes 10–15 seconds."}
                 </p>
               )}
             </div>

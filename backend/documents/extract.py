@@ -4,7 +4,6 @@ turn it into structured fields the verification form can use.
 
 Uploaded files are processed in memory and never stored.
 """
-import base64
 import io
 import json
 import re
@@ -16,8 +15,8 @@ from land.models import Mouza, Plot
 from verification.assistant import chat
 
 MAX_BYTES = 8 * 1024 * 1024
-# Gemma 4 reasons before answering; reading one page takes about a minute on the hosted API.
-EXTRACT_TIMEOUT = 120
+# About 10 s on Google AI Studio with minimal thinking; slower OpenAI-compatible servers need more.
+EXTRACT_TIMEOUT = 90
 MAX_SIDE = 2000
 IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 PDF_TYPE = "application/pdf"
@@ -29,6 +28,10 @@ UNIT_TO_ACRE = {
     "katha": Decimal("720") / Decimal("43560"),
     "bigha": Decimal("14400") / Decimal("43560"),
     "ojutangsho": Decimal("0.0001"),
+}
+# The model sometimes answers the unit in Bangla, occasionally misspelled (e.g. "শতংশ").
+UNIT_ALIASES = {
+    "একর": "acre", "শত": "decimal", "ডেসিমেল": "decimal", "কাঠা": "katha", "বিঘা": "bigha", "অযুত": "ojutangsho",
 }
 
 _BN_TO_ASCII = str.maketrans("০১২৩৪৫৬৭৮৯", "0123456789")
@@ -62,8 +65,8 @@ class ExtractionError(Exception):
         self.message_bn = message_bn
 
 
-def to_image_data_url(data: bytes, content_type: str) -> str:
-    """Return a JPEG/PNG data URL; PDFs are rendered from their first page."""
+def to_jpeg(data: bytes, content_type: str) -> bytes:
+    """Return the document as a JPEG; PDFs are rendered from their first page."""
     from PIL import Image
 
     if content_type == PDF_TYPE:
@@ -86,7 +89,7 @@ def to_image_data_url(data: bytes, content_type: str) -> str:
     image.thumbnail((MAX_SIDE, MAX_SIDE))
     out = io.BytesIO()
     image.save(out, format="JPEG", quality=88)
-    return "data:image/jpeg;base64," + base64.b64encode(out.getvalue()).decode("ascii")
+    return out.getvalue()
 
 
 def parse_json(text: str) -> dict:
@@ -104,12 +107,26 @@ def _clean(value) -> str:
 
 
 def _to_acre(area: str, unit: str | None) -> str | None:
-    try:
-        value = Decimal(_clean(area).replace(",", ""))
-    except (InvalidOperation, ValueError):
+    # The area may carry its own unit, e.g. "৩৩ শতাংশ"; a unit written there wins over area_unit.
+    match = re.match(r"\s*([\d,]*\.?\d+)\s*(.*)", _clean(area))
+    if not match:
         return None
-    acre = value * UNIT_TO_ACRE.get((unit or "acre").lower(), Decimal("1"))
+    try:
+        value = Decimal(match.group(1).replace(",", ""))
+    except InvalidOperation:
+        return None
+    acre = value * UNIT_TO_ACRE[_unit_key(match.group(2) or unit)]
     return f"{acre.quantize(Decimal('0.0001')).normalize():f}"
+
+
+def _unit_key(unit: str | None) -> str:
+    unit = (unit or "").strip().lower()
+    if unit in UNIT_TO_ACRE:
+        return unit
+    for prefix, key in UNIT_ALIASES.items():
+        if unit.startswith(prefix):
+            return key
+    return "acre"
 
 
 def _name_score(a: str, b_en: str, b_bn: str) -> float:
@@ -187,6 +204,7 @@ def normalise(raw: dict) -> dict:
 def extract(data: bytes, content_type: str) -> dict:
     if len(data) > MAX_BYTES:
         raise ExtractionError("The file is larger than 8 MB.", "ফাইলটি ৮ MB-এর বেশি।")
-    image = to_image_data_url(data, content_type)
-    reply = chat(PROMPT, "Read this document.", image_data_url=image, temperature=0, timeout=EXTRACT_TIMEOUT)
+    image = (to_jpeg(data, content_type), "image/jpeg")
+    reply = chat(PROMPT, "Read this document.", image=image, temperature=0, timeout=EXTRACT_TIMEOUT,
+                 json_output=True)
     return normalise(parse_json(reply))
