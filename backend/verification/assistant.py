@@ -141,14 +141,23 @@ def _plain_text(text: str) -> str:
     return re.sub(r"^#+\s*", "", text, flags=re.MULTILINE).strip()
 
 
-def chat(system: str, user: str) -> str:
+def llm_configured() -> bool:
+    return bool(settings.LLM_API_URL and settings.LLM_MODEL)
+
+
+def chat(system: str, user: str, image_data_url: str | None = None, temperature: float = 0.2) -> str:
     """Call the configured OpenAI-compatible chat endpoint and return the reply text."""
     if settings.LLM_MODEL.lower().startswith("gemma"):
         # Gemma on the Gemini API rejects system instructions, so they go in the user turn.
         messages = [{"role": "user", "content": f"{system}\n\n{user}"}]
     else:
         messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
-    body = json.dumps({"model": settings.LLM_MODEL, "temperature": 0.2, "messages": messages}).encode("utf-8")
+    if image_data_url:
+        messages[-1]["content"] = [
+            {"type": "text", "text": messages[-1]["content"]},
+            {"type": "image_url", "image_url": {"url": image_data_url}},
+        ]
+    body = json.dumps({"model": settings.LLM_MODEL, "temperature": temperature, "messages": messages}).encode("utf-8")
     req = urllib.request.Request(
         settings.LLM_API_URL.rstrip("/") + "/chat/completions", data=body, method="POST",
         headers={"Content-Type": "application/json", "Authorization": f"Bearer {settings.LLM_API_KEY}"},
@@ -160,7 +169,7 @@ def chat(system: str, user: str) -> str:
 
 def answer(question: str, result: dict, lang: str = "bn") -> dict:
     lang = "en" if lang == "en" else "bn"
-    if settings.LLM_API_URL and settings.LLM_MODEL:
+    if llm_configured():
         try:
             return {"answer": _llm(question, result, lang), "source": "llm", "model": settings.LLM_MODEL}
         except Exception:  # network/LLM failure must not break the report
