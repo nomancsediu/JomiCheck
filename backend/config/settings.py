@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "reports",
     "costs",
     "documents",
+    "anomaly",
 ]
 
 MIDDLEWARE = [

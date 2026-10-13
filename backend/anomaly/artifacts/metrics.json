@@ -1,0 +1,24 @@
+{
+  "model": "IsolationForest(n_estimators=300, contamination=0.05)",
+  "features": [
+    "price_ratio",
+    "log_holding_days",
+    "plot_transfers_365",
+    "area_fraction",
+    "seller_plots_365"
+  ],
+  "train_rows": 20000,
+  "test_rows": 5000,
+  "anomaly_rate": 0.05,
+  "precision": 0.745,
+  "recall": 0.712,
+  "f1": 0.728,
+  "false_positive_rate": 0.013,
+  "recall_by_pattern": {
+    "flip": 0.925,
+    "broker": 1.0,
+    "chain": 1.0,
+    "undervalue": 0.105
+  },
+  "note": "Measured on synthetic data with planted patterns; real-world accuracy needs real records."
+}
