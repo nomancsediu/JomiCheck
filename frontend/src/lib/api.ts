@@ -181,6 +181,29 @@ export type CostEstimate = {
   notes: Bi[];
 };
 
+export type ExtractedDocument = {
+  fields: {
+    document_type: string;
+    survey: string | null;
+    district: string;
+    upazila: string;
+    mouza: string;
+    jl_no: string;
+    khatian_no: string;
+    mutation_case_no: string;
+    owners: { name: string; father_name: string; share: string }[];
+    plots: { dag_no: string; land_class: string; area_acre: string | null; found?: boolean }[];
+    warnings: string[];
+  };
+  location: {
+    district_id: number;
+    upazila_id: number;
+    mouza_id: number;
+    mouza: Bi;
+    jl_no: number;
+  } | null;
+};
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -225,6 +248,17 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ question, lang }),
     }),
+  extractDocument: async (file: File, lang: "bn" | "en") => {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${API_URL}/documents/extract/`, { method: "POST", body: form, cache: "no-store" });
+    const body = await res.json().catch(() => null);
+    if (!res.ok) {
+      const b = body as { detail?: string; detail_bn?: string } | null;
+      throw new ApiError((lang === "bn" ? b?.detail_bn : b?.detail) ?? `Request failed (${res.status})`, res.status, body);
+    }
+    return body as ExtractedDocument;
+  },
   costEstimate: (payload: { price_bdt: number; area_type: AreaType; area_acre?: string; mouza_rate_per_acre?: number }) =>
     request<CostEstimate>("/costs/estimate/", { method: "POST", body: JSON.stringify(payload) }),
   inheritance: (payload: { area_acre: string; heirs: { relation: string; name?: string }[] }) =>

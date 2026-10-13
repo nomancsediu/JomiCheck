@@ -1,6 +1,7 @@
 "use client";
 
-import { AlertCircle, Check, Loader2, Search } from "lucide-react";
+import { AlertCircle, Check, Loader2, ScanText, Search } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useDemoCases } from "@/components/DemoCases";
@@ -140,9 +141,17 @@ export default function VerifyPage() {
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         <section className="rounded-xl border border-line bg-white">
-          <div className="border-b border-line px-6 py-5">
-            <h1 className="text-2xl font-bold tracking-tight">{t("form_title")}</h1>
-            <p className="mt-1 text-sm text-muted">{t("form_sub")}</p>
+          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-line px-6 py-5">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">{t("form_title")}</h1>
+              <p className="mt-1 text-sm text-muted">{t("form_sub")}</p>
+            </div>
+            <Link
+              href="/upload"
+              className="inline-flex items-center gap-2 rounded-md border border-line px-3 py-2 text-sm font-medium hover:border-brand-500"
+            >
+              <ScanText className="size-4 text-brand-700" /> {t("upload_cta")}
+            </Link>
           </div>
 
           {loading ? (
