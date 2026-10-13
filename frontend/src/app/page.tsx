@@ -130,10 +130,7 @@ export default function Home() {
       <section className="border-b border-line bg-white">
         <div className="page-x grid items-center gap-12 py-14 lg:grid-cols-[1.1fr_1fr] lg:py-20">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-800">
-              LandTech 2026 · P5 {lang === "bn" ? "নাগরিক ক্রয়-পূর্ব যাচাই" : "Citizen Pre-Purchase Verification"}
-            </p>
-            <h1 className="mt-5 text-4xl font-bold leading-tight tracking-tight text-ink sm:text-5xl">{t("hero_title")}</h1>
+            <h1 className="text-4xl font-bold leading-tight tracking-tight text-ink sm:text-5xl">{t("hero_title")}</h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted">{t("hero_body")}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
