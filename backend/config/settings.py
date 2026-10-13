@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "land",
     "verification",
     "reports",
+    "costs",
 ]
 
 MIDDLEWARE = [
