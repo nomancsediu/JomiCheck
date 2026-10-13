@@ -14,6 +14,7 @@ function useLinks() {
   return [
     { href: "/verify", label: t("nav_verify") },
     { href: "/inheritance", label: t("nav_inheritance") },
+    { href: "/costs", label: t("nav_costs") },
     { href: "/verify-report", label: t("nav_check_report") },
   ];
 }

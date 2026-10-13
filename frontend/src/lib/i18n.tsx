@@ -16,6 +16,7 @@ const dict = {
   nav_verify: { bn: "জমি যাচাই", en: "Verify land" },
   nav_inheritance: { bn: "ওয়ারিশ হিসাব", en: "Inheritance" },
   nav_check_report: { bn: "রিপোর্ট যাচাই", en: "Check a report" },
+  nav_costs: { bn: "খরচ ও একক", en: "Costs & units" },
   nav_registry: { bn: "রেকর্ড প্যানেল", en: "Records panel" },
   start_verification: { bn: "যাচাই শুরু করুন", en: "Start verification" },
   try_demo: { bn: "ডেমো কেস দেখুন", en: "See demo cases" },

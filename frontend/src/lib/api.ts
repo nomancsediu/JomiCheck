@@ -160,6 +160,27 @@ export type ReportCheck = {
   };
 };
 
+export type AreaType = "city_major" | "city_other" | "pourashava" | "union";
+
+export type CostLine = { key: string; label: Bi; rate_percent: string | null; amount: number };
+
+export type CostEstimate = {
+  price_bdt: number;
+  area_type: AreaType;
+  area_type_label: Bi;
+  mouza_minimum_bdt: number | null;
+  below_minimum: boolean;
+  deed_value_bdt: number;
+  registration: CostLine[];
+  registration_total: number;
+  mutation: CostLine[];
+  mutation_total: number;
+  fees_total: number;
+  grand_total: number;
+  rates_as_of: string;
+  notes: Bi[];
+};
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -204,6 +225,8 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ question, lang }),
     }),
+  costEstimate: (payload: { price_bdt: number; area_type: AreaType; area_acre?: string; mouza_rate_per_acre?: number }) =>
+    request<CostEstimate>("/costs/estimate/", { method: "POST", body: JSON.stringify(payload) }),
   inheritance: (payload: { area_acre: string; heirs: { relation: string; name?: string }[] }) =>
     request<{ area_acre: string; heirs: HeirRow[]; notes: string[]; law: string }>("/inheritance/", {
       method: "POST",
