@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>JomiCheck — Full Project Plan (LandTech 2026)</title>
+<style>
+  @font-face { font-family: "NotoSans"; src: url("fonts/NotoSans.ttf"); font-weight: 100 900; }
+  @font-face { font-family: "NotoBengali"; src: url("fonts/NotoSansBengali.ttf"); font-weight: 100 900; }
+
+  @page { size: A4; margin: 18mm 16mm 18mm 16mm;
+    @bottom-center { content: "JomiCheck — LandTech 2026  |  Page " counter(page); font-family: "NotoSans"; font-size: 8pt; color: #888; }
+  }
+  @page :first { @bottom-center { content: none; } }
+
+  :root { --g: #0f5132; --g2: #198754; --lg: #e9f5ee; --red: #b42318; --amber: #b54708; --ink: #1d2433; --muted: #5b6475; }
+  * { box-sizing: border-box; }
+  body { font-family: "NotoSans", "NotoBengali", sans-serif; color: var(--ink); font-size: 10pt; line-height: 1.5; margin: 0; }
+  .bn { font-family: "NotoBengali", "NotoSans", sans-serif; }
+
+  h1 { font-size: 20pt; color: var(--g); margin: 0 0 6px; border-bottom: 3px solid var(--g2); padding-bottom: 4px; }
+  h2 { font-size: 13pt; color: var(--g); margin: 18px 0 6px; }
+  h3 { font-size: 11pt; color: var(--ink); margin: 12px 0 4px; }
+  h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
+  pre { break-inside: avoid; }
+  p { margin: 4px 0 8px; }
+  ul, ol { margin: 4px 0 8px; padding-left: 20px; }
+  li { margin: 2px 0; }
+  .section { page-break-before: always; }
+  .avoid { page-break-inside: avoid; }
+
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 9pt; page-break-inside: auto; }
+  tr { page-break-inside: avoid; }
+  th { background: var(--g); color: #fff; text-align: left; padding: 5px 7px; font-weight: 600; }
+  td { border-bottom: 1px solid #d9dee6; padding: 5px 7px; vertical-align: top; }
+  tr:nth-child(even) td { background: #f7f9fb; }
+
+  .box { border-left: 4px solid var(--g2); background: var(--lg); padding: 8px 12px; margin: 8px 0 12px; border-radius: 3px; }
+  .warn { border-left-color: var(--amber); background: #fff6e8; }
+  .danger { border-left-color: var(--red); background: #fdecea; }
+  .tag { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 8pt; font-weight: 600; color: #fff; }
+  .t-high { background: var(--red); } .t-med { background: var(--amber); } .t-low { background: var(--g2); }
+  .t-must { background: var(--red); } .t-should { background: var(--amber); } .t-nice { background: #475467; }
+  .muted { color: var(--muted); }
+  .small { font-size: 8.5pt; }
+
+  /* Cover */
+  .cover { height: 255mm; display: flex; flex-direction: column; justify-content: space-between; }
+  .cover .top { background: linear-gradient(135deg, #0f5132, #198754); color: #fff; padding: 40px 34px; border-radius: 8px; }
+  .cover .brand { font-size: 40pt; font-weight: 800; letter-spacing: 1px; margin: 0; }
+  .cover .tagline { font-size: 18pt; margin: 4px 0 18px; }
+  .cover .sub { font-size: 12pt; opacity: .95; }
+  .cover .meta { margin-top: 18px; }
+  .cover .meta td { border: none; padding: 4px 0; background: none !important; font-size: 10.5pt; }
+  .cover .meta td:first-child { color: var(--muted); width: 42%; }
+  .cover .foot { font-size: 8.5pt; color: var(--muted); border-top: 1px solid #ddd; padding-top: 8px; }
+
+  /* TOC */
+  .toc { columns: 2; column-gap: 26px; font-size: 10pt; }
+  .toc div { padding: 2px 0; border-bottom: 1px dotted #ccc; break-inside: avoid; }
+
+  /* Architecture */
+  .flow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 8px 0 12px; }
+  .flow .n { background: var(--g); color: #fff; padding: 6px 9px; border-radius: 5px; font-size: 8.5pt; font-weight: 600; }
+  .flow .a { color: var(--g2); font-weight: 800; }
+  .layers { display: grid; grid-template-columns: 1fr; gap: 6px; margin: 8px 0 12px; }
+  .layer { border: 1.5px solid var(--g2); border-radius: 6px; padding: 7px 10px; display: grid; grid-template-columns: 150px 1fr; gap: 8px; }
+  .layer b { color: var(--g); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .card { border: 1px solid #d9dee6; border-radius: 6px; padding: 8px 10px; }
+  .card h3 { margin-top: 0; }
+  .score { font-size: 16pt; font-weight: 800; }
+  code { font-family: "DejaVu Sans Mono", monospace; font-size: 8.5pt; background: #f1f3f6; padding: 0 3px; border-radius: 3px; }
+  pre { font-family: "DejaVu Sans Mono", "NotoBengali", monospace; font-size: 8pt; background: #f1f3f6; padding: 8px; border-radius: 4px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div>
+    <div class="top">
+      <p class="brand">JomiCheck</p>
+      <p class="tagline bn">কেনার আগে যাচাই করুন — Check Before You Buy</p>
+      <p class="sub">An AI-powered, lawyer-grade pre-purchase land verification and fraud detection system for citizens of Bangladesh</p>
+    </div>
+    <table class="meta">
+      <tr><td>Event</td><td>LandTech 2026 — LandTech Innovation Hackathon</td></tr>
+      <tr><td>Track</td><td>Digital Land Records, Verification &amp; Digitization</td></tr>
+      <tr><td>Primary problem statement</td><td><b>P5 — Citizen Pre-Purchase Verification</b></td></tr>
+      <tr><td>Supporting problem statements</td><td>P3 — Fraud &amp; Double-Selling Detection (intelligence layer)<br>P2 — Deed &amp; Ownership Verification (tamper-proof report)</td></tr>
+      <tr><td>Organizer</td><td>Dept. of CSE &amp; CSE-TECH, Daffodil International University<br>Supported by the Dept. of Law, DIU</td></tr>
+      <tr><td>Round 1 deadline</td><td><b>October 16, 2026</b></td></tr>
+      <tr><td>Document type</td><td>Full project plan (internal team document)</td></tr>
+    </table>
+  </div>
+  <div class="foot">
+    Disclaimer: JomiCheck is a decision-support and risk-screening tool. It does not provide official legal verification or legal advice. All prototype data is synthetic. Legal references in this document should be confirmed with the team's faculty mentor / Department of Law before submission.
+  </div>
+</div>
+
+<!-- ============ TOC ============ -->
+<div class="section">
+  <h1>Contents</h1>
+  <div class="toc">
+    <div>1. Executive Summary</div>
+    <div>2. Hackathon Requirements &amp; Rule Compliance</div>
+    <div>3. The Problem in the Bangladesh Context</div>
+    <div>4. Solution Overview &amp; Positioning</div>
+    <div>5. Legal Due-Diligence Framework (Lawyer's View)</div>
+    <div>6. Complete Feature Set</div>
+    <div>7. Legal Reference Map</div>
+    <div>8. Risk Engine &amp; Scoring Model</div>
+    <div>9. Demo Scenarios</div>
+    <div>10. System Architecture &amp; Tech Stack</div>
+    <div>11. Data Model</div>
+    <div>12. API Design</div>
+    <div>13. Synthetic Data Plan</div>
+    <div>14. AI / ML Layer</div>
+    <div>15. User Interface Screens</div>
+    <div>16. 3-Day Implementation Plan &amp; Team Split</div>
+    <div>17. Round 1 Submission Package</div>
+    <div>18. Final Round Plan</div>
+    <div>19. Countrywide Implementation Plan</div>
+    <div>20. Risks &amp; Mitigation</div>
+    <div>21. Limitations, Ethics &amp; Disclaimer</div>
+    <div>22. Future Scope</div>
+  </div>
+
+  <h1 style="margin-top:22px">1. Executive Summary</h1>
+  <p>Land disputes are among the most common civil cases in Bangladesh. Most of them start before the sale: a seller who is not the recorded owner, land sold twice, an heir selling more than their share, land under litigation, mortgage, acquisition or khas status. An ordinary buyer cannot read and cross-check khatians, deeds, mutation records and legal status on their own.</p>
+  <p><b>JomiCheck</b> performs, in minutes, the title search that an experienced land lawyer would carry out before a purchase. A citizen enters the plot identifiers (District, Upazila, Mouza, Dag, Khatian) and the seller's name, or uploads documents. JomiCheck then:</p>
+  <ol>
+    <li>Builds the <b>ownership chain</b> (<span class="bn">বায়া দলিল</span>) and checks it for gaps.</li>
+    <li>Verifies that the seller has the <b>legal right to sell</b>: recorded ownership, inheritance share (<span class="bn">ফারায়েজ</span>), power of attorney validity, minor/deceased owner.</li>
+    <li>Checks the <b>status of the land</b>: litigation, mortgage, khas, vested (<span class="bn">অর্পিত</span>), waqf, acquisition, tax arrears.</li>
+    <li>Detects <b>fraud</b>: double-selling, over-selling, conflicting registration vs mutation, prior sale agreements (<span class="bn">বায়নানামা</span>), suspicious rapid transfers.</li>
+    <li>Warns about <b>pre-emption risk</b> (<span class="bn">হক-শুফা</span>) from co-sharers.</li>
+    <li>Produces a <b>transparent risk score</b> (Low / Medium / High) where every flag cites the relevant law and is explained in simple Bangla or English.</li>
+    <li>Generates a <b>tamper-proof report</b> (QR + hash) with a document checklist and next steps.</li>
+  </ol>
+  <div class="box"><b>One-line pitch:</b> JomiCheck does an experienced land lawyer's pre-purchase title search in minutes — ownership, inheritance share, pre-emption, litigation, khas and acquisition — with the relevant law cited for every risk.</div>
+</div>
+
+<!-- ============ 2. RULES ============ -->
+<div class="section">
+  <h1>2. Hackathon Requirements &amp; Rule Compliance</h1>
+  <h2>2.1 Key facts</h2>
+  <table>
+    <tr><th style="width:35%">Item</th><th>Requirement</th></tr>
+    <tr><td>Team</td><td>4 members: 2 DIU students (one is Team Leader) + 1 faculty mentor + 1 industry mentor</td></tr>
+    <tr><td>Round 1 submission</td><td><b>October 16, 2026</b> on landtech.diu.edu.bd/landtech</td></tr>
+    <tr><td>Final Round</td><td>Up to 25 teams; Knowledge Tower (Library), DIU; date TBA</td></tr>
+    <tr><td>Confirmation fee</td><td>100 BDT within 3 days of selection announcement (bKash/Rocket)</td></tr>
+    <tr><td>Final presentation</td><td>5 minutes pitch + live demo, 3 minutes Q&amp;A; both students present; mentors cannot answer</td></tr>
+    <tr><td>Prizes</td><td>Champion 20,000 BDT; 1st Runner-up 10,000 BDT; 2nd Runner-up 5,000 BDT</td></tr>
+  </table>
+
+  <h2>2.2 Strict data, privacy &amp; security rules (Section 8)</h2>
+  <div class="box danger">Any violation means <b>immediate disqualification</b> and may be reported to authorities.</div>
+  <table>
+    <tr><th style="width:35%">Rule</th><th>How JomiCheck complies</th></tr>
+    <tr><td>Use only synthetic, organizer-provided or public open data</td><td>All owners, plots, deeds, mutations and cases are generated by our own script. Only public administrative names (district / upazila) are real.</td></tr>
+    <tr><td>No real personal data (names, NID, phone, address, real land records)</td><td>Fictional names (e.g. <span class="bn">রহিম উদ্দিন</span>), fake NIDs (e.g. <code>0000000001</code>), no real addresses.</td></tr>
+    <tr><td>No scraping / automated querying / bulk download from government portals</td><td>No connection to any government system. Integration is described only as future, authorized work.</td></tr>
+    <tr><td>No security testing of live systems</td><td>QR / hash / security features demonstrated only on our own prototype.</td></tr>
+    <tr><td>Real documents must be anonymized and pre-approved</td><td>We use only self-made dummy deeds watermarked "SAMPLE / DUMMY".</td></tr>
+  </table>
+
+  <h2>2.3 Development &amp; AI rules</h2>
+  <ul>
+    <li>Original work; open-source libraries allowed with licences respected and credited in the README.</li>
+    <li>Repository must keep <b>commit history</b> — commit early and often, from both students.</li>
+    <li>All AI tools used must be <b>disclosed in the README</b> with a short note on how they were used.</li>
+    <li>Both students must be able to explain all code and design; judges may question either student.</li>
+    <li>Changes between Round 1 and Final must be summarized in the README.</li>
+  </ul>
+</div>
+
+<!-- ============ 3. PROBLEM ============ -->
+<div class="section">
+  <h1>3. The Problem in the Bangladesh Context</h1>
+  <p>Land information in Bangladesh is spread across multiple records, offices and survey generations:</p>
+  <table>
+    <tr><th style="width:28%">Record</th><th>What it holds</th><th style="width:26%">Office</th></tr>
+    <tr><td>Khatian / Porcha (<span class="bn">খতিয়ান / পর্চা</span>)</td><td>Record of rights — owners and their shares</td><td>Land Records &amp; Survey / AC Land</td></tr>
+    <tr><td>Survey generations</td><td>CS, SA, RS, BS (and City Survey) khatians — often conflicting</td><td>DLRS</td></tr>
+    <tr><td>Dag (<span class="bn">দাগ</span>)</td><td>Plot number within a Mouza</td><td>Mouza map</td></tr>
+    <tr><td>Deed (<span class="bn">দলিল</span>)</td><td>Registered sale, gift (heba), exchange, partition</td><td>Sub-Registry Office</td></tr>
+    <tr><td>Mutation (<span class="bn">নামজারি</span>), DCR</td><td>Updating the record of rights after transfer</td><td>AC Land Office</td></tr>
+    <tr><td>Land Development Tax (<span class="bn">দাখিলা</span>)</td><td>Tax payment proof</td><td>Union Land Office</td></tr>
+    <tr><td>Legal status</td><td>Court cases, acquisition, khas, vested property, mortgage</td><td>Courts, DC office, banks</td></tr>
+  </table>
+
+  <h2>Common risks a buyer faces</h2>
+  <table>
+    <tr><th style="width:28%">Risk</th><th>What happens</th></tr>
+    <tr><td>Ownership mismatch</td><td>The seller is not the person recorded in the latest khatian.</td></tr>
+    <tr><td>Double-selling</td><td>The same plot or share is sold to more than one buyer.</td></tr>
+    <tr><td>Over-selling</td><td>An heir or co-sharer sells more land than their legal share.</td></tr>
+    <tr><td>Registration vs mutation gap</td><td>Deed registered but mutation never done, or done in another name.</td></tr>
+    <tr><td>Survey conflicts</td><td>Owner or area differs between CS, SA, RS and BS records.</td></tr>
+    <tr><td>Restricted land</td><td>Khas, vested, waqf, debottor, acquisition, forest, river-eroded land.</td></tr>
+    <tr><td>Encumbrance</td><td>Land mortgaged to a bank or under an earlier sale agreement.</td></tr>
+    <tr><td>Pre-emption (<span class="bn">হক-শুফা</span>)</td><td>A co-sharer later claims the land through court after the sale.</td></tr>
+    <tr><td>Power of attorney abuse</td><td>Sale through a revoked or unregistered POA, or after the principal's death.</td></tr>
+  </table>
+  <p>The result is lost savings, years of litigation and family conflict. Citizens need a simple, trustworthy way to <b>screen a plot before paying any money</b>.</p>
+</div>
+
+<!-- ============ 4. SOLUTION ============ -->
+<div class="section">
+  <h1>4. Solution Overview &amp; Positioning</h1>
+  <h2>4.1 How it works</h2>
+  <table>
+    <tr><th style="width:8%">Step</th><th>System action</th></tr>
+    <tr><td>1</td><td>Citizen enters District → Upazila → Mouza → Dag → Khatian and seller's name, or uploads documents.</td></tr>
+    <tr><td>2</td><td>System collects ownership, deeds, mutation, survey history, legal status, mortgage and tax records.</td></tr>
+    <tr><td>3</td><td>OCR / extraction converts uploaded documents into structured fields.</td></tr>
+    <tr><td>4</td><td>Verification engine cross-checks records (ownership, chain of title, survey lineage, mutation).</td></tr>
+    <tr><td>5</td><td>Legal engine checks right to sell (inheritance share, POA, minor/deceased owner, Section 52A).</td></tr>
+    <tr><td>6</td><td>Fraud engine detects double-selling, over-selling, prior bainanama, suspicious transfers.</td></tr>
+    <tr><td>7</td><td>Risk engine computes a tiered, explainable score with legal citations.</td></tr>
+    <tr><td>8</td><td>AI explains findings in Bangla/English; report is generated with QR + hash, checklist and next steps.</td></tr>
+  </table>
+
+  <h2>4.2 Why JomiCheck stands out</h2>
+  <table>
+    <tr><th style="width:38%">A typical P5 project</th><th>JomiCheck</th></tr>
+    <tr><td>Compares seller name with owner</td><td>Full <b>lawyer-style title search</b> with a 25-year chain of title</td></tr>
+    <tr><td>Generic risk score</td><td>Tiered score; <b>every flag cites the relevant law</b></td></tr>
+    <tr><td>Ignores inheritance</td><td><b>Faraiz share calculator</b> detects heirs over-selling</td></tr>
+    <tr><td>Detects double-selling after it happens</td><td><b>Purchase-intent alert</b> warns buyers before it happens</td></tr>
+    <tr><td>No pre-emption awareness</td><td><b>Hak-e-Shufa risk</b> warning with co-sharer list</td></tr>
+    <tr><td>Plain PDF report</td><td><b>Tamper-proof report</b> with QR code and SHA-256 hash</td></tr>
+    <tr><td>Result only</td><td>Document checklist, questions for the seller, site-visit checklist, next steps</td></tr>
+  </table>
+  <div class="box">Problem statement coverage: <b>P5</b> (citizen verification) as the product, <b>P3</b> (fraud detection) as the intelligence layer, and <b>P2</b> (QR / hashing) for report integrity.</div>
+</div>
+
+<!-- ============ 5. LEGAL FRAMEWORK ============ -->
+<div class="section">
+  <h1>5. Legal Due-Diligence Framework (Lawyer's View)</h1>
+  <p>Before a client buys land, an experienced land lawyer checks the following. JomiCheck automates each step.</p>
+  <table>
+    <tr><th style="width:5%">#</th><th style="width:30%">Lawyer's check</th><th>What JomiCheck automates</th></tr>
+    <tr><td>1</td><td>Chain of title (25–30 years)</td><td>Builds the deed chain (<span class="bn">বায়া দলিল</span>) and flags missing links or a seller who never received title.</td></tr>
+    <tr><td>2</td><td>Survey consistency (CS → SA → RS → BS)</td><td>Compares owner and area across survey generations and flags breaks.</td></tr>
+    <tr><td>3</td><td>Mutation, DCR, tax receipts</td><td>Verifies mutation is in the seller's name and matches the latest deed; checks tax arrears.</td></tr>
+    <tr><td>4</td><td>Encumbrance</td><td>Checks mortgage / lien records and prior registered sale agreements.</td></tr>
+    <tr><td>5</td><td>Restricted status</td><td>Checks khas, vested, abandoned, waqf, debottor, acquisition, forest, river-eroded status.</td></tr>
+    <tr><td>6</td><td>Litigation</td><td>Checks civil suits, Land Survey Tribunal cases, injunctions, Section 144 proceedings.</td></tr>
+    <tr><td>7</td><td>Seller's right to sell</td><td>Section 52A check; inheritance share; POA validity; minor or deceased owner.</td></tr>
+    <tr><td>8</td><td>Co-sharer rights</td><td>Pre-emption (Hak-e-Shufa) risk for joint holdings.</td></tr>
+    <tr><td>9</td><td>Physical possession &amp; boundary</td><td>Generates a site-visit checklist (possession, <span class="bn">চৌহদ্দি</span>, neighbours).</td></tr>
+    <tr><td>10</td><td>Price sanity</td><td>Compares declared price with the mouza rate to flag suspicious under-valuation.</td></tr>
+  </table>
+</div>
+
+<!-- ============ 6. FEATURES ============ -->
+<div class="section">
+  <h1>6. Complete Feature Set</h1>
+  <p class="small muted">Priority for Round 1: <span class="tag t-must">MUST</span> <span class="tag t-should">SHOULD</span> <span class="tag t-nice">FINAL</span> (deferred to the Final Round)</p>
+
+  <h2>A. Title &amp; right to sell</h2>
+  <table>
+    <tr><th style="width:27%">Feature</th><th>What it does</th><th style="width:11%">Priority</th></tr>
+    <tr><td>Ownership verification</td><td>Fuzzy / transliteration-aware match of seller name with the recorded owner and share.</td><td><span class="tag t-must">MUST</span></td></tr>
+    <tr><td>Section 52A check</td><td>Seller's name must be in the latest record of rights, or seller must prove inheritance.</td><td><span class="tag t-must">MUST</span></td></tr>
+    <tr><td>Ownership history timeline</td><td>Visual chain of title with gaps highlighted.</td><td><span class="tag t-must">MUST</span></td></tr>
+    <tr><td>Faraiz inheritance calculator</td><td>Computes each heir's share under Muslim law; shows how much the seller can legally sell.</td><td><span class="tag t-must">MUST</span></td></tr>
+    <tr><td>Over-selling detection</td><td>Flags sale area greater than the seller's legal share.</td><td><span class="tag t-must">MUST</span></td></tr>
+    <tr><td>Power of attorney check</td><td>Registered? Revoked? Principal alive? Scope covers sale?</td><td><span class="tag t-should">SHOULD</span></td></tr>
+    <tr><td>Minor / deceased owner</td><td>Court permission needed for minor's land; all heirs needed for deceased owner's land.</td><td><span class="tag t-should">SHOULD</span></td></tr>
+    <tr><td>Hindu Dayabhaga inheritance</td><td>Inheritance shares for Hindu owners.</td><td><span class="tag t-nice">FINAL</span></td></tr>
+    <tr><td>Survey lineage graph</td><td>CS → SA → RS → BS owner/area comparison as a graph.</td><td><span class="tag t-nice">FINAL</span></td></tr>
+  </table>
+
+  <h2>B. Land status &amp; encumbrance</h2>
+  <table>
+    <tr><th style="width:27%">Feature</th><th>What it does</th><th style="width:11%">Priority</th></tr>
+    <tr><td>Restricted land check</td><td>Khas, vested, abandoned, waqf, debottor, forest, rail/road, river-eroded land.</td><td><span class="tag t-must">MUST</span></td></tr>
+    <tr><td>Acquisition check</td><td>Ongoing or notified government acquisition.</td><td><span class="tag t-must">MUST</span></td></tr>
+    <tr><td>Litigation check</td><td>Civil suits, Land Survey Tribunal cases, injunctions, Section 144.</td><td><span class="tag t-must">MUST</span></td></tr>
+    <tr><td>Mortgage check</td><td>Bank or private mortgage on the plot.</td><td><span class="tag t-should">SHOULD</span></td></tr>
+    <tr><td>Tax arrears</td><td>Unpaid land development tax.</td><td><span class="tag t-should">SHOULD</span></td></tr>
+  </table>
+
+  <h2>C. Fraud &amp; co-sharer risk</h2>
+  <table>
+    <tr><th style="width:27%">Feature</th><th>What it does</th><th style="width:11%">Priority</th></tr>
+    <tr><td>Double-selling detection</td><td>Same Dag / share in multiple active transactions.</td><td><span class="tag t-must">MUST</span></td></tr>
+    <tr><td>Mutation vs registration</td><td>Mutation missing, outdated or in a different name than the deed.</td><td><span class="tag t-must">MUST</span></td></tr>
+    <tr><td>Prior bainanama</td><td>Existing registered sale agreement with another buyer.</td><td><span class="tag t-should">SHOULD</span></td></tr>
+    <tr><td>Hak-e-Shufa warning</td><td>Joint holding → lists co-sharers who may claim pre-emption.</td><td><span class="tag t-should">SHOULD</span></td></tr>
+    <tr><td>Purchase-intent alert</td><td>Multiple buyers checking the same Dag are alerted — prevents double-selling.</td><td><span class="tag t-should">SHOULD</span></td></tr>
+    <tr><td>Suspicious transfer pattern</td><td>Rapid repeated transfers or price far below mouza rate (rules + anomaly model).</td><td><span class="tag t-nice">FINAL</span></td></tr>
+  </table>
+
+  <h2>D. Citizen support &amp; report</h2>
+  <table>
+    <tr><th style="width:27%">Feature</th><th>What it does</th><th style="width:11%">Priority</th></tr>
+    <tr><td>Risk score with legal citation</td><td>Low / Medium / High with reasons and the relevant law for each flag.</td><td><span class="tag t-must">MUST</span></td></tr>
+    <tr><td>AI explanation (Bangla/English)</td><td>Plain-language explanation and follow-up Q&amp;A.</td><td><span class="tag t-must">MUST</span></td></tr>
+    <tr><td>Verification report (PDF)</td><td>Property details, timeline, flags, score, next steps.</td><td><span class="tag t-must">MUST</span></td></tr>
+    <tr><td>Tamper-proof report</td><td>QR code + SHA-256 hash; verify page detects altered copies.</td><td><span class="tag t-should">SHOULD</span></td></tr>
+    <tr><td>Document checklist</td><td>Khatian, DCR, tax receipt, previous deeds, heirship certificate, etc.</td><td><span class="tag t-should">SHOULD</span></td></tr>
+    <tr><td>Questions for the seller</td><td>Generated from the detected risks.</td><td><span class="tag t-should">SHOULD</span></td></tr>
+    <tr><td>Site-visit checklist</td><td>Possession, boundaries, neighbours, access road.</td><td><span class="tag t-should">SHOULD</span></td></tr>
+    <tr><td>Next-step guide</td><td>Which office to visit (AC Land, Sub-Registry, court) and what to bring.</td><td><span class="tag t-should">SHOULD</span></td></tr>
+    <tr><td>Document upload + OCR</td><td>Extract fields from deeds, porcha, mutation documents.</td><td><span class="tag t-nice">FINAL</span></td></tr>
+    <tr><td>Cost calculator</td><td>Stamp duty, registration fee, local tax, mutation fee estimate.</td><td><span class="tag t-nice">FINAL</span></td></tr>
+    <tr><td>Map view</td><td>Plot location and boundaries (PostGIS).</td><td><span class="tag t-nice">FINAL</span></td></tr>
+  </table>
+</div>
+
+<!-- ============ 7. LEGAL REFERENCES ============ -->
+<div class="section">
+  <h1>7. Legal Reference Map</h1>
+  <div class="box warn">These references guide the rule design. They must be reviewed by the faculty mentor / Department of Law before they are cited in the concept note or the app.</div>
+  <table>
+    <tr><th style="width:38%">Law</th><th>Relevance to JomiCheck</th></tr>
+    <tr><td>Registration Act, 1908 — Section 52A</td><td>Seller's name must be in the latest record of rights (or proof of inheritance) for a sale deed to be registered.</td></tr>
+    <tr><td>Registration Act, 1908 — Section 17A</td><td>Agreement for sale (bainanama) must be registered → prior-agreement check.</td></tr>
+    <tr><td>Transfer of Property Act, 1882 — Section 53C</td><td>Sale of immovable property only by registered deed.</td></tr>
+    <tr><td>State Acquisition and Tenancy Act, 1950 — Section 96</td><td>Pre-emption (Hak-e-Shufa) right of co-sharers within the statutory period.</td></tr>
+    <tr><td>State Acquisition and Tenancy Act, 1950 — Section 145A</td><td>Land Survey Tribunal cases on record-of-rights errors.</td></tr>
+    <tr><td>Land Crime Prevention and Remedy Act, 2023 (<span class="bn">ভূমি অপরাধ প্রতিরোধ ও প্রতিকার আইন, ২০২৩</span>)</td><td>Offences such as selling more land than owned, forgery and fraudulent transfer.</td></tr>
+    <tr><td>Land Development Tax Act, 2023</td><td>Land development tax and arrears.</td></tr>
+    <tr><td>Power of Attorney Act, 2012</td><td>Registration, scope and revocation of power of attorney for sale.</td></tr>
+    <tr><td>Acquisition and Requisition of Immovable Property Act, 2017</td><td>Government acquisition status.</td></tr>
+    <tr><td>Vested Property Return Act, 2001</td><td>Vested property (<span class="bn">অর্পিত সম্পত্তি</span>) status.</td></tr>
+    <tr><td>Guardians and Wards Act, 1890</td><td>Court permission for sale of a minor's property.</td></tr>
+    <tr><td>Muslim personal law (Faraiz) / Hindu Dayabhaga law</td><td>Inheritance share calculation.</td></tr>
+  </table>
+</div>
+
+<!-- ============ 8. RISK ENGINE ============ -->
+<div class="section">
+  <h1>8. Risk Engine &amp; Scoring Model</h1>
+  <p>The engine uses deterministic, explainable rules first. Each rule produces a flag with: severity, points, evidence, legal reference, plain-language explanation and recommended action.</p>
+
+  <h2>8.1 Severity tiers</h2>
+  <table>
+    <tr><th style="width:20%">Tier</th><th>Examples</th><th style="width:22%">Effect</th></tr>
+    <tr><td><span class="tag t-high">CRITICAL</span></td><td>Seller is not the owner; double-selling; khas / vested land; acquisition in progress; revoked POA</td><td>Result is <b>HIGH</b> regardless of total score</td></tr>
+    <tr><td><span class="tag t-med">MAJOR</span></td><td>Pending litigation; mortgage; over-selling share; mutation missing or mismatched; survey conflict; prior bainanama</td><td>+20 to +30 each</td></tr>
+    <tr><td><span class="tag t-low">MINOR</span></td><td>Tax arrears; pre-emption exposure; chain-of-title gap; price below mouza rate; document field inconsistency</td><td>+5 to +10 each</td></tr>
+  </table>
+
+  <h2>8.2 Rule weights (initial)</h2>
+  <table>
+    <tr><th>Rule</th><th style="width:16%">Tier</th><th style="width:12%">Points</th></tr>
+    <tr><td>Seller ≠ recorded owner</td><td>Critical</td><td>+40</td></tr>
+    <tr><td>Same Dag / share in multiple active sales</td><td>Critical</td><td>+35</td></tr>
+    <tr><td>Khas / vested / waqf / debottor land</td><td>Critical</td><td>+40</td></tr>
+    <tr><td>Acquisition notified or in progress</td><td>Critical</td><td>+40</td></tr>
+    <tr><td>Sale through revoked / invalid POA</td><td>Critical</td><td>+35</td></tr>
+    <tr><td>Pending litigation / injunction</td><td>Major</td><td>+30</td></tr>
+    <tr><td>Sale area exceeds legal share (over-selling)</td><td>Major</td><td>+25</td></tr>
+    <tr><td>Mortgage / lien</td><td>Major</td><td>+25</td></tr>
+    <tr><td>Mutation missing / in another name</td><td>Major</td><td>+20</td></tr>
+    <tr><td>Prior registered bainanama</td><td>Major</td><td>+20</td></tr>
+    <tr><td>Survey generation conflict</td><td>Major</td><td>+20</td></tr>
+    <tr><td>Conflicting transaction information</td><td>Minor</td><td>+10</td></tr>
+    <tr><td>Pre-emption (Hak-e-Shufa) exposure</td><td>Minor</td><td>+10</td></tr>
+    <tr><td>Chain-of-title gap</td><td>Minor</td><td>+10</td></tr>
+    <tr><td>Price far below mouza rate</td><td>Minor</td><td>+8</td></tr>
+    <tr><td>Land tax arrears</td><td>Minor</td><td>+6</td></tr>
+  </table>
+  <h2>8.3 Score bands</h2>
+  <p>Total is capped at 100. <span class="tag t-low">LOW 0–30</span> &nbsp; <span class="tag t-med">MEDIUM 31–60</span> &nbsp; <span class="tag t-high">HIGH 61–100</span> &nbsp; — any critical flag forces HIGH.</p>
+
+  <h2>8.4 Flag output format</h2>
+<pre>{
+  "code": "OWNERSHIP_MISMATCH",
+  "tier": "CRITICAL",
+  "points": 40,
+  "evidence": "Latest BS khatian 456 lists 'Abdul Karim', seller is 'Rahim Uddin'",
+  "law": "Registration Act 1908, Section 52A",
+  "explain_bn": "বিক্রেতার নাম সর্বশেষ খতিয়ানে নেই...",
+  "explain_en": "The seller is not the recorded owner...",
+  "action": "Ask the seller for the deed and mutation in his name; verify at AC Land office."
+}</pre>
+</div>
+
+<!-- ============ 9. DEMO SCENARIOS ============ -->
+<div class="section">
+  <h1>9. Demo Scenarios</h1>
+  <p>Three prepared cases show the full range of the system. All data is synthetic.</p>
+
+  <div class="card avoid">
+    <h3>Case 1 — Clean property &nbsp;<span class="tag t-low">LOW</span> <span class="score" style="color:#198754">6/100</span></h3>
+    <p>Dag 101, Khatian 210. Seller is the recorded owner, mutation is in his name, complete chain of title, no case or mortgage. Only a small tax arrear.</p>
+    <p><b>Recommendation:</b> Low risk. Collect the listed documents, pay the tax arrear and proceed with a lawyer.</p>
+  </div>
+
+  <div class="card avoid" style="margin-top:10px">
+    <h3>Case 2 — Inheritance over-selling &nbsp;<span class="tag t-med">MEDIUM</span> <span class="score" style="color:#b54708">55/100</span></h3>
+    <p>Dag 118, 1.00 acre. Recorded owner (deceased) left a wife, two sons and one daughter. Seller Karim (a son) is selling 0.40 acre.</p>
+    <table>
+      <tr><th>Heir</th><th>Faraiz share</th><th>Area</th></tr>
+      <tr><td>Wife</td><td>1/8</td><td>0.125 acre</td></tr>
+      <tr><td>Son (Karim)</td><td>2/5 of remaining 7/8 = 7/20</td><td><b>0.350 acre</b></td></tr>
+      <tr><td>Son</td><td>7/20</td><td>0.350 acre</td></tr>
+      <tr><td>Daughter</td><td>7/40</td><td>0.175 acre</td></tr>
+    </table>
+    <p>Flags: over-selling 0.05 acre (+25), mutation not done in heirs' names (+20), Hak-e-Shufa exposure from co-heirs (+10).</p>
+    <p><b>Recommendation:</b> Buy only up to 0.35 acre, after mutation, with written consent of the other heirs.</p>
+  </div>
+
+  <div class="card avoid" style="margin-top:10px">
+    <h3>Case 3 — Fraud &nbsp;<span class="tag t-high">HIGH</span> <span class="score" style="color:#b42318">91/100</span></h3>
+    <p>Seller Rahim, Dag 125, Khatian 456. The latest record shows a different owner, and the same Dag appears in another active transaction.</p>
+    <p>Flags: ownership mismatch (critical, +40), double-selling (critical, +35), conflicting transaction information (+10), tax arrears (+6).</p>
+    <p><b>Recommendation:</b> Do not proceed without official verification at the AC Land and Sub-Registry offices.</p>
+  </div>
+</div>
+
+<!-- ============ 10. ARCHITECTURE ============ -->
+<div class="section">
+  <h1>10. System Architecture &amp; Tech Stack</h1>
+  <h2>10.1 Request flow</h2>
+  <div class="flow">
+    <span class="n">Citizen</span><span class="a">→</span>
+    <span class="n">Web App</span><span class="a">→</span>
+    <span class="n">FastAPI</span><span class="a">→</span>
+    <span class="n">Records DB</span><span class="a">→</span>
+    <span class="n">OCR &amp; Extraction</span><span class="a">→</span>
+    <span class="n">Verification Engine</span><span class="a">→</span>
+    <span class="n">Legal Engine</span><span class="a">→</span>
+    <span class="n">Fraud Engine</span><span class="a">→</span>
+    <span class="n">Risk Scoring</span><span class="a">→</span>
+    <span class="n">AI Explanation</span><span class="a">→</span>
+    <span class="n">Signed Report</span>
+  </div>
+
+  <h2>10.2 Layers</h2>
+  <div class="layers">
+    <div class="layer"><b>Presentation</b><span>Next.js (React) web app, Bangla + English UI, report viewer, QR verify page</span></div>
+    <div class="layer"><b>API</b><span>FastAPI (Python) — REST endpoints, validation (Pydantic), PDF generation</span></div>
+    <div class="layer"><b>Verification engine</b><span>Ownership match, chain of title, mutation vs registration, survey lineage</span></div>
+    <div class="layer"><b>Legal engine</b><span>Section 52A, Faraiz calculator, POA, minor/deceased owner, Hak-e-Shufa, restricted land</span></div>
+    <div class="layer"><b>Fraud engine</b><span>Double-selling, over-selling, prior bainanama, rapid transfers, price anomaly</span></div>
+    <div class="layer"><b>Risk engine</b><span>Tiered scoring, critical override, legal citation per flag</span></div>
+    <div class="layer"><b>AI layer</b><span>LLM explanation (Bangla/English) and Q&amp;A grounded only on the computed flags</span></div>
+    <div class="layer"><b>Data</b><span>PostgreSQL (SQLite acceptable for Round 1); PostGIS for maps later; synthetic data generator</span></div>
+    <div class="layer"><b>Integrity</b><span>SHA-256 hash of report content, QR code linking to verify endpoint</span></div>
+  </div>
+
+  <h2>10.3 Tech stack</h2>
+  <table>
+    <tr><th style="width:28%">Component</th><th>Technology</th></tr>
+    <tr><td>Frontend</td><td>Next.js / React, Tailwind CSS</td></tr>
+    <tr><td>Backend</td><td>FastAPI, Pydantic, SQLAlchemy</td></tr>
+    <tr><td>Database</td><td>PostgreSQL (+ PostGIS later); SQLite for quick local setup</td></tr>
+    <tr><td>Name matching</td><td>RapidFuzz + Bangla↔English transliteration table</td></tr>
+    <tr><td>OCR (Final Round)</td><td>PaddleOCR or Tesseract (Bangla + English)</td></tr>
+    <tr><td>ML (Final Round)</td><td>Scikit-learn Isolation Forest for transfer anomalies</td></tr>
+    <tr><td>AI explanation</td><td>Open-source LLM (local) or LLM API; strictly grounded on flags</td></tr>
+    <tr><td>Report</td><td>HTML → PDF, <code>qrcode</code> library, SHA-256 (hashlib)</td></tr>
+    <tr><td>Deployment</td><td>Vercel (frontend) + Render / Railway (backend), or a single VPS with Docker</td></tr>
+  </table>
+</div>
+
+<!-- ============ 11-12. DATA MODEL + API ============ -->
+<div class="section">
+  <h1>11. Data Model</h1>
+  <table>
+    <tr><th style="width:22%">Entity</th><th>Key fields</th></tr>
+    <tr><td>Location</td><td>district, upazila, mouza, jl_no</td></tr>
+    <tr><td>Plot</td><td>dag_no, mouza_id, area_acre, land_class, mouza_rate, geometry (later)</td></tr>
+    <tr><td>Khatian</td><td>khatian_no, survey (CS/SA/RS/BS), mouza_id, plots</td></tr>
+    <tr><td>KhatianOwner</td><td>khatian_id, person_id, share (fraction)</td></tr>
+    <tr><td>Person</td><td>name_bn, name_en, father_name, religion, is_minor, is_deceased, date_of_death, fake_nid</td></tr>
+    <tr><td>Heir</td><td>deceased_id, heir_id, relation (wife, son, daughter, ...)</td></tr>
+    <tr><td>Deed</td><td>deed_no, type (sale/heba/exchange/partition), date, sub_registry, plot_id, area, price, sellers, buyers, status</td></tr>
+    <tr><td>Bainanama</td><td>agreement_no, plot_id, seller, buyer, date, registered, status</td></tr>
+    <tr><td>Mutation</td><td>case_no, khatian_id, new_owner, deed_id, date, status</td></tr>
+    <tr><td>PowerOfAttorney</td><td>poa_no, principal, attorney, scope, registered, revoked, date</td></tr>
+    <tr><td>LegalStatus</td><td>plot_id, type (case/acquisition/khas/vested/waqf/debottor/forest), reference, status</td></tr>
+    <tr><td>Mortgage</td><td>plot_id, lender, amount, date, status</td></tr>
+    <tr><td>TaxRecord</td><td>holding_no, plot_id, paid_upto, arrears</td></tr>
+    <tr><td>PurchaseIntent</td><td>plot_id, buyer_token, created_at</td></tr>
+    <tr><td>Report</td><td>id, inputs, flags, score, level, explanation, sha256, created_at</td></tr>
+  </table>
+
+  <h1 style="margin-top:20px">12. API Design</h1>
+  <table>
+    <tr><th style="width:38%">Endpoint</th><th>Purpose</th></tr>
+    <tr><td><code>GET /locations</code></td><td>District → Upazila → Mouza dropdown data</td></tr>
+    <tr><td><code>POST /verify</code></td><td>Run full verification for plot + seller; returns flags, score, report id</td></tr>
+    <tr><td><code>GET /plots/{id}/history</code></td><td>Chain of title and survey lineage</td></tr>
+    <tr><td><code>POST /inheritance/calculate</code></td><td>Faraiz share calculation for a deceased owner</td></tr>
+    <tr><td><code>POST /explain</code></td><td>AI explanation / Q&amp;A for a report (Bangla or English)</td></tr>
+    <tr><td><code>GET /reports/{id}</code></td><td>Report JSON</td></tr>
+    <tr><td><code>GET /reports/{id}/pdf</code></td><td>Signed PDF report</td></tr>
+    <tr><td><code>GET /verify-report/{hash}</code></td><td>QR target: confirms whether a report is authentic</td></tr>
+    <tr><td><code>POST /documents</code></td><td>(Final Round) upload + OCR extraction</td></tr>
+  </table>
+</div>
+
+<!-- ============ 13. SYNTHETIC DATA ============ -->
+<div class="section">
+  <h1>13. Synthetic Data Plan</h1>
+  <p><b>Synthetic data</b> is fictional data created by the team that looks like real land records but belongs to no real person or plot. The hackathon rules require it.</p>
+  <h2>13.1 Dataset size (Round 1)</h2>
+  <ul>
+    <li>3 mouzas in 2 upazilas (real public district/upazila names; fictional mouza data)</li>
+    <li>~50 plots, ~70 khatians across CS / SA / RS / BS, ~120 fictional persons</li>
+    <li>~150 deeds, ~80 mutations, ~15 legal-status entries, ~8 mortgages, ~6 POAs, ~5 bainanamas</li>
+  </ul>
+  <h2>13.2 Planted scenarios (one per rule)</h2>
+  <table>
+    <tr><th style="width:5%">#</th><th>Scenario</th><th style="width:22%">Expected result</th></tr>
+    <tr><td>1</td><td>Clean plot, full chain, mutation done</td><td>LOW</td></tr>
+    <tr><td>2</td><td>Seller not the recorded owner</td><td>HIGH (critical)</td></tr>
+    <tr><td>3</td><td>Same Dag in two active sale deeds</td><td>HIGH (critical)</td></tr>
+    <tr><td>4</td><td>Heir selling more than Faraiz share</td><td>MEDIUM</td></tr>
+    <tr><td>5</td><td>Deed registered, mutation in another name</td><td>MEDIUM</td></tr>
+    <tr><td>6</td><td>Khas land offered for sale</td><td>HIGH (critical)</td></tr>
+    <tr><td>7</td><td>Plot under acquisition notice</td><td>HIGH (critical)</td></tr>
+    <tr><td>8</td><td>Pending civil suit + injunction</td><td>MEDIUM / HIGH</td></tr>
+    <tr><td>9</td><td>Bank mortgage on plot</td><td>MEDIUM</td></tr>
+    <tr><td>10</td><td>Sale through revoked POA</td><td>HIGH (critical)</td></tr>
+    <tr><td>11</td><td>Prior registered bainanama with another buyer</td><td>MEDIUM</td></tr>
+    <tr><td>12</td><td>Owner differs between SA and RS khatian</td><td>MEDIUM</td></tr>
+    <tr><td>13</td><td>Three transfers within 6 months at low price</td><td>MEDIUM</td></tr>
+  </table>
+  <h2>13.3 Rules for the dataset</h2>
+  <ul>
+    <li>Fictional names only (e.g. <span class="bn">রহিম উদ্দিন, করিম মিয়া, ফাতেমা বেগম</span>); fake NIDs like <code>0000000001</code>.</li>
+    <li>Dummy deed images (if any) made by the team and watermarked "SAMPLE / DUMMY".</li>
+    <li>Generator script committed to the repo; seed fixed so data is reproducible.</li>
+    <li>README statement: <i>"All data is synthetic and generated by our script. No real personal data or government portal data is used."</i></li>
+  </ul>
+</div>
+
+<!-- ============ 14-15. AI + UI ============ -->
+<div class="section">
+  <h1>14. AI / ML Layer</h1>
+  <table>
+    <tr><th style="width:24%">Layer</th><th>Technique</th><th style="width:16%">Round</th></tr>
+    <tr><td>Rules (core)</td><td>Deterministic legal and fraud rules — explainable and auditable</td><td>Round 1</td></tr>
+    <tr><td>Entity matching</td><td>Fuzzy matching + Bangla/English transliteration for names</td><td>Round 1</td></tr>
+    <tr><td>Explanation</td><td>LLM converts flags into plain Bangla/English; answers follow-up questions; never invents facts — prompt contains only computed flags</td><td>Round 1</td></tr>
+    <tr><td>Document extraction</td><td>PaddleOCR / Tesseract + field parser; user can correct extracted fields</td><td>Final</td></tr>
+    <tr><td>Anomaly detection</td><td>Isolation Forest on transfer frequency, price/mouza-rate ratio, ownership duration</td><td>Final</td></tr>
+    <tr><td>Workflow (optional)</td><td>LangGraph: extract → verify → detect → score → explain</td><td>Final</td></tr>
+  </table>
+  <div class="box"><b>Design principle:</b> the decision comes from transparent rules; AI only explains it. This keeps results trustworthy and defensible in front of law judges.</div>
+
+  <h1 style="margin-top:20px">15. User Interface Screens</h1>
+  <table>
+    <tr><th style="width:5%">#</th><th style="width:26%">Screen</th><th>Content</th></tr>
+    <tr><td>1</td><td>Home</td><td>Tagline, "Start verification" button, language toggle (বাংলা / English)</td></tr>
+    <tr><td>2</td><td>Search form</td><td>District → Upazila → Mouza → Dag → Khatian, seller name, area to buy</td></tr>
+    <tr><td>3</td><td>Result dashboard</td><td>Risk gauge, level badge, list of flags with tier, law and explanation</td></tr>
+    <tr><td>4</td><td>Ownership timeline</td><td>Chain of title with gaps highlighted</td></tr>
+    <tr><td>5</td><td>Inheritance view</td><td>Heir tree with Faraiz shares and seller's sellable area</td></tr>
+    <tr><td>6</td><td>Ask AI</td><td>Chat about the report in Bangla or English</td></tr>
+    <tr><td>7</td><td>Report</td><td>Downloadable PDF with QR, hash, checklists, next steps</td></tr>
+    <tr><td>8</td><td>Verify report</td><td>Scan QR / paste hash to check authenticity</td></tr>
+  </table>
+</div>
+
+<!-- ============ 16. 3-DAY PLAN ============ -->
+<div class="section">
+  <h1>16. 3-Day Implementation Plan &amp; Team Split</h1>
+  <p><b>Student A</b> = backend, data, rules. &nbsp; <b>Student B</b> = frontend, report, video, concept note. Both review each other's code daily so both can explain everything.</p>
+
+  <h2>Day 1 — October 13–14: Foundation</h2>
+  <table>
+    <tr><th style="width:12%">Owner</th><th>Task</th></tr>
+    <tr><td>Both</td><td>Create GitHub repo, README skeleton, folder structure; first commits</td></tr>
+    <tr><td>A</td><td>FastAPI project, database models, synthetic data generator with all 13 scenarios</td></tr>
+    <tr><td>A</td><td>Rules: ownership mismatch, double-selling, Section 52A, mutation mismatch, litigation, khas/vested/acquisition</td></tr>
+    <tr><td>B</td><td>Next.js project, search form with cascading dropdowns, result dashboard layout</td></tr>
+    <tr><td>B</td><td>Draft concept note outline</td></tr>
+  </table>
+
+  <h2>Day 2 — October 15: Differentiating features</h2>
+  <table>
+    <tr><th style="width:12%">Owner</th><th>Task</th></tr>
+    <tr><td>A</td><td>Faraiz calculator + over-selling rule; POA, bainanama, mortgage, Hak-e-Shufa, tax rules</td></tr>
+    <tr><td>A</td><td>Risk engine with tiers, critical override and legal citations; <code>/verify</code> endpoint complete</td></tr>
+    <tr><td>B</td><td>Ownership timeline, inheritance view, flag cards with law and explanation</td></tr>
+    <tr><td>B</td><td>AI explanation (Bangla/English) using only computed flags</td></tr>
+    <tr><td>Both</td><td>PDF report with QR + SHA-256, document checklist, next steps; verify-report page</td></tr>
+  </table>
+
+  <h2>Day 3 — October 16: Polish &amp; submit</h2>
+  <table>
+    <tr><th style="width:12%">Owner</th><th>Task</th></tr>
+    <tr><td>Both</td><td>Test the 3 demo cases end to end; fix bugs; UI polish</td></tr>
+    <tr><td>A</td><td>Deploy backend + frontend (optional but recommended); finalize README</td></tr>
+    <tr><td>B</td><td>Record and edit 3-minute demo video</td></tr>
+    <tr><td>B</td><td>Finalize 4-page concept note PDF; mentor review of legal references</td></tr>
+    <tr><td>Both</td><td><b>Submit before the deadline</b> — do not wait for the last hour</td></tr>
+  </table>
+
+  <h2>Cut list if time runs out (in this order)</h2>
+  <ol>
+    <li>Purchase-intent alert</li>
+    <li>Site-visit checklist and seller questions</li>
+    <li>Verify-report page (keep QR + hash on the PDF)</li>
+    <li>Deployment (submit with a local demo video)</li>
+  </ol>
+  <div class="box warn">Never cut: synthetic data with planted fraud cases, core rules, risk score with reasons, Faraiz calculator, Bangla explanation, report.</div>
+</div>
+
+<!-- ============ 17. SUBMISSION ============ -->
+<div class="section">
+  <h1>17. Round 1 Submission Package</h1>
+  <h2>17.1 Checklist</h2>
+  <table>
+    <tr><th style="width:5%">✓</th><th>Item</th><th style="width:30%">Requirement</th></tr>
+    <tr><td>☐</td><td>Concept note PDF</td><td>Max 4 pages</td></tr>
+    <tr><td>☐</td><td>GitHub repo link (public or shared with organizers), with commit history</td><td>Mandatory</td></tr>
+    <tr><td>☐</td><td>README: setup, data sources, AI tool disclosure, licences/credits</td><td>Mandatory</td></tr>
+    <tr><td>☐</td><td>Demo video</td><td>Max 3 minutes</td></tr>
+    <tr><td>☐</td><td>Live deployment link</td><td>Recommended</td></tr>
+  </table>
+
+  <h2>17.2 Concept note outline (4 pages)</h2>
+  <table>
+    <tr><th style="width:12%">Page</th><th>Content</th></tr>
+    <tr><td>1</td><td>Title, team &amp; mentors, problem statement (P5 + P3, P2), the problem in Bangladesh with key facts</td></tr>
+    <tr><td>2</td><td>Proposed solution, lawyer-grade due-diligence framework, key features</td></tr>
+    <tr><td>3</td><td>Architecture diagram, tech stack, risk engine, synthetic data and compliance</td></tr>
+    <tr><td>4</td><td>Countrywide implementation plan, impact, limitations, future scope</td></tr>
+  </table>
+
+  <h2>17.3 README must include</h2>
+  <ul>
+    <li>Project overview and problem statement</li>
+    <li>Setup and run instructions (backend, frontend, data generator)</li>
+    <li>Data sources: "All data is synthetic, generated by <code>scripts/generate_data.py</code>"</li>
+    <li>AI tools used and how (e.g. coding assistant for scaffolding, LLM for explanations)</li>
+    <li>Open-source libraries and licences</li>
+    <li>Disclaimer: decision-support tool, not legal advice</li>
+  </ul>
+
+  <h2>17.4 Demo video script (3 minutes)</h2>
+  <table>
+    <tr><th style="width:15%">Time</th><th>Content</th></tr>
+    <tr><td>0:00–0:25</td><td>Problem: a buyer loses savings to a seller who sold the same land twice</td></tr>
+    <tr><td>0:25–0:45</td><td>Introduce JomiCheck and what it checks</td></tr>
+    <tr><td>0:45–1:15</td><td>Case 1 — clean plot → LOW</td></tr>
+    <tr><td>1:15–1:55</td><td>Case 2 — inheritance over-selling → MEDIUM, Faraiz view</td></tr>
+    <tr><td>1:55–2:30</td><td>Case 3 — Rahim fraud → HIGH 91/100, flags with laws, Bangla explanation</td></tr>
+    <tr><td>2:30–2:50</td><td>Report PDF with QR; verify page detects a tampered copy</td></tr>
+    <tr><td>2:50–3:00</td><td>Impact and countrywide vision</td></tr>
+  </table>
+</div>
+
+<!-- ============ 18. FINAL ROUND ============ -->
+<div class="section">
+  <h1>18. Final Round Plan</h1>
+  <h2>18.1 Improvements after Round 1</h2>
+  <ul>
+    <li>OCR document upload with editable extracted fields</li>
+    <li>CS → SA → RS → BS survey lineage graph</li>
+    <li>Isolation Forest anomaly detection on transfers</li>
+    <li>Hindu Dayabhaga inheritance; cost calculator; map view with PostGIS</li>
+    <li>Summarize all changes in the README (required)</li>
+  </ul>
+
+  <h2>18.2 Pitch deck (max 10 slides)</h2>
+  <table>
+    <tr><th style="width:8%">#</th><th>Slide</th></tr>
+    <tr><td>1</td><td>Title + tagline + team</td></tr>
+    <tr><td>2</td><td>Problem — a real-life style story and key facts</td></tr>
+    <tr><td>3</td><td>Why existing processes fail (fragmented records, no citizen tool)</td></tr>
+    <tr><td>4</td><td>Solution — JomiCheck in one picture</td></tr>
+    <tr><td>5</td><td>Lawyer-grade checks and legal references</td></tr>
+    <tr><td>6</td><td>Live demo (switch to app)</td></tr>
+    <tr><td>7</td><td>Architecture and AI layer</td></tr>
+    <tr><td>8</td><td>Countrywide implementation plan</td></tr>
+    <tr><td>9</td><td>Impact and sustainability</td></tr>
+    <tr><td>10</td><td>Roadmap and ask</td></tr>
+  </table>
+
+  <h2>18.3 5-minute pitch split</h2>
+  <p>Student A: problem and solution (1:30) → Student B: live demo (2:30) → Student A: architecture, rollout and close (1:00).</p>
+
+  <h2>18.4 Expected judge questions</h2>
+  <table>
+    <tr><th style="width:42%">Question</th><th>Answer direction</th></tr>
+    <tr><td>Where will real data come from?</td><td>Authorized APIs from the Ministry of Land (e-Porcha, e-Mutation, land registration); prototype uses synthetic data as required.</td></tr>
+    <tr><td>Can forged documents fool the system?</td><td>Uploaded documents are cross-checked against official records; in production, the record database is the source of truth, not the seller's papers.</td></tr>
+    <tr><td>Is the risk score legally valid?</td><td>No — it is decision support; every flag cites the law and recommends official verification.</td></tr>
+    <tr><td>Why not blockchain?</td><td>We use hashing + QR for report integrity; a ledger can be added when official records are integrated.</td></tr>
+    <tr><td>How is the Faraiz calculation done?</td><td>Explain the rule-based algorithm (fixed shares, residuaries, 2:1 son/daughter ratio) with an example.</td></tr>
+    <tr><td>What does the AI do exactly?</td><td>Only explains computed flags; it does not make decisions.</td></tr>
+    <tr><td>Business model?</td><td>Free for citizens; paid API for banks, lawyers and real-estate firms; government partnership.</td></tr>
+  </table>
+</div>
+
+<!-- ============ 19. COUNTRYWIDE ============ -->
+<div class="section">
+  <h1>19. Countrywide Implementation Plan</h1>
+  <table>
+    <tr><th style="width:18%">Phase</th><th style="width:15%">Timeline</th><th>Activities</th></tr>
+    <tr><td>1. Pilot</td><td>0–6 months</td><td>Partner with one upazila land office under the Ministry of Land; authorized read-only access; test with real buyers through the office help desk</td></tr>
+    <tr><td>2. Integration</td><td>6–12 months</td><td>Official API integration with e-Porcha, e-Mutation, land development tax and land registration systems; court case data where available</td></tr>
+    <tr><td>3. District rollout</td><td>12–24 months</td><td>Expand to several districts; Union Digital Centers offer assisted checks for rural citizens</td></tr>
+    <tr><td>4. National</td><td>24+ months</td><td>All districts; mobile app and SMS/USSD access; bank and lawyer APIs; official verification QR on reports</td></tr>
+  </table>
+  <h2>Sustainability</h2>
+  <ul>
+    <li>Free basic check for citizens</li>
+    <li>Paid API / detailed reports for banks (collateral verification), law firms, developers and real-estate agencies</li>
+    <li>Government partnership as part of Smart Land Management / Smart Bangladesh initiatives</li>
+  </ul>
+  <h2>Expected impact</h2>
+  <ul>
+    <li>Fewer citizens lose money to fraudulent or risky land purchases</li>
+    <li>Fewer land-related civil cases over time</li>
+    <li>Better awareness of land law among ordinary buyers</li>
+    <li>Pressure on sellers to keep mutation, tax and records up to date</li>
+  </ul>
+
+  <h1 style="margin-top:20px">20. Risks &amp; Mitigation</h1>
+  <table>
+    <tr><th style="width:34%">Risk</th><th>Mitigation</th></tr>
+    <tr><td>No access to real government data</td><td>Synthetic data for prototype; clear authorized-integration roadmap</td></tr>
+    <tr><td>Incorrect legal logic</td><td>Mentor / Law department review; citations shown; disclaimer</td></tr>
+    <tr><td>Bangla OCR accuracy</td><td>Deferred to Final Round; manual correction of extracted fields</td></tr>
+    <tr><td>LLM hallucination</td><td>LLM receives only computed flags; decisions come from rules</td></tr>
+    <tr><td>Time pressure (3 days)</td><td>Strict MUST / SHOULD / FINAL priorities and cut list</td></tr>
+    <tr><td>Students unable to explain code</td><td>Daily cross-review; each student demos the other's module</td></tr>
+    <tr><td>Rule violation (data)</td><td>Only synthetic data; no portal access; README statement</td></tr>
+  </table>
+</div>
+
+<!-- ============ 21-22 ============ -->
+<div class="section">
+  <h1>21. Limitations, Ethics &amp; Disclaimer</h1>
+  <ul>
+    <li>JomiCheck is a <b>decision-support and risk-screening tool</b>, not official legal verification and not legal advice.</li>
+    <li>The prototype uses only <b>synthetic data</b>; it does not access any government system.</li>
+    <li>Results depend on the completeness and accuracy of the available records.</li>
+    <li>Inheritance calculation covers common cases; complex cases require a lawyer.</li>
+    <li>Personal data in a production system must be protected with consent, access control, encryption and audit logs.</li>
+    <li>Every report recommends confirming findings at the relevant government office and with a lawyer.</li>
+  </ul>
+
+  <h1 style="margin-top:20px">22. Future Scope</h1>
+  <ul>
+    <li>Authorized integration with e-Porcha, e-Mutation, registration and land tax systems</li>
+    <li>Survey lineage graph across CS, SA, RS, BS and City Survey</li>
+    <li>Map-based plot view and boundary checks with PostGIS and cadastral maps</li>
+    <li>Watchlist: "notify me if this Dag is transferred, mortgaged or under a case"</li>
+    <li>Mobile app, SMS/USSD access and Union Digital Center assisted mode</li>
+    <li>Bank collateral verification API and lawyer dashboard</li>
+    <li>Ledger-anchored report hashes when official records are integrated</li>
+  </ul>
+
+  <div class="box" style="margin-top:20px">
+    <b>Summary:</b> JomiCheck turns a lawyer's pre-purchase title search into a fast, transparent and citizen-friendly tool. It fits P5 directly, uses P3 fraud detection as its intelligence layer and P2-style hashing for report integrity, and it is designed to scale countrywide through authorized government integration.
+  </div>
+</div>
+
+</body>
+</html>
