@@ -3,3 +3,5 @@ djangorestframework==3.18.3
 django-cors-headers==4.9.0
 qrcode==8.2
 RapidFuzz==3.14.6
+pillow==12.3.0
+pypdfium2==5.14.0

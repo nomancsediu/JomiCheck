@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 from costs import views as cost_views
+from documents import views as document_views
 from land import views as land_views
 from reports import views as report_views
 from verification import views as verification_views
@@ -13,6 +14,7 @@ api = [
     path("verify/", verification_views.verify_plot),
     path("inheritance/", verification_views.inheritance),
     path("costs/estimate/", cost_views.cost_estimate),
+    path("documents/extract/", document_views.extract_document),
     path("reports/<str:public_id>/", report_views.report_detail),
     path("reports/<str:public_id>/verify/", report_views.report_verify),
     path("reports/<str:public_id>/ask/", report_views.report_ask),

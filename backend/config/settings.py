@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "verification",
     "reports",
     "costs",
+    "documents",
 ]
 
 MIDDLEWARE = [
@@ -103,6 +104,9 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Uploaded documents stay in memory (never written to disk) up to the 8 MB limit.
+FILE_UPLOAD_MAX_MEMORY_SIZE = 8 * 1024 * 1024
 
 
 REST_FRAMEWORK = {
