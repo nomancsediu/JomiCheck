@@ -17,7 +17,8 @@ export function InheritanceTable({ heirs, highlightId }: { heirs: HeirRow[]; hig
   const max = Math.max(...heirs.map((h) => h.share_decimal), 0.0001);
 
   return (
-    <table className="w-full text-sm">
+    <div className="overflow-x-auto">
+    <table className="w-full min-w-[420px] text-sm">
       <thead>
         <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-muted">
           <th className="py-2 pr-3 font-medium">{t("heir")}</th>
@@ -53,5 +54,6 @@ export function InheritanceTable({ heirs, highlightId }: { heirs: HeirRow[]; hig
         })}
       </tbody>
     </table>
+    </div>
   );
 }

@@ -16,7 +16,7 @@ export default function VerifyReportForm() {
   return (
     <div className="page-x py-14 *:mx-auto *:max-w-xl">
       <div className="flex items-center gap-3">
-        <span className="flex size-11 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
+        <span className="hidden size-11 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 sm:flex">
           <QrCode className="size-6" />
         </span>
         <h1 className="text-2xl font-bold tracking-tight">{lang === "bn" ? "রিপোর্টের সত্যতা যাচাই" : "Verify a report"}</h1>

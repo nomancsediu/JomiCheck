@@ -109,7 +109,7 @@ const REPORT_PARTS: Text[] = [
 function Step({ n, icon: Icon, title, children }: { n: number; icon: LucideIcon; title: string; children: ReactNode }) {
   const { num, t } = useLang();
   return (
-    <section className="grid gap-6 border-t border-line py-10 lg:grid-cols-[260px_1fr]">
+    <section className="grid grid-cols-1 gap-6 border-t border-line py-10 lg:grid-cols-[260px_1fr]">
       <div className="flex items-start gap-4 lg:flex-col">
         <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-brand-700 text-white">
           <Icon className="size-6" />
@@ -146,31 +146,32 @@ function RuleTable({ title, note, rules, tone }: { title: string; note: string; 
   const { lang, num } = useLang();
   return (
     <div className="overflow-hidden rounded-xl border border-line bg-white">
-      <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-line px-5 py-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-line px-4 py-3 sm:px-5">
         <h3 className="flex items-center gap-2 font-bold">
           <span className={`h-4 w-1.5 rounded-full ${tone}`} />
           {title}
         </h3>
         <p className="text-sm text-muted">{note}</p>
       </div>
-      <table className="w-full text-left text-sm">
-        <thead className="bg-paper text-xs text-muted">
-          <tr>
-            <th className="px-5 py-2 font-semibold">{lang === "bn" ? "কী যাচাই হয়" : "What is checked"}</th>
-            <th className="px-5 py-2 font-semibold">{lang === "bn" ? "আইনি ভিত্তি" : "Legal basis"}</th>
-            <th className="px-5 py-2 text-right font-semibold">{lang === "bn" ? "পয়েন্ট" : "Points"}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rules.map((r) => (
-            <tr key={r.check.en} className="border-t border-line align-top">
-              <td className="px-5 py-3 font-medium text-ink">{r.check[lang]}</td>
-              <td className="px-5 py-3 text-muted">{r.law}</td>
-              <td className="px-5 py-3 text-right font-mono font-semibold">+{num(r.points)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="hidden grid-cols-[1fr_1fr_5rem] gap-4 bg-paper px-5 py-2 text-xs font-semibold text-muted sm:grid">
+        <span>{lang === "bn" ? "কী যাচাই হয়" : "What is checked"}</span>
+        <span>{lang === "bn" ? "আইনি ভিত্তি" : "Legal basis"}</span>
+        <span className="text-right">{lang === "bn" ? "পয়েন্ট" : "Points"}</span>
+      </div>
+      <ul>
+        {rules.map((r) => (
+          <li
+            key={r.check.en}
+            className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 border-t border-line px-4 py-3 text-sm first:border-t-0 sm:grid-cols-[1fr_1fr_5rem] sm:px-5 sm:first:border-t"
+          >
+            <span className="font-medium text-ink">{r.check[lang]}</span>
+            <span className="col-span-2 row-start-2 text-muted sm:col-span-1 sm:row-start-auto">{r.law}</span>
+            <span className="col-start-2 row-start-1 text-right font-mono font-semibold sm:col-start-auto sm:row-start-auto">
+              +{num(r.points)}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -244,9 +245,9 @@ export default function HowItWorks() {
             <table className="w-full text-left text-sm">
               <tbody>
                 {ROLES.map((r) => (
-                  <tr key={r.role.en} className="border-t border-line first:border-t-0">
-                    <td className="w-48 px-5 py-3 font-semibold">{L(r.role)}</td>
-                    <td className="px-5 py-3 text-muted">{L(r.meaning)}</td>
+                  <tr key={r.role.en} className="flex flex-col border-t border-line py-3 first:border-t-0 sm:table-row sm:py-0">
+                    <td className="block px-4 font-semibold sm:table-cell sm:w-48 sm:px-5 sm:py-3">{L(r.role)}</td>
+                    <td className="block px-4 text-muted sm:table-cell sm:px-5 sm:py-3">{L(r.meaning)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -294,8 +295,8 @@ export default function HowItWorks() {
           <p className="font-semibold">
             {bn ? "উদাহরণ: আব্দুল মজিদ ২০২২ সালে মারা যান, জমি ১ একর।" : "Example: Abdul Majid died in 2022 leaving 1 acre."}
           </p>
-          <div className="overflow-hidden rounded-xl border border-line bg-white">
-            <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto rounded-xl border border-line bg-white">
+            <table className="w-full min-w-[440px] text-left text-sm">
               <thead className="bg-paper text-xs text-muted">
                 <tr>
                   <th className="px-5 py-2 font-semibold">{bn ? "ওয়ারিশ" : "Heir"}</th>

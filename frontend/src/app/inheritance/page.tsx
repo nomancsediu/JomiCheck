@@ -40,7 +40,7 @@ export default function InheritancePage() {
   return (
     <div className="page-x py-10">
       <div className="flex items-center gap-3">
-        <span className="flex size-11 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
+        <span className="hidden size-11 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 sm:flex">
           <Calculator className="size-6" />
         </span>
         <div>
@@ -53,7 +53,7 @@ export default function InheritancePage() {
         </div>
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_1.2fr]">
+      <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.2fr]">
         <form onSubmit={calculate} className="space-y-4 rounded-xl border border-line bg-white p-5">
           <label className="block text-sm font-medium">
             {lang === "bn" ? "মোট জমি (একর)" : "Total land (acre)"}
@@ -80,7 +80,7 @@ export default function InheritancePage() {
                     ))}
                   </select>
                   <input
-                    className={`${cls} flex-1`}
+                    className={`${cls} min-w-0 flex-1`}
                     value={row.name}
                     onChange={(e) => update(i, { name: e.target.value })}
                     placeholder={lang === "bn" ? "নাম (ঐচ্ছিক)" : "Name (optional)"}

@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Suspense } from "react";
+import { Menu, X } from "lucide-react";
+import { Suspense, useState } from "react";
 import { Logo } from "./Logo";
 import { useLang } from "@/lib/i18n";
 
@@ -48,25 +49,26 @@ function ActiveNavLink({ href, label, cls }: { href: string; label: string; cls:
 export function SiteHeader() {
   const { t, lang, setLang } = useLang();
   const links = useLinks();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header className="no-print sticky top-0 z-30 border-b border-line bg-white">
-      <div className="page-x flex h-16 items-center gap-6">
-        <Link href="/" className="flex items-center gap-3">
+      <div className="page-x flex h-16 items-center gap-4">
+        <Link href="/" className="flex min-w-0 items-center gap-3" onClick={() => setMenuOpen(false)}>
           <Logo />
-          <span className="leading-tight">
+          <span className="min-w-0 leading-tight">
             <span className="block text-lg font-bold tracking-tight text-brand-800">JomiCheck</span>
-            <span className="block text-xs text-muted">{t("brand_tagline")}</span>
+            <span className="block truncate text-xs text-muted">{t("brand_tagline")}</span>
           </span>
         </Link>
 
-        <nav className="ml-auto hidden items-center gap-1 md:flex">
+        <nav className="ml-auto hidden items-center gap-1 xl:flex">
           <Suspense fallback={<NavLinks withActive={false} />}>
             <NavLinks withActive />
           </Suspense>
         </nav>
 
-        <div className="ml-auto flex items-center gap-3 md:ml-2">
+        <div className="ml-auto flex shrink-0 items-center gap-2 xl:ml-2">
           <div className="flex rounded-md border border-line p-0.5 text-sm" role="group" aria-label="Language">
             {(["bn", "en"] as const).map((l) => (
               <button
@@ -80,15 +82,31 @@ export function SiteHeader() {
               </button>
             ))}
           </div>
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            className="flex size-10 items-center justify-center rounded-md border border-line text-ink hover:bg-paper xl:hidden"
+            aria-label={lang === "bn" ? "মেনু" : "Menu"}
+            aria-expanded={menuOpen}
+          >
+            {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
         </div>
       </div>
-      <nav className="page-x flex gap-1 overflow-x-auto border-t border-line py-2 md:hidden">
-        {links.map((l) => (
-          <Link key={l.href} href={l.href} className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm text-ink hover:bg-paper">
-            {l.label}
-          </Link>
-        ))}
-      </nav>
+      {menuOpen && (
+        <nav className="page-x flex flex-col gap-1 border-t border-line bg-white py-3 shadow-card xl:hidden">
+          {links.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              onClick={() => setMenuOpen(false)}
+              className="rounded-md px-3 py-3 font-medium text-ink hover:bg-paper"
+            >
+              {l.label}
+            </Link>
+          ))}
+        </nav>
+      )}
     </header>
   );
 }

@@ -163,9 +163,9 @@ function UnitConverter() {
 
   return (
     <div className="rounded-xl border border-line bg-white p-5">
-      <div className="flex flex-wrap gap-2">
-        <input className={`${cls} w-40`} type="number" min="0" step="any" value={value} onChange={(e) => setValue(e.target.value)} aria-label="Value" />
-        <select className={cls} value={unit} onChange={(e) => setUnit(e.target.value)} aria-label="Unit">
+      <div className="grid grid-cols-2 gap-2 sm:flex">
+        <input className={`${cls} min-w-0 sm:w-40`} type="number" min="0" step="any" value={value} onChange={(e) => setValue(e.target.value)} aria-label="Value" />
+        <select className={`${cls} min-w-0`} value={unit} onChange={(e) => setUnit(e.target.value)} aria-label="Unit">
           {AREA_UNITS.map((u) => (
             <option key={u.key} value={u.key}>
               {pick(u.label)}
@@ -200,7 +200,7 @@ export default function CostsPage({ searchParams }: { searchParams: Promise<{ ar
     <div className="page-x space-y-12 py-10">
       <section>
         <div className="mb-6 flex items-center gap-3">
-          <span className="flex size-11 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
+          <span className="hidden size-11 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 sm:flex">
             <Receipt className="size-6" />
           </span>
           <div>
@@ -217,7 +217,7 @@ export default function CostsPage({ searchParams }: { searchParams: Promise<{ ar
 
       <section>
         <div className="mb-4 flex items-center gap-3">
-          <span className="flex size-11 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
+          <span className="hidden size-11 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 sm:flex">
             <Ruler className="size-6" />
           </span>
           <div>

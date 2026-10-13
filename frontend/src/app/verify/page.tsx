@@ -264,12 +264,12 @@ export default function VerifyPage() {
                 </p>
               )}
 
-              <div className="flex items-center justify-between gap-4 border-t border-line pt-5 sm:col-span-3">
+              <div className="flex flex-col-reverse gap-4 border-t border-line pt-5 sm:col-span-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="max-w-md text-xs text-muted">{t("disclaimer")}</p>
                 <button
                   type="submit"
                   disabled={!canSubmit}
-                  className="inline-flex shrink-0 items-center gap-2 rounded-md bg-brand-700 px-5 py-3 font-semibold text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:bg-brand-200"
+                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-brand-700 px-5 py-3 font-semibold text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:bg-brand-200"
                 >
                   <Search className="size-4" /> {t("run_check")}
                 </button>

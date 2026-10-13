@@ -101,7 +101,7 @@ export default function UploadPage() {
   return (
     <div className="page-x py-10">
       <div className="flex items-center gap-3">
-        <span className="flex size-11 items-center justify-center rounded-lg bg-brand-50 text-brand-700">
+        <span className="hidden size-11 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 sm:flex">
           <ScanText className="size-6" />
         </span>
         <div>

@@ -48,7 +48,7 @@ export function KhatianSheet({ ror, plot }: { ror: RecordOfRights; plot: Verific
       <div>
         <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted">{t("ks_owner_part")}</p>
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-sm">
+          <table className="w-full min-w-[520px] border-collapse text-sm">
             <thead>
               <tr>
                 <th className={`${th} w-16`}><ColNo n={1} />{t("ks_serial")}</th>
@@ -90,7 +90,7 @@ export function KhatianSheet({ ror, plot }: { ror: RecordOfRights; plot: Verific
       <div>
         <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted">{t("ks_plot_part")}</p>
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-sm">
+          <table className="w-full min-w-[520px] border-collapse text-sm">
             <thead>
               <tr>
                 <th className={th}><ColNo n={5} />{t("ks_dag")}</th>

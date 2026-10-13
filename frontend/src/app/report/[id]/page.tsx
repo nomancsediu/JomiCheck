@@ -158,29 +158,29 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             {t("plot")} {num(r.plot.dag_no)}, {pick(r.plot.mouza)}, {pick(r.plot.upazila)}
           </h1>
         </div>
-        <div className="no-print flex gap-2">
+        <div className="no-print grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto">
           <button
             onClick={() => window.print()}
-            className="inline-flex items-center gap-2 rounded-md border border-line bg-white px-4 py-2 text-sm font-medium hover:border-brand-500"
+            className="inline-flex flex-col items-center justify-center gap-1 rounded-md border border-line bg-white px-2 py-2 text-xs font-medium hover:border-brand-500 sm:flex-row sm:gap-2 sm:px-4 sm:text-sm"
           >
             <Printer className="size-4" /> {t("print")}
           </button>
           <Link
             href={`/costs?area=${encodeURIComponent(r.input.area_acre)}&rate=${r.plot.mouza_rate_per_acre}`}
-            className="inline-flex items-center gap-2 rounded-md border border-line bg-white px-4 py-2 text-sm font-medium hover:border-brand-500"
+            className="inline-flex flex-col items-center justify-center gap-1 rounded-md border border-line bg-white px-2 py-2 text-xs font-medium hover:border-brand-500 sm:flex-row sm:gap-2 sm:px-4 sm:text-sm"
           >
             <Receipt className="size-4" /> {t("estimate_cost")}
           </Link>
           <Link
             href="/verify"
-            className="inline-flex items-center gap-2 rounded-md bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800"
+            className="inline-flex flex-col items-center justify-center gap-1 rounded-md bg-brand-700 px-2 py-2 text-xs font-semibold text-white hover:bg-brand-800 sm:flex-row sm:gap-2 sm:px-4 sm:text-sm"
           >
             <Plus className="size-4" /> {t("new_check")}
           </Link>
         </div>
       </div>
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-[1.35fr_1fr_1fr]">
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[1.35fr_1fr_1fr]">
         <section
           className="flex flex-col items-center gap-4 rounded-xl border-2 bg-white p-5 sm:flex-row sm:items-center"
           style={{ borderColor: LEVEL_COLOR[r.level] }}
@@ -208,7 +208,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         </div>
       )}
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_380px]">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_380px]">
         <div className="space-y-6">
           <section>
             <h2 className="mb-3 text-lg font-semibold">
@@ -262,7 +262,7 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
         </aside>
       </div>
 
-      <div className="print-break mt-8 grid gap-6 md:grid-cols-2">
+      <div className="print-break mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card title={t("documents")} icon={<ClipboardList className="size-5 text-brand-700" />}>
           <Checklist items={r.documents} />
         </Card>

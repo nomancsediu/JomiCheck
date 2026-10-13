@@ -76,18 +76,18 @@ export default function VerifyReportResult({
               [t("seller"), pick(facts.seller)],
               [t("area"), `${num(facts.area_acre)} ${t("acre")}`],
             ].map(([k, v]) => (
-              <div key={k} className="grid grid-cols-[160px_1fr] gap-4 px-5 py-2.5">
+              <div key={k} className="grid grid-cols-[110px_minmax(0,1fr)] gap-3 px-4 py-2.5 sm:grid-cols-[160px_minmax(0,1fr)] sm:gap-4 sm:px-5">
                 <dt className="text-muted">{k}</dt>
-                <dd className="font-medium">{v}</dd>
+                <dd className="font-medium break-words">{v}</dd>
               </div>
             ))}
-            <div className="grid grid-cols-[160px_1fr] gap-4 px-5 py-2.5">
+            <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3 px-4 py-2.5 sm:grid-cols-[160px_minmax(0,1fr)] sm:gap-4 sm:px-5">
               <dt className="text-muted">{t("risk_level")}</dt>
               <dd className="flex items-center gap-3">
                 <LevelBadge level={facts.level} /> <span className="font-mono">{num(facts.score)}/{num(100)}</span>
               </dd>
             </div>
-            <div className="grid grid-cols-[160px_1fr] gap-4 px-5 py-2.5">
+            <div className="grid grid-cols-[110px_minmax(0,1fr)] gap-3 px-4 py-2.5 sm:grid-cols-[160px_minmax(0,1fr)] sm:gap-4 sm:px-5">
               <dt className="text-muted">{t("findings")}</dt>
               <dd>
                 <ul className="list-disc space-y-0.5 pl-4">
