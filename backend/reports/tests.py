@@ -25,7 +25,7 @@ class ApiTests(TestCase):
         locs = self.client.get("/api/locations/").json()
         self.assertEqual({d["name"]["en"] for d in locs}, {"Dhaka", "Gazipur"})
         cases = self.client.get("/api/demo-cases/").json()
-        self.assertEqual(len(cases), 13)
+        self.assertEqual(len(cases), 14)
         self.assertIn("mouza_id", cases[0])
 
     def test_verify_creates_sealed_report(self):

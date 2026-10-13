@@ -7,7 +7,7 @@ scenarios in DEMO_CASES exercise each verification rule.
 """
 
 import random
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 
 from django.db import transaction
@@ -120,6 +120,14 @@ DEMO_CASES = [
         "summary_en": "Widow sells the whole plot although most of it belongs to her minor son.",
         "summary_bn": "বিধবা পুরো জমি বিক্রি করছেন, যদিও বেশিরভাগ অংশ তাঁর নাবালক ছেলের।",
         "mouza": "Shantipur", "dag_no": "225", "khatian_no": "710", "seller_name": "Nasima Begum", "area_acre": "0.50",
+    },
+    {
+        "key": "ml_broker",
+        "title_en": "Quick resale by a land broker (caught by ML)",
+        "title_bn": "দালালের দ্রুত পুনঃবিক্রি (মেশিন লার্নিং ধরেছে)",
+        "summary_en": "Seller is the recorded owner and no rule is broken, but he bought months ago and sold three other dags this year.",
+        "summary_bn": "বিক্রেতা রেকর্ডভুক্ত মালিক, কোনো নিয়ম ভাঙেনি; কিন্তু কয়েক মাস আগে কিনেছেন এবং এ বছর আরও তিনটি দাগ বিক্রি করেছেন।",
+        "mouza": "Charabag", "dag_no": "235", "khatian_no": "845", "seller_name": "Selim Reza", "area_acre": "0.25",
     },
 ]
 
@@ -401,6 +409,32 @@ def seed(random_seed: int = 42) -> dict:
     s.khatian(shantipur, 150, "RS", [p225], [(mofiz, 1)])
     s.khatian(shantipur, 710, "BS", [p225], [(mofiz, 1)])
     s.tax(p225)
+
+    # 14. Land broker reselling quickly (only the anomaly model notices) -------
+    # Dates are relative to today so the pattern stays "recent" whenever the demo is seeded.
+    today = date.today()
+    selim = s.person("Selim Reza", "সেলিম রেজা", father_name_en="Abdul Wahab", father_name_bn="আব্দুল ওয়াহাব")
+    rob = s.person("Abdur Rob", "আব্দুর রব", father_name_en="Nur Mohammad", father_name_bn="নূর মোহাম্মদ")
+    p235 = s.plot(charabag, 235, "0.25", 2_000_000, "homestead")
+    s.khatian(charabag, 96, "SA", [p235], [(rob, 1)])
+    s.khatian(charabag, 196, "RS", [p235], [(rob, 1)])
+    s.khatian(charabag, 545, "BS", [p235], [(rob, 1)])
+    d = s.deed(p235, today - timedelta(days=140), "0.25", 420_000, [rob], [selim], SAVAR_SR)
+    k = s.khatian(charabag, 845, "NAMJARI", [p235], [(selim, 1)], year=today.year)
+    s.mutation(p235, selim, today - timedelta(days=125), "approved", deed=d, khatian=k)
+    s.tax(p235)
+    for i, (dag, bought_ago, sold_ago) in enumerate([(236, 330, 250), (237, 290, 190), (238, 240, 100)]):
+        en, bn = s.random_name()
+        owner = s.person(en, bn)
+        en, bn = s.random_name()
+        buyer = s.person(en, bn)
+        plot = s.plot(charabag, dag, "0.20", 2_000_000, "homestead")
+        s.khatian(charabag, 97 + i, "SA", [plot], [(owner, 1)])
+        s.khatian(charabag, 197 + i, "RS", [plot], [(owner, 1)])
+        s.khatian(charabag, 546 + i, "BS", [plot], [(owner, 1)])
+        s.deed(plot, today - timedelta(days=bought_ago), "0.20", 330_000, [owner], [selim], SAVAR_SR)
+        s.deed(plot, today - timedelta(days=sold_ago), "0.20", 360_000, [selim], [buyer], SAVAR_SR)
+        s.tax(plot)
 
     # Background: ordinary clean plots ---------------------------------------
     offices = {rampur: SAVAR_SR, charabag: SAVAR_SR, notunhat: KERANI_SR, shantipur: KALIA_SR}

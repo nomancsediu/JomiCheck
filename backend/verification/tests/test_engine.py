@@ -18,6 +18,7 @@ EXPECTED = {
     "survey_conflict": ("MEDIUM", 36, {"TITLE_CHAIN_BREAK", "TAX_ARREARS"}),
     "rapid_transfers": ("MEDIUM", 33, {"RAPID_TRANSFERS", "PRICE_BELOW_RATE"}),
     "minor_heir": ("HIGH", 80, {"OVER_SELLING", "MINOR_INTEREST", "MUTATION_MISSING", "PRE_EMPTION"}),
+    "ml_broker": ("LOW", 20, {"TRANSFER_ANOMALY"}),
 }
 
 

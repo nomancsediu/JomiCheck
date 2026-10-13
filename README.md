@@ -143,7 +143,7 @@ cd frontend && npx tsc --noEmit && npx eslint src && npm run build
 
 ## Demo scenarios
 
-All 13 are on the home page and in the "quick fill" list on `/verify`.
+All 14 are on the home page and in the "quick fill" list on `/verify`.
 
 | # | Scenario | Dag / Mouza | Seller | Result |
 |---|---|---|---|---|
@@ -160,6 +160,7 @@ All 13 are on the home page and in the "quick fill" list on `/verify`.
 | 11 | Break in survey records | 205 Notunhat | Rafiq Mondol | MEDIUM 36 |
 | 12 | Rapid low-price transfers | 215 Notunhat | Imran Hossain | MEDIUM 33 |
 | 13 | Widow selling minor heir's land | 225 Shantipur | Nasima Begum | HIGH 80 |
+| 14 | Broker reselling quickly (only ML catches it) | 235 Charabag | Selim Reza | LOW 20 + ML flag |
 
 ---
 

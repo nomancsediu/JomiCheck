@@ -36,7 +36,7 @@ const dict = {
   section_checks_sub: { bn: "একজন ভূমি আইনজীবী ক্রয়ের আগে যে বিষয়গুলো দেখেন, সবগুলো এক জায়গায়।", en: "Everything a land lawyer reviews before a purchase, in one place." },
   section_how: { bn: "কীভাবে কাজ করে", en: "How it works" },
   section_demo: { bn: "ডেমো কেস", en: "Demo cases" },
-  section_demo_sub: { bn: "কৃত্রিম (সিনথেটিক) ডেটায় তৈরি ১৩টি পরিস্থিতি। যেকোনোটিতে ক্লিক করে পূর্ণ রিপোর্ট দেখুন।", en: "13 scenarios built on synthetic data. Click any of them to run a full verification." },
+  section_demo_sub: { bn: "কৃত্রিম (সিনথেটিক) ডেটায় তৈরি ১৪টি পরিস্থিতি। যেকোনোটিতে ক্লিক করে পূর্ণ রিপোর্ট দেখুন।", en: "14 scenarios built on synthetic data. Click any of them to run a full verification." },
 
   form_title: { bn: "জমির তথ্য দিন", en: "Enter land details" },
   form_sub: { bn: "খতিয়ান বা দলিলে যেভাবে লেখা আছে সেভাবে দিন।", en: "Enter the details as written on the khatian or deed." },
