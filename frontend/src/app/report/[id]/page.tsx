@@ -7,6 +7,7 @@ import { AskPanel } from "@/components/report/AskPanel";
 import { FlagCard } from "@/components/report/FlagCard";
 import { InheritanceTable } from "@/components/report/InheritanceTable";
 import { IntegrityCard } from "@/components/report/IntegrityCard";
+import { KhatianSheet } from "@/components/report/KhatianSheet";
 import { Lineage } from "@/components/report/Lineage";
 import { Timeline } from "@/components/report/Timeline";
 import { LEVEL_COLOR, LevelBadge, RiskGauge } from "@/components/RiskGauge";
@@ -107,7 +108,7 @@ function PlotCard({ r }: { r: VerificationResult }) {
     [t("upazila"), pick(r.plot.upazila)],
     [t("mouza"), `${pick(r.plot.mouza)} (JL ${num(r.plot.mouza.jl_no)})`],
     [t("total_area"), `${num(r.plot.area_acre)} ${t("acre")}`],
-    [t("land_class"), r.plot.land_class],
+    [t("land_class"), pick({ en: r.plot.land_class, bn: r.plot.land_class_bn ?? r.plot.land_class })],
   ];
   return (
     <section className="rounded-xl border border-line bg-white p-5">
@@ -219,29 +220,8 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           </section>
 
           {r.record_of_rights && (
-            <Card title={`${t("record_of_rights")} — ${r.record_of_rights.survey} ${num(r.record_of_rights.khatian_no)}`}>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-muted">
-                    <th className="py-2 pr-3 font-medium">{t("owner")}</th>
-                    <th className="py-2 pr-3 font-medium">{t("share")}</th>
-                    <th className="py-2 font-medium">{t("acre")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {r.record_of_rights.owners.map((o) => (
-                    <tr key={o.name.en} className="border-b border-line last:border-b-0">
-                      <td className="py-2.5 pr-3 font-medium">
-                        {pick(o.name)}
-                        {o.is_deceased && <span className="ml-2 rounded bg-paper px-1.5 py-0.5 text-xs text-muted">{t("deceased")}</span>}
-                        {o.is_minor && <span className="ml-2 rounded bg-medium-bg px-1.5 py-0.5 text-xs text-medium">{t("minor")}</span>}
-                      </td>
-                      <td className="py-2.5 pr-3 font-mono">{num(o.share)}</td>
-                      <td className="py-2.5 font-mono">{num(o.area_acre)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <Card title={t("record_of_rights")}>
+              <KhatianSheet ror={r.record_of_rights} plot={r.plot} />
             </Card>
           )}
 

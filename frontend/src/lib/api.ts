@@ -75,12 +75,37 @@ export type Inheritance = {
   law: string;
 };
 
+export type KhatianOwnerRow = {
+  serial?: number;
+  name: Bi;
+  father?: Bi | null;
+  share: string;
+  share_ana?: Bi & { exact: boolean };
+  area_acre: string;
+  is_deceased: boolean;
+  is_minor: boolean;
+  is_government: boolean;
+  death_year?: number | null;
+};
+
+export type RecordOfRights = {
+  survey: string;
+  khatian_no: string;
+  record_year: number;
+  mutation_case_no?: string | null;
+  dag_no?: string;
+  land_class?: Bi;
+  plot_area_acre?: string;
+  owners: KhatianOwnerRow[];
+};
+
 export type VerificationResult = {
   plot: {
     id: number;
     dag_no: string;
     area_acre: string;
     land_class: string;
+    land_class_bn: string;
     mouza_rate_per_acre: number;
     mouza: Bi & { jl_no: number };
     upazila: Bi;
@@ -95,19 +120,7 @@ export type VerificationResult = {
     sellable_area_acre: string | null;
     prior_sold_acre: string;
   };
-  record_of_rights: {
-    survey: string;
-    khatian_no: string;
-    record_year: number;
-    owners: {
-      name: Bi;
-      share: string;
-      area_acre: string;
-      is_deceased: boolean;
-      is_minor: boolean;
-      is_government: boolean;
-    }[];
-  } | null;
+  record_of_rights: RecordOfRights | null;
   flags: Flag[];
   score: number;
   level: Level;
