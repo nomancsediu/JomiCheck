@@ -23,25 +23,25 @@ export function SiteFooter() {
       <div className="page-x flex flex-col items-center gap-2 py-5 text-center">
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2">
-            <Logo size={26} />
-            <span className="font-bold tracking-tight text-brand-800">JomiCheck</span>
+            <Logo size={30} />
+            <span className="text-lg font-bold tracking-tight text-brand-800">JomiCheck</span>
           </Link>
           <span className="h-4 w-px bg-line" />
           <a
             href={REPO_URL}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-brand-700"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink hover:text-brand-700"
           >
             <GitHubIcon />
             GitHub
           </a>
         </div>
-        <p className="text-sm text-muted">
+        <p className="text-sm font-medium text-ink">
           © {bn ? "২০২৬" : "2026"} · {bn ? "তৈরি করেছে" : "Built by"}{" "}
-          <span className="font-semibold text-brand-800">Team Semicolons</span>
+          <span className="font-bold text-brand-800">Team Semicolons</span>
         </p>
-        <p className="max-w-3xl text-xs text-muted/80">{t("disclaimer")}</p>
+        <p className="max-w-4xl text-[13px] font-medium text-muted">{t("disclaimer")}</p>
       </div>
     </footer>
   );
