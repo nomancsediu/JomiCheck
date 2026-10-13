@@ -113,15 +113,20 @@ npm run dev
 
 Open http://localhost:3000.
 
-### Optional: LLM for the assistant
+### AI assistant (Gemma via Google AI Studio)
 
-Without these variables the assistant uses its built-in bilingual glossary. With them, it calls any OpenAI-compatible endpoint (local or hosted):
+The "Ask about this report" assistant uses Google's open **Gemma** model through the Google AI Studio (Gemini API) OpenAI-compatible endpoint.
 
 ```bash
-export LLM_API_URL=http://localhost:11434/v1   # e.g. a local open-source model server
-export LLM_API_KEY=anything
-export LLM_MODEL=your-model-name
+cd backend
+cp .env.example .env                  # then paste your key from https://aistudio.google.com/apikey
+python manage.py check_llm --list     # Gemma models your key can use
+python manage.py check_llm            # sends a test question and prints the answer
 ```
+
+Set `LLM_MODEL` in `backend/.env` to one of the listed Gemma models. Any other OpenAI-compatible server (e.g. a local Ollama) works by changing `LLM_API_URL` and `LLM_MODEL`. Without a key, the assistant falls back to its built-in bilingual glossary, and each answer in the UI shows which source produced it.
+
+Only the computed report (synthetic data) is sent to the model. The risk score and flags always come from the rule engine; the model only explains them.
 
 ### Tests
 
@@ -185,7 +190,7 @@ The rule catalog (`backend/verification/catalog.py`) cites the Registration Act 
 <!-- Team: keep this section accurate and complete before submission. -->
 
 - **Cursor (AI coding assistant)** — used to help scaffold the Django and Next.js projects, draft code for the verification engine, data generator, API and UI, and write tests and documentation. All code was reviewed, run and tested by the team, and both team members can explain it.
-- **Optional LLM** — the report assistant can call an OpenAI-compatible model when configured; it only explains the computed findings and never decides the risk.
+- **Gemma (Google, via Google AI Studio)** — powers the in-app report assistant. It receives only the computed report for synthetic data, answers in Bangla or English, and never decides the risk; the rule engine does.
 
 ## Open-source libraries
 
