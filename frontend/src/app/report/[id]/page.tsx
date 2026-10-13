@@ -4,12 +4,14 @@ import { BrainCircuit, CheckSquare, ClipboardList, Info, MapPin, MessageSquareTe
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { AskPanel } from "@/components/report/AskPanel";
+import { DocumentCheckCard } from "@/components/report/DocumentCheckCard";
 import { FlagCard } from "@/components/report/FlagCard";
 import { InheritanceTable } from "@/components/report/InheritanceTable";
 import { IntegrityCard } from "@/components/report/IntegrityCard";
 import { KhatianSheet } from "@/components/report/KhatianSheet";
 import { Lineage } from "@/components/report/Lineage";
 import { Timeline } from "@/components/report/Timeline";
+import { WatchCard } from "@/components/report/WatchCard";
 import { LEVEL_COLOR, LevelBadge, RiskGauge } from "@/components/RiskGauge";
 import { api, type Bi, type Report, type VerificationResult } from "@/lib/api";
 import { useLang, type DictKey } from "@/lib/i18n";
@@ -225,6 +227,14 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
             )}
             {r.ml_check && <MlCheck check={r.ml_check} />}
           </section>
+
+          <WatchCard plotId={r.plot.id} reportId={report.id} />
+
+          {r.document_check && (
+            <Card title={t("document_check")}>
+              <DocumentCheckCard check={r.document_check} />
+            </Card>
+          )}
 
           {r.record_of_rights && (
             <Card title={t("record_of_rights")}>

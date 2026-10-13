@@ -129,6 +129,7 @@ export type VerificationResult = {
   timeline: TimelineEvent[];
   notes: Bi[];
   ml_check?: { model: string; checked: number; unusual: number };
+  document_check?: DocumentCheck | null;
   summary: Bi;
   documents: Bi[];
   next_steps: Bi[];
@@ -182,6 +183,37 @@ export type CostEstimate = {
   notes: Bi[];
 };
 
+export type WatchAlert = {
+  kind: string;
+  severity: "critical" | "major";
+  date: string | null;
+  en: string;
+  bn: string;
+};
+
+export type PlotWatch = {
+  id: number;
+  plot_id: number;
+  report_id: string;
+  created_at: string;
+  plot: { dag_no: string; mouza: Bi; upazila: Bi };
+  alerts: WatchAlert[];
+};
+
+export type DocumentFields = ExtractedDocument["fields"];
+
+export type DocumentCheck = {
+  documents: {
+    index: number;
+    type: string;
+    label: Bi;
+    status: "ok" | "major" | "critical";
+    checks: { ok: boolean; severity: "ok" | "major" | "critical"; en: string; bn: string }[];
+  }[];
+  critical: number;
+  major: number;
+};
+
 export type ExtractedDocument = {
   fields: {
     document_type: string;
@@ -194,6 +226,15 @@ export type ExtractedDocument = {
     mutation_case_no: string;
     owners: { name: string; father_name: string; share: string }[];
     plots: { dag_no: string; land_class: string; area_acre: string | null; found?: boolean }[];
+    deed: {
+      deed_no: string;
+      registration_date: string;
+      sub_registry_office: string;
+      sellers: string[];
+      buyers: string[];
+      price_bdt: string;
+    } | null;
+    tax_receipt: { holding_no: string; paid_upto_year: string; owner_name: string } | null;
     warnings: string[];
   };
   location: {
@@ -240,7 +281,22 @@ export const api = {
     area_acre: string;
     khatian_no?: string;
     buyer_token?: string;
+    documents?: DocumentFields[];
   }) => request<Report>("/verify/", { method: "POST", body: JSON.stringify(payload) }),
+  watches: () => request<PlotWatch[]>(`/watch/?buyer_token=${encodeURIComponent(buyerToken())}`),
+  watch: (plot_id: number, report_id: string) =>
+    request<PlotWatch>("/watch/", {
+      method: "POST",
+      body: JSON.stringify({ plot_id, report_id, buyer_token: buyerToken() }),
+    }),
+  unwatch: async (id: number) => {
+    await fetch(`${API_URL}/watch/${id}/?buyer_token=${encodeURIComponent(buyerToken())}`, { method: "DELETE" });
+  },
+  checkDocuments: (mouza_id: number, documents: DocumentFields[], dag_no?: string) =>
+    request<DocumentCheck>("/documents/check/", {
+      method: "POST",
+      body: JSON.stringify({ mouza_id, documents, dag_no }),
+    }),
   report: (id: string) => request<Report>(`/reports/${id}/`),
   checkReport: (id: string, hash: string) =>
     request<ReportCheck>(`/reports/${id}/verify/?h=${encodeURIComponent(hash)}`),
