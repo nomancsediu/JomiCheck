@@ -36,12 +36,23 @@ class AssistantTests(SimpleTestCase):
         self.assertEqual(out["answer"], "নামজারি হলো খতিয়ানে নাম তোলা।")
 
     @override_settings(LLM_API_URL="https://example.test/v1", LLM_API_KEY="k", LLM_MODEL="gemma-4-26b-a4b-it")
-    def test_transient_server_error_is_retried_once(self):
-        error = urllib.error.HTTPError("https://example.test", 500, "Internal", {}, io.BytesIO(b""))
-        with mock.patch("urllib.request.urlopen", side_effect=[error, _reply("*সতর্কবার্তা: যাচাই করুন")]) as urlopen:
+    def test_overload_and_rate_limit_are_retried(self):
+        overloaded = urllib.error.HTTPError("https://example.test", 503, "Unavailable", {}, io.BytesIO(b""))
+        limited = urllib.error.HTTPError("https://example.test", 429, "Too Many", {}, io.BytesIO(b""))
+        with mock.patch("urllib.request.urlopen", side_effect=[overloaded, limited, _reply("*সতর্কবার্তা: যাচাই করুন")]) as urlopen, \
+                mock.patch("time.sleep") as sleep:
             out = assistant.answer("?", RESULT, "bn")
-        self.assertEqual(urlopen.call_count, 2)
+        self.assertEqual(urlopen.call_count, 3)
+        self.assertEqual([c.args[0] for c in sleep.call_args_list], [2, 4])
         self.assertEqual(out["answer"], "সতর্কবার্তা: যাচাই করুন")
+
+    @override_settings(LLM_API_URL="https://example.test/v1", LLM_API_KEY="k", LLM_MODEL="gemma-4-26b-a4b-it")
+    def test_bad_request_is_not_retried(self):
+        bad = urllib.error.HTTPError("https://example.test", 400, "Bad Request", {}, io.BytesIO(b"bad"))
+        with mock.patch("urllib.request.urlopen", side_effect=bad) as urlopen, self.assertLogs(level="WARNING"):
+            out = assistant.answer("khatian?", RESULT, "en")
+        self.assertEqual(urlopen.call_count, 1)
+        self.assertEqual(out["source"], "built-in")
 
     @override_settings(LLM_API_URL="https://example.test/v1", LLM_API_KEY="k", LLM_MODEL="other-model")
     def test_other_models_get_system_message(self):

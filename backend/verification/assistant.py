@@ -10,12 +10,16 @@ offline.
 import json
 import logging
 import re
+import time
 import urllib.error
 import urllib.request
 
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
+
+RETRIES = 2
+RETRY_DELAY = 2  # seconds; doubled on each retry
 
 GLOSSARY = [
     {
@@ -165,15 +169,17 @@ def chat(system: str, user: str, image_data_url: str | None = None, temperature:
         settings.LLM_API_URL.rstrip("/") + "/chat/completions", data=body, method="POST",
         headers={"Content-Type": "application/json", "Authorization": f"Bearer {settings.LLM_API_KEY}"},
     )
-    for attempt in range(2):
+    for attempt in range(RETRIES + 1):
         try:
             with urllib.request.urlopen(req, timeout=timeout or settings.LLM_TIMEOUT) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
             break
         except urllib.error.HTTPError as exc:
-            # The hosted API returns occasional transient 5xx errors; one retry is enough in practice.
-            if exc.code < 500 or attempt == 1:
+            # The hosted API often answers "overloaded" (503) or "rate limited" (429) for a few seconds.
+            if (exc.code != 429 and exc.code < 500) or attempt == RETRIES:
+                logger.warning("LLM HTTP %s: %s", exc.code, exc.read()[:300])
                 raise
+            time.sleep(RETRY_DELAY * 2 ** attempt)
     return strip_reasoning(data["choices"][0]["message"]["content"])
 
 
