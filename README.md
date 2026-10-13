@@ -33,7 +33,10 @@ Problem statement: **P5 — Citizen Pre-Purchase Verification**, with **P3 — F
 | Report | Risk gauge, findings with law and action, ownership timeline, document checklist, seller questions, site-visit checklist, next steps, print/PDF |
 | Khatian view | Latest record of rights in the official column layout: serial, owner and father's name, share in ana-gonda-kora-kranti, dag, land class, area, remarks, mutation case |
 | Purchase cost | Stamp duty, registration fee, local government tax, source tax and mutation fees by area type; flags deeds priced below the government mouza minimum |
-| Document upload | Upload a khatian or porcha photo/PDF; Gemma reads mouza, JL, khatian, dag, owners and area into editable fields, matches them to records and starts verification. Files are processed in memory and not stored |
+| Document upload | Upload up to five photos/PDFs (khatian or porcha, deed, land tax receipt); Gemma reads mouza, JL, khatian, dag, owners, deed parties and area into editable fields, matches them to records and starts verification. Files are processed in memory and not stored |
+| Forged paper detection | Every uploaded paper is compared with the records: khatian number, owners and shares, dag and area; deed number, cancelled deeds, sellers, buyers and date; tax receipt holding and paid-up year. A paper that contradicts the record raises a CRITICAL finding (Land Crime Prevention and Remedy Act 2023, s.5; Penal Code ss.467, 471) |
+| Plot watch | After verifying, a buyer can watch the plot. Any deed, mutation, case, mortgage, bainanama or power of attorney recorded later, or another buyer checking the same plot, appears on `/watch` until registration |
+| Mouza map | A map sheet of the mouza with the buyer's dag highlighted and every neighbouring dag coloured by the risk if its recorded owner sold it. The outlines are generated, not surveyed |
 | Unit converter | Decimal (shotok), katha, bigha, acre, ojutangsho, square feet, square metre, hectare |
 | Integrity | SHA-256 seal + QR code; `/verify-report` shows whether a copy matches the registry |
 | Assistant | "Ask about this report" in Bangla/English — built-in legal glossary offline, or Gemma (or any OpenAI-compatible LLM) grounded only on the report facts |
@@ -45,6 +48,7 @@ Problem statement: **P5 — Citizen Pre-Purchase Verification**, with **P3 — F
 |---|---|---|
 | Critical | Seller not the owner, double-selling, khas/vested land, acquisition, injunction, invalid POA | Result is **HIGH** regardless of score |
 | Major | Litigation, survey break, over-selling, minor's land, mortgage, rapid transfers, mutation missing, prior bainanama, ML-detected unusual transfer | +20 to +30 |
+| Critical | Uploaded paper contradicts the record (possible forgery) | Result is **HIGH** |
 | Minor | Conflicting deed, pre-emption, wrong khatian, under-priced deed, tax arrears | +5 to +10 |
 
 Score is capped at 100. LOW 0–30, MEDIUM 31–60, HIGH 61–100.
@@ -76,16 +80,19 @@ Citizen ─▶ Next.js web app ─▶ Django REST API ─▶ Verification engine
 
 ```
 backend/
-  land/            models, admin, synthetic data generator (seed.py), location & demo APIs
+  land/            models, admin, synthetic data generator (seed.py), mouza map sheet (mapsheet.py), location & demo APIs
   verification/    engine.py, catalog.py (rules + bilingual text + law), faraiz.py,
                    matching.py, guidance.py, assistant.py, tests/
   reports/         Report model, integrity.py (hash + QR), report APIs, tests
   costs/           rates.py (all purchase-cost rates in one place), calculator, API, tests
-  documents/       AI document extraction (extract.py), sample-khatian generator, API, tests
+  documents/       AI document extraction (extract.py), cross-check against records (crosscheck.py),
+                   sample-document generator, API, tests
+  watch/           plot watch: snapshot of a plot's records, alerts for anything new, API, tests
   anomaly/         ML: transfer features, synthetic training data, Isolation Forest train/score, tests
 frontend/src/
-  app/             /, /verify, /upload, /report/[id], /verify-report, /inheritance, /costs
-  components/      gauge, findings, timeline, lineage, inheritance table, assistant, integrity
+  app/             /, /verify, /upload, /report/[id], /watch, /verify-report, /inheritance, /costs
+  components/      gauge, findings, timeline, lineage, inheritance table, document check, watch, mouza map,
+                   assistant, integrity
   lib/             API client, Bangla/English i18n
 ```
 
@@ -133,7 +140,14 @@ python manage.py check_llm            # sends a test question and prints the ans
 
 Set `LLM_MODEL` in `backend/.env` to one of the listed Gemma models. Any other OpenAI-compatible server (e.g. a local Ollama) works by changing `LLM_API_URL` and `LLM_MODEL`. Without a key, the assistant falls back to its built-in bilingual glossary, and each answer in the UI shows which source produced it.
 
-The same model reads uploaded documents on `/upload`. The three sample khatians on that page (`frontend/public/samples/`) are rendered from the synthetic records with `python manage.py make_sample_docs`; they are watermarked as synthetic and carry no government emblem.
+The same model reads uploaded documents on `/upload`. The sample papers on that page (`frontend/public/samples/`) are rendered from the synthetic records with `python manage.py make_sample_docs`: genuine khatians for dags 101, 118 and 125, a genuine deed for dag 101, and three planted forgeries (a khatian for dag 118 that names Karim Mia sole owner, a deed for dag 125 whose number is not in the sub-registry record, and a tax receipt for dag 125 showing tax paid two years beyond the record). They are watermarked as synthetic and carry no government emblem. The comparison with the records is done by `documents/crosscheck.py`, not by the model.
+
+To demonstrate plot watch, start watching a plot from its report and then record a synthetic event:
+
+```bash
+python manage.py simulate_watch_event 101 --kind injunction   # or mortgage, bainanama
+python manage.py simulate_watch_event 101 --clear             # remove the demo events again
+```
 
 Only the computed report (synthetic data) is sent to the model. The risk score and flags always come from the rule engine; the model only explains them.
 
@@ -164,7 +178,7 @@ In a verification, the model scores every sale of the plot in the last ten years
 ### Tests
 
 ```bash
-cd backend && python manage.py test        # 55 tests: Faraiz, demo scenarios, khatian notation, costs, anomaly model, AI assistant and document reading (mocked), API, tamper detection
+cd backend && python manage.py test        # 71 tests: Faraiz, demo scenarios, khatian notation, costs, anomaly model, AI assistant and document reading (mocked), forged-paper cross-check, plot watch, mouza map, API, tamper detection
 cd frontend && npx tsc --noEmit && npx eslint src && npm run build
 ```
 
@@ -199,10 +213,14 @@ All 14 are on the home page and in the "quick fill" list on `/verify`.
 |---|---|---|
 | GET | `/api/locations/` | District → Upazila → Mouza tree |
 | GET | `/api/mouzas/<id>/plots/` | Dag numbers in a mouza |
+| GET | `/api/mouzas/<id>/map/` | Mouza map sheet: dag outlines with each dag's record risk |
 | GET | `/api/demo-cases/` | Planted demo scenarios |
 | POST | `/api/verify/` | Run verification and store a sealed report |
 | POST | `/api/inheritance/` | Standalone Faraiz calculator |
-| POST | `/api/documents/extract/` | Read an uploaded khatian/porcha image or PDF (multipart `file`) with the AI model |
+| POST | `/api/documents/extract/` | Read an uploaded khatian/porcha, deed or tax receipt image or PDF (multipart `file`) with the AI model |
+| POST | `/api/documents/check/` | Compare read documents with the records (`mouza_id`, `documents`, optional `dag_no`) |
+| GET, POST | `/api/watch/` | List watched plots with alerts / start watching (`buyer_token`, `plot_id`, `report_id`) |
+| DELETE | `/api/watch/<id>/?buyer_token=` | Stop watching |
 | POST | `/api/costs/estimate/` | Purchase cost estimate (`price_bdt`, `area_type`, optional `area_acre` + `mouza_rate_per_acre`) |
 | GET | `/api/reports/<id>/` | Report with QR code |
 | GET | `/api/reports/<id>/verify/?h=<sha256>` | Authenticity check |
@@ -225,7 +243,7 @@ The rule catalog (`backend/verification/catalog.py`) cites the Registration Act 
 <!-- Team: keep this section accurate and complete before submission. -->
 
 - **Cursor (AI coding assistant)** — used to help scaffold the Django and Next.js projects, draft code for the verification engine, data generator, API and UI, and write tests and documentation. All code was reviewed, run and tested by the team, and both team members can explain it.
-- **Gemma (Google, via Google AI Studio)** — powers the in-app report assistant. It receives only the computed report for synthetic data, answers in Bangla or English, and never decides the risk; the rule engine does.
+- **Gemma (Google, via Google AI Studio)** — powers the in-app report assistant and reads uploaded documents. The assistant receives only the computed report for synthetic data, answers in Bangla or English, and never decides the risk; the rule engine does. For uploads, the model only reads fields; deciding whether a paper matches the record is done by code.
 
 ## Open-source libraries
 

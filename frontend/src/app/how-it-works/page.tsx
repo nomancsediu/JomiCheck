@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Bell,
   BrainCircuit,
   Calculator,
   Database,
@@ -24,7 +25,7 @@ const OVERVIEW: { icon: LucideIcon; title: Text }[] = [
   { icon: FileScan, title: { bn: "জমির তথ্য দিন", en: "Enter the land details" } },
   { icon: Database, title: { bn: "সব রেকর্ড একসাথে আনা হয়", en: "All records are collected" } },
   { icon: UserSearch, title: { bn: "বিক্রেতা কে, তা শনাক্ত", en: "The seller is identified" } },
-  { icon: Scale, title: { bn: "২৪টি আইনি যাচাই", en: "24 legal checks run" } },
+  { icon: Scale, title: { bn: "২৫টি আইনি যাচাই", en: "25 legal checks run" } },
   { icon: Gauge, title: { bn: "ঝুঁকির স্কোর তৈরি", en: "A risk score is calculated" } },
   { icon: QrCode, title: { bn: "সিল করা রিপোর্ট", en: "A sealed report is issued" } },
 ];
@@ -56,6 +57,7 @@ const CRITICAL: Rule[] = [
   { check: { bn: "খাস, অর্পিত, পরিত্যক্ত, ওয়াকফ, দেবোত্তর বা সংরক্ষিত বনভূমি", en: "Khas, vested, abandoned, waqf, debottor or reserved forest land" }, law: "SAT Act 1950; Vested Property Return Act 2001; Waqf Ordinance 1962; Forest Act 1927", points: 40 },
   { check: { bn: "সরকারি অধিগ্রহণের নোটিশ জারি হয়েছে", en: "A government acquisition notice has been issued" }, law: "Acquisition and Requisition of Immovable Property Act 2017", points: 40 },
   { check: { bn: "আদালত হস্তান্তরে নিষেধাজ্ঞা দিয়েছে", en: "A court order restrains transfer" }, law: "Code of Civil Procedure 1908, Order XXXIX", points: 40 },
+  { check: { bn: "আপলোড করা খতিয়ান, দলিল বা দাখিলা সরকারি রেকর্ডের সাথে মেলে না (জাল হতে পারে)", en: "An uploaded khatian, deed or tax receipt contradicts the record (possible forgery)" }, law: "ভূমি অপরাধ প্রতিরোধ ও প্রতিকার আইন ২০২৩, ধারা ৫; Penal Code 1860, ss.467, 471", points: 40 },
   { check: { bn: "আমমোক্তারনামা বাতিল, অনিবন্ধিত, শুধু ব্যবস্থাপনার জন্য, অথবা মালিক মৃত", en: "Power of attorney is revoked, unregistered, management only, or the owner has died" }, law: "Power of Attorney Act 2012", points: 35 },
 ];
 
@@ -103,6 +105,8 @@ const REPORT_PARTS: Text[] = [
   { bn: "সর্বশেষ খতিয়ান সরকারি কলাম বিন্যাসে", en: "The latest khatian in the official column layout" },
   { bn: "ওয়ারিশদের ফারায়েজ অংশ ও জরিপের ধারাবাহিকতা", en: "Heirs' Faraiz shares and the survey lineage" },
   { bn: "মালিকানার পূর্ণ ইতিহাস", en: "Full ownership timeline" },
+  { bn: "মৌজা নকশায় আপনার দাগ এবং পাশের দাগগুলোর ঝুঁকি", en: "Your dag on the mouza map, with the risk of the neighbouring dags" },
+  { bn: "আপলোড করা প্রতিটি কাগজ রেকর্ডের সাথে মেলে কিনা", en: "Whether each uploaded paper matches the record" },
   { bn: "যে কাগজ চাইবেন, বিক্রেতাকে যে প্রশ্ন করবেন, সরেজমিনে যা দেখবেন", en: "Documents to ask for, questions for the seller, what to check on site" },
 ];
 
@@ -213,8 +217,13 @@ export default function HowItWorks() {
           </p>
           <p>
             {bn
-              ? "চাইলে টাইপ না করে খতিয়ান বা পর্চার ছবি বা PDF আপলোড করা যায়। Google AI Studio থেকে Gemma 4 মডেল ছবিটি পড়ে মৌজা, জেএল নম্বর, খতিয়ান নম্বর, মালিকের নাম, পিতার নাম, অংশ, দাগ ও জমির পরিমাণ বের করে, এবং আমাদের রেকর্ডের সাথে মৌজা ও দাগ মিলিয়ে দেখে। ক্রেতা সব ঘর দেখে ঠিক করে নিতে পারেন। ফাইল কোথাও সংরক্ষণ করা হয় না।"
-              : "Instead of typing, the buyer can upload a photo or PDF of the khatian. The Gemma 4 model from Google AI Studio reads the mouza, JL number, khatian number, owners, fathers' names, shares, dag and area, then matches the mouza and dag with our records. The buyer reviews and corrects every field. The file is never stored."}
+              ? "চাইলে টাইপ না করে বিক্রেতার দেওয়া কাগজের ছবি বা PDF আপলোড করা যায়: খতিয়ান বা পর্চা, দলিল, খাজনার দাখিলা, একসাথে পাঁচটি পর্যন্ত। Google AI Studio থেকে Gemma 4 মডেল প্রতিটি কাগজ পড়ে মৌজা, জেএল নম্বর, খতিয়ান নম্বর, মালিক, অংশ, দাগ, জমির পরিমাণ, দলিল নম্বর, দাতা ও গ্রহীতা বের করে। ক্রেতা সব ঘর দেখে ঠিক করে নিতে পারেন। ফাইল কোথাও সংরক্ষণ করা হয় না।"
+              : "Instead of typing, the buyer can upload photos or PDFs of the papers the seller handed over: khatian or porcha, deed and land tax receipt, up to five at once. The Gemma 4 model from Google AI Studio reads the mouza, JL number, khatian number, owners, shares, dag, area, deed number, sellers and buyers from each one. The buyer reviews and corrects every field. The files are never stored."}
+          </p>
+          <p>
+            {bn
+              ? "তারপর জমিচেক প্রতিটি কাগজ সরকারি রেকর্ডের সাথে মেলায়: এই খতিয়ান নম্বর আছে কিনা, মালিকের নাম ও অংশ মেলে কিনা, দলিল নম্বর সাব রেজিস্ট্রি রেকর্ডে আছে কিনা বা বাতিল কিনা, দাতা ও গ্রহীতা ঠিক কিনা, দাখিলায় যে সাল পর্যন্ত খাজনা দেখানো আছে তা রেকর্ডের সাথে মেলে কিনা। কোনো কাগজ রেকর্ডের বিপরীত কথা বললে তা জাল হতে পারে, এবং রিপোর্টে গুরুতর সমস্যা হিসেবে আসে। এই মেলানো কোডে হয়, AI এখানে সিদ্ধান্ত নেয় না।"
+              : "JomiCheck then compares each paper with the record: does this khatian number exist, do the owners and shares match, is the deed number in the sub-registry record or cancelled, are the sellers and buyers right, does the tax receipt's paid-up year match the record. A paper that contradicts the record may be forged and becomes a critical finding. This comparison is done by code; the AI does not decide it."}
           </p>
           <Link href="/upload" className="inline-flex font-semibold text-brand-700 hover:underline">
             {bn ? "ডকুমেন্ট আপলোড পেজ খুলুন →" : "Open the document upload page →"}
@@ -260,7 +269,7 @@ export default function HowItWorks() {
           </p>
         </Step>
 
-        <Step n={4} icon={Scale} title={L({ bn: "২৪টি আইনি যাচাই", en: "Running 24 legal checks" })}>
+        <Step n={4} icon={Scale} title={L({ bn: "২৫টি আইনি যাচাই", en: "Running 25 legal checks" })}>
           <p>
             {bn
               ? "প্রতিটি যাচাই একটি নির্দিষ্ট আইনের ধারা থেকে এসেছে। গুরুত্ব অনুযায়ী তিন ভাগে ভাগ করা, আর প্রতিটির নির্দিষ্ট পয়েন্ট আছে। কোনো সমস্যা পাওয়া গেলে রিপোর্টে আইনের নাম, প্রমাণ, করণীয় এবং বিক্রেতাকে কী জিজ্ঞেস করবেন তা লেখা থাকে।"
@@ -374,6 +383,17 @@ export default function HowItWorks() {
           </p>
         </Step>
 
+        <Step n={10} icon={Bell} title={L({ bn: "রেজিস্ট্রি পর্যন্ত জমির উপর নজর রাখা", en: "Watching the plot until registration" })}>
+          <p>
+            {bn
+              ? "যাচাইয়ের দিন জমি পরিষ্কার থাকলেও বায়না আর রেজিস্ট্রির মাঝের কয়েক সপ্তাহে বিক্রেতা অন্য কাউকে বিক্রি করতে পারেন, বন্ধক রাখতে পারেন, বা কেউ মামলা করতে পারেন। রিপোর্টে \"নজর রাখা শুরু করুন\" চাপলে জমিচেক ওই দিনের সব রেকর্ডের একটি ছবি রাখে। এরপর নতুন কোনো দলিল, নামজারি, মামলা, বন্ধক, বায়নানামা বা আমমোক্তারনামা রেকর্ড হলে, কিংবা অন্য কোনো ক্রেতা একই দাগ যাচাই করলে, তা \"নজরদারি\" পেজে সতর্কতা হিসেবে দেখা যায়।"
+              : "Even if the land is clean on the day of checking, in the weeks between the bainanama and registration the seller can sell to someone else, mortgage it, or someone can file a case. Pressing \"Start watching\" on the report saves a snapshot of every record that day. Any deed, mutation, case, mortgage, bainanama or power of attorney recorded later, or another buyer checking the same dag, then shows up as an alert on the \"Watchlist\" page."}
+          </p>
+          <Link href="/watch" className="inline-flex font-semibold text-brand-700 hover:underline">
+            {bn ? "নজরদারি পেজ খুলুন →" : "Open the watchlist →"}
+          </Link>
+        </Step>
+
         <section className="border-t border-line py-10">
           <div className="flex items-center gap-3">
             <ShieldAlert className="size-6 text-medium" />
@@ -386,6 +406,7 @@ export default function HowItWorks() {
                 bn ? "সব তথ্য কৃত্রিম। বাস্তবে চালু করতে ভূমি মন্ত্রণালয়ের রেকর্ডের সাথে অনুমোদিত সংযোগ লাগবে।" : "All data is synthetic. A real deployment needs an approved connection to Ministry of Land records.",
                 bn ? "স্বয়ংক্রিয় উত্তরাধিকার হিসাব এখন শুধু মুসলিম আইনের জন্য; অন্য ক্ষেত্রে আইনজীবী দিয়ে যাচাইয়ের সতর্কতা দেওয়া হয়।" : "Automatic inheritance shares cover Muslim law only; for others the report asks for a lawyer's review.",
                 bn ? "মেশিন লার্নিং মডেলের নির্ভুলতা কৃত্রিম ডেটায় মাপা; আসল ডেটা দিয়ে আবার প্রশিক্ষণ দিতে হবে।" : "The machine learning accuracy is measured on synthetic data; it must be retrained on real data.",
+                bn ? "মৌজা নকশার দাগের সীমানা কৃত্রিমভাবে তৈরি, জরিপ করা নয়। বাস্তবে ভূমি রেকর্ড ও জরিপ অধিদপ্তরের ডিজিটাল নকশা লাগবে।" : "The dag outlines on the mouza map are generated, not surveyed. A real deployment needs the digital maps of the Directorate of Land Records and Surveys.",
               ]}
             />
           </div>

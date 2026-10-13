@@ -61,6 +61,7 @@ Do not guess: copy names exactly as written, in the script they are written in.
 
 For a deed fill "deed" (sellers are the donors/transferors, buyers the recipients) and list the sold land in "plots".
 Copy dates exactly as written on the document (e.g. 14-06-2015); do not reorder them.
+Copy each area number exactly as written with the unit written next to it (e.g. "৩০ শতাংশ" gives area "30", area_unit "decimal"); never convert units yourself.
 For a land development tax receipt (dakhila) fill "tax_receipt"; "paid_upto_year" is the last year the tax covers.
 Leave "deed" and "tax_receipt" null for other documents.
 
@@ -123,7 +124,11 @@ def _to_acre(area: str, unit: str | None) -> str | None:
         value = Decimal(match.group(1).replace(",", ""))
     except InvalidOperation:
         return None
-    acre = value * UNIT_TO_ACRE[_unit_key(match.group(2) or unit)]
+    key = _unit_key(match.group(2) or unit)
+    if key == "decimal" and value < 1:
+        # No real plot is under one decimal (435 sq ft); the model has already converted to acres.
+        key = "acre"
+    acre = value * UNIT_TO_ACRE[key]
     return f"{acre.quantize(Decimal('0.0001')).normalize():f}"
 
 

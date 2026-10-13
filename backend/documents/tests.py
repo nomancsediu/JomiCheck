@@ -41,6 +41,7 @@ class ParseJsonTests(TestCase):
         self.assertEqual(_to_acre("৩৩ শতাংশ", "decimal"), "0.33")
         self.assertEqual(_to_acre("10 katha", None), "0.1653")
         self.assertIsNone(_to_acre("unclear", "acre"))
+        self.assertEqual(_to_acre("0.30", "decimal"), "0.3")
 
 
 @override_settings(**LLM)
