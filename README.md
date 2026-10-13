@@ -28,6 +28,7 @@ Problem statement: **P5 — Citizen Pre-Purchase Verification**, with **P3 — F
 | Pre-emption | Hak-e-Shufa exposure from co-sharers (SAT Act s.96) |
 | Survey lineage | CS → SA → RS → BS → mutation chain, with unexplained owner changes flagged |
 | Fraud patterns | Rapid repeated transfers, deeds far below mouza rate, deeds by people with no recorded right |
+| Anomaly detection (ML) | Isolation Forest model scores every recent sale and the proposed sale; flags unusual combinations (short holding, many dags sold by one seller, repeated sales) that no single rule catches |
 | Purchase-intent alert | Warns when other buyers checked the same plot in the last 30 days |
 | Report | Risk gauge, findings with law and action, ownership timeline, document checklist, seller questions, site-visit checklist, next steps, print/PDF |
 | Khatian view | Latest record of rights in the official column layout: serial, owner and father's name, share in ana-gonda-kora-kranti, dag, land class, area, remarks, mutation case |
@@ -43,7 +44,7 @@ Problem statement: **P5 — Citizen Pre-Purchase Verification**, with **P3 — F
 | Tier | Examples | Effect |
 |---|---|---|
 | Critical | Seller not the owner, double-selling, khas/vested land, acquisition, injunction, invalid POA | Result is **HIGH** regardless of score |
-| Major | Litigation, survey break, over-selling, minor's land, mortgage, rapid transfers, mutation missing, prior bainanama | +20 to +30 |
+| Major | Litigation, survey break, over-selling, minor's land, mortgage, rapid transfers, mutation missing, prior bainanama, ML-detected unusual transfer | +20 to +30 |
 | Minor | Conflicting deed, pre-emption, wrong khatian, under-priced deed, tax arrears | +5 to +10 |
 
 Score is capped at 100. LOW 0–30, MEDIUM 31–60, HIGH 61–100.
@@ -57,6 +58,7 @@ Citizen ─▶ Next.js web app ─▶ Django REST API ─▶ Verification engine
                                    │                 ├─ seller resolution & name matching
                                    │                 ├─ Faraiz inheritance
                                    │                 ├─ legal / fraud / lineage rules
+                                   │                 ├─ anomaly model (Isolation Forest)
                                    │                 └─ guidance (documents, questions, steps)
                                    ├─ Land records DB (synthetic)
                                    ├─ Report integrity (SHA-256 + QR)
@@ -68,6 +70,7 @@ Citizen ─▶ Next.js web app ─▶ Django REST API ─▶ Verification engine
 | Frontend | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, lucide-react |
 | Backend | Django 6, Django REST Framework, django-cors-headers |
 | Matching | RapidFuzz |
+| Machine learning | scikit-learn (Isolation Forest), NumPy |
 | Integrity | hashlib (SHA-256), qrcode (SVG) |
 | Database | SQLite for the prototype (PostgreSQL-ready) |
 
@@ -79,6 +82,7 @@ backend/
   reports/         Report model, integrity.py (hash + QR), report APIs, tests
   costs/           rates.py (all purchase-cost rates in one place), calculator, API, tests
   documents/       AI document extraction (extract.py), sample-khatian generator, API, tests
+  anomaly/         ML: transfer features, synthetic training data, Isolation Forest train/score, tests
 frontend/src/
   app/             /, /verify, /upload, /report/[id], /verify-report, /inheritance, /costs
   components/      gauge, findings, timeline, lineage, inheritance table, assistant, integrity
@@ -100,6 +104,7 @@ source ../.venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py seed_demo            # loads the synthetic dataset
+python manage.py train_anomaly        # optional: trains the ML model (also trained automatically on first use)
 python manage.py createsuperuser      # optional, for the records panel at /admin
 python manage.py runserver 8000
 ```
@@ -132,10 +137,34 @@ The same model reads uploaded documents on `/upload`. The three sample khatians 
 
 Only the computed report (synthetic data) is sent to the model. The risk score and flags always come from the rule engine; the model only explains them.
 
+### Machine learning: unusual transfer detection
+
+`backend/anomaly/` adds an unsupervised **Isolation Forest** (scikit-learn) that looks at each land sale as five numbers:
+
+| Feature | Meaning |
+|---|---|
+| `price_ratio` | Deed price ÷ government mouza value |
+| `log_holding_days` | How long the seller owned the land before selling |
+| `plot_transfers_365` | Sales of the same dag within one year |
+| `area_fraction` | Share of the dag being sold |
+| `seller_plots_365` | Different dags the same seller sold within one year |
+
+Real transaction data is not available to the team, so the model is trained on 20,000 **synthetic** transfers whose normal distributions are hand-set, with 5% planted fraud patterns (quick flip, broker reselling many dags, chain transfers, under-valued deed). On a separate synthetic test set of 5,000 transfers:
+
+| Precision | Recall | F1 | False-positive rate |
+|---|---|---|---|
+| 0.745 | 0.712 | 0.728 | 0.013 |
+
+Recall by pattern: flip 0.93, broker 1.00, chain 1.00, under-valued 0.11. Under-valued deeds alone are hard for the model, which is why the separate price rule handles them. These numbers are on synthetic data and show that the pipeline works, not real-world accuracy.
+
+In a verification, the model scores every sale of the plot in the last ten years plus the proposed sale. If a rule (rapid transfers, low price) already fired, the model's view is added to that finding as extra evidence. Otherwise it raises its own MAJOR finding (+20), "Unusual transfer pattern (machine learning)", with the reasons in plain Bangla/English. Demo case 14 shows a seller whom every rule clears but the model catches. The model never decides on its own that land is unsafe.
+
+`python manage.py train_anomaly` retrains it and writes `backend/anomaly/artifacts/metrics.json`.
+
 ### Tests
 
 ```bash
-cd backend && python manage.py test        # 44 tests: Faraiz, demo scenarios, khatian notation, costs, AI assistant and document reading (mocked), API, tamper detection
+cd backend && python manage.py test        # 50 tests: Faraiz, demo scenarios, khatian notation, costs, anomaly model, AI assistant and document reading (mocked), API, tamper detection
 cd frontend && npx tsc --noEmit && npx eslint src && npm run build
 ```
 
@@ -200,7 +229,7 @@ The rule catalog (`backend/verification/catalog.py`) cites the Registration Act 
 
 ## Open-source libraries
 
-Django (BSD-3), Django REST Framework (BSD-3), django-cors-headers (MIT), qrcode (BSD), RapidFuzz (MIT), Pillow (MIT-CMU), pypdfium2 (Apache-2.0/BSD-3), Next.js (MIT), React (MIT), Tailwind CSS (MIT), lucide-react (ISC), IBM Plex and Noto Sans Bengali fonts (SIL OFL 1.1).
+Django (BSD-3), Django REST Framework (BSD-3), django-cors-headers (MIT), qrcode (BSD), RapidFuzz (MIT), Pillow (MIT-CMU), pypdfium2 (Apache-2.0/BSD-3), scikit-learn (BSD-3), NumPy (BSD-3), joblib (BSD-3), Next.js (MIT), React (MIT), Tailwind CSS (MIT), lucide-react (ISC), IBM Plex and Noto Sans Bengali fonts (SIL OFL 1.1).
 
 ## Changes since Round 1
 
