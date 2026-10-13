@@ -3,7 +3,7 @@
 import { AlertTriangle, CheckCircle2, FileImage, Loader2, ScanText, Search, Upload, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api, buyerToken, type ExtractedDocument } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 
@@ -28,6 +28,14 @@ export default function UploadPage() {
   const [error, setError] = useState<string | null>(null);
   const [doc, setDoc] = useState<ExtractedDocument | null>(null);
   const [form, setForm] = useState({ dag: "", khatian: "", seller: "", area: "" });
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    if (!reading) return;
+    const started = Date.now();
+    const id = window.setInterval(() => setElapsed(Math.floor((Date.now() - started) / 1000)), 1000);
+    return () => window.clearInterval(id);
+  }, [reading]);
 
   const bn = lang === "bn";
 
@@ -47,6 +55,7 @@ export default function UploadPage() {
 
   async function read() {
     if (!file) return;
+    setElapsed(0);
     setReading(true);
     setError(null);
     try {
@@ -158,8 +167,15 @@ export default function UploadPage() {
                 className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand-700 py-2.5 font-semibold text-white hover:bg-brand-800 disabled:opacity-60"
               >
                 {reading ? <Loader2 className="size-4 animate-spin" /> : <ScanText className="size-4" />}
-                {reading ? (bn ? "AI পড়ছে…" : "AI is reading…") : bn ? "তথ্য বের করুন" : "Extract details"}
+                {reading ? `${bn ? "AI পড়ছে…" : "AI is reading…"} ${num(elapsed)}s` : bn ? "তথ্য বের করুন" : "Extract details"}
               </button>
+              {reading && (
+                <p className="mt-2 text-center text-xs text-muted">
+                  {bn
+                    ? "Gemma প্রতিটি ঘর মিলিয়ে পড়ছে; এক মিনিট পর্যন্ত লাগতে পারে।"
+                    : "Gemma checks every column before answering; this can take up to a minute."}
+                </p>
+              )}
             </div>
           )}
 
