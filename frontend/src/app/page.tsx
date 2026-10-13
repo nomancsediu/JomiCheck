@@ -171,7 +171,7 @@ export default function Home() {
           <h2 className="text-3xl font-bold tracking-tight">{t("section_checks")}</h2>
           <p className="mt-2 text-muted">{t("section_checks_sub")}</p>
         </div>
-        <div className="mt-8 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-px overflow-hidden rounded-lg border border-line bg-line shadow-card sm:grid-cols-2 lg:grid-cols-3">
           {CHECKS.map((c) => (
             <div key={c.en} className="flex gap-4 bg-white p-5">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-brand-50 text-brand-700">
@@ -211,7 +211,7 @@ export default function Home() {
             <Link
               key={tool.en}
               href={tool.href}
-              className="group flex flex-col rounded-lg border border-line bg-white p-5 transition hover:border-brand-500 hover:shadow-sm"
+              className="group flex flex-col rounded-lg border border-line bg-white p-5 transition hover:border-brand-500"
             >
               <div className="flex items-center justify-between">
                 <span className="flex size-10 items-center justify-center rounded-md bg-brand-50 text-brand-700">

@@ -173,7 +173,7 @@ function UnitConverter() {
           ))}
         </select>
       </div>
-      <dl className="mt-4 grid gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
+      <dl className="mt-4 grid gap-px overflow-hidden rounded-lg border border-line bg-line shadow-card sm:grid-cols-2 lg:grid-cols-4">
         {AREA_UNITS.map((u) => (
           <div key={u.key} className={`bg-white p-3 ${u.key === unit ? "bg-brand-50" : ""}`}>
             <dt className="text-xs text-muted">{pick(u.label)}</dt>
