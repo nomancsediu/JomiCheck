@@ -173,7 +173,7 @@ RULES = {
     },
     "TRANSFER_ANOMALY": {
         "tier": MAJOR, "points": 20,
-        "law": "Statistical fraud indicator — Isolation Forest model (LandTech P3)",
+        "law": "Statistical fraud indicator: Isolation Forest model (LandTech P3)",
         "title_en": "Unusual transfer pattern (machine learning)",
         "title_bn": "অস্বাভাবিক লেনদেনের ধরন (মেশিন লার্নিং)",
         "explain_en": "The anomaly model rates the {label} as unusual compared with normal land transfers: {reasons}. No single rule was broken, but this combination is typical of land brokers reselling quickly or of sham transfers.",
