@@ -32,6 +32,7 @@ Problem statement: **P5 — Citizen Pre-Purchase Verification**, with **P3 — F
 | Report | Risk gauge, findings with law and action, ownership timeline, document checklist, seller questions, site-visit checklist, next steps, print/PDF |
 | Khatian view | Latest record of rights in the official column layout: serial, owner and father's name, share in ana-gonda-kora-kranti, dag, land class, area, remarks, mutation case |
 | Purchase cost | Stamp duty, registration fee, local government tax, source tax and mutation fees by area type; flags deeds priced below the government mouza minimum |
+| Document upload | Upload a khatian or porcha photo/PDF; Gemma reads mouza, JL, khatian, dag, owners and area into editable fields, matches them to records and starts verification. Files are processed in memory and not stored |
 | Unit converter | Decimal (shotok), katha, bigha, acre, ojutangsho, square feet, square metre, hectare |
 | Integrity | SHA-256 seal + QR code; `/verify-report` shows whether a copy matches the registry |
 | Assistant | "Ask about this report" in Bangla/English — built-in legal glossary offline, or any OpenAI-compatible LLM grounded only on the report facts |
@@ -77,8 +78,9 @@ backend/
                    matching.py, guidance.py, assistant.py, tests/
   reports/         Report model, integrity.py (hash + QR), report APIs, tests
   costs/           rates.py (all purchase-cost rates in one place), calculator, API, tests
+  documents/       AI document extraction (extract.py), sample-khatian generator, API, tests
 frontend/src/
-  app/             /, /verify, /report/[id], /verify-report, /inheritance, /costs
+  app/             /, /verify, /upload, /report/[id], /verify-report, /inheritance, /costs
   components/      gauge, findings, timeline, lineage, inheritance table, assistant, integrity
   lib/             API client, Bangla/English i18n
 ```
@@ -126,12 +128,14 @@ python manage.py check_llm            # sends a test question and prints the ans
 
 Set `LLM_MODEL` in `backend/.env` to one of the listed Gemma models. Any other OpenAI-compatible server (e.g. a local Ollama) works by changing `LLM_API_URL` and `LLM_MODEL`. Without a key, the assistant falls back to its built-in bilingual glossary, and each answer in the UI shows which source produced it.
 
+The same model reads uploaded documents on `/upload`. The three sample khatians on that page (`frontend/public/samples/`) are rendered from the synthetic records with `python manage.py make_sample_docs`; they are watermarked as synthetic and carry no government emblem.
+
 Only the computed report (synthetic data) is sent to the model. The risk score and flags always come from the rule engine; the model only explains them.
 
 ### Tests
 
 ```bash
-cd backend && python manage.py test        # 35 tests: Faraiz, demo scenarios, khatian notation, costs, API, tamper detection
+cd backend && python manage.py test        # 44 tests: Faraiz, demo scenarios, khatian notation, costs, AI assistant and document reading (mocked), API, tamper detection
 cd frontend && npx tsc --noEmit && npx eslint src && npm run build
 ```
 
@@ -168,6 +172,7 @@ All 13 are on the home page and in the "quick fill" list on `/verify`.
 | GET | `/api/demo-cases/` | Planted demo scenarios |
 | POST | `/api/verify/` | Run verification and store a sealed report |
 | POST | `/api/inheritance/` | Standalone Faraiz calculator |
+| POST | `/api/documents/extract/` | Read an uploaded khatian/porcha image or PDF (multipart `file`) with the AI model |
 | POST | `/api/costs/estimate/` | Purchase cost estimate (`price_bdt`, `area_type`, optional `area_acre` + `mouza_rate_per_acre`) |
 | GET | `/api/reports/<id>/` | Report with QR code |
 | GET | `/api/reports/<id>/verify/?h=<sha256>` | Authenticity check |
@@ -194,7 +199,7 @@ The rule catalog (`backend/verification/catalog.py`) cites the Registration Act 
 
 ## Open-source libraries
 
-Django (BSD-3), Django REST Framework (BSD-3), django-cors-headers (MIT), qrcode (BSD), RapidFuzz (MIT), Next.js (MIT), React (MIT), Tailwind CSS (MIT), lucide-react (ISC), IBM Plex and Noto Sans Bengali fonts (SIL OFL 1.1).
+Django (BSD-3), Django REST Framework (BSD-3), django-cors-headers (MIT), qrcode (BSD), RapidFuzz (MIT), Pillow (MIT-CMU), pypdfium2 (Apache-2.0/BSD-3), Next.js (MIT), React (MIT), Tailwind CSS (MIT), lucide-react (ISC), IBM Plex and Noto Sans Bengali fonts (SIL OFL 1.1).
 
 ## Changes since Round 1
 
