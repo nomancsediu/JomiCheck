@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 RETRIES = 2
 RETRY_DELAY = 2  # seconds; doubled on each retry
+MIN_ATTEMPT_SECONDS = 10  # no retry if less time than this is left in the budget
 GOOGLE_API_HOST = "generativelanguage.googleapis.com"
 
 GLOSSARY = [
@@ -159,22 +160,28 @@ def uses_google_sdk() -> bool:
 
 def chat(system: str, user: str, image: tuple[bytes, str] | None = None, temperature: float = 0.2,
          timeout: int | None = None, json_output: bool = False) -> str:
-    """Send one prompt (and optionally an image as (bytes, mime type)) to the configured model; return the reply text."""
-    timeout = timeout or settings.LLM_TIMEOUT
+    """Send one prompt (and optionally an image as (bytes, mime type)) to the configured model; return the reply text.
+
+    `timeout` is the total time budget in seconds, retries included.
+    """
+    deadline = time.monotonic() + (timeout or settings.LLM_TIMEOUT)
     if settings.LLM_MODEL.lower().startswith("gemma"):
         # Gemma on the Gemini API rejects system instructions, so they go in the user turn.
         system, user = None, f"{system}\n\n{user}"
     send = _google_chat if uses_google_sdk() else _openai_chat
     for attempt in range(RETRIES + 1):
+        remaining = max(1, int(deadline - time.monotonic()))
         try:
-            return strip_reasoning(send(system, user, image, temperature, timeout, json_output))
+            return strip_reasoning(send(system, user, image, temperature, remaining, json_output))
         except Exception as exc:
             status = getattr(exc, "code", None)
+            delay = RETRY_DELAY * 2 ** attempt
             # The hosted API often answers "overloaded" (503) or "rate limited" (429) for a few seconds.
-            if not isinstance(status, int) or (status != 429 and status < 500) or attempt == RETRIES:
+            retryable = isinstance(status, int) and (status == 429 or status >= 500)
+            if not retryable or attempt == RETRIES or deadline - time.monotonic() - delay < MIN_ATTEMPT_SECONDS:
                 logger.warning("LLM call failed (%s): %s", status, str(exc)[:300])
                 raise
-            time.sleep(RETRY_DELAY * 2 ** attempt)
+            time.sleep(delay)
 
 
 def _google_chat(system, user, image, temperature, timeout, json_output) -> str:

@@ -46,6 +46,20 @@ class AssistantTests(SimpleTestCase):
         self.assertEqual([c.args[0] for c in sleep.call_args_list], [2, 4])
         self.assertEqual(out["answer"], "সতর্কবার্তা: যাচাই করুন")
 
+    @override_settings(LLM_API_URL="https://example.test/v1", LLM_API_KEY="k", LLM_MODEL="gemma-4-26b-a4b-it",
+                       LLM_TIMEOUT=45)
+    def test_retries_stay_within_the_time_budget(self):
+        clock = iter([0, 0, 40])  # deadline set, first attempt starts, first attempt fails after 40 s
+        timed_out = urllib.error.HTTPError("https://example.test", 504, "Deadline", {}, io.BytesIO(b""))
+        with mock.patch("urllib.request.urlopen", side_effect=timed_out) as urlopen, \
+                mock.patch("time.monotonic", side_effect=lambda: next(clock)), \
+                mock.patch("time.sleep") as sleep, self.assertLogs(level="WARNING"):
+            out = assistant.answer("?", RESULT, "bn")
+        self.assertEqual(urlopen.call_count, 1)
+        self.assertEqual(urlopen.call_args.kwargs["timeout"], 45)
+        sleep.assert_not_called()
+        self.assertEqual(out["source"], "built-in")
+
     @override_settings(LLM_API_URL="https://example.test/v1", LLM_API_KEY="k", LLM_MODEL="gemma-4-26b-a4b-it")
     def test_bad_request_is_not_retried(self):
         bad = urllib.error.HTTPError("https://example.test", 400, "Bad Request", {}, io.BytesIO(b"bad"))

@@ -164,7 +164,7 @@ In a verification, the model scores every sale of the plot in the last ten years
 ### Tests
 
 ```bash
-cd backend && python manage.py test        # 50 tests: Faraiz, demo scenarios, khatian notation, costs, anomaly model, AI assistant and document reading (mocked), API, tamper detection
+cd backend && python manage.py test        # 55 tests: Faraiz, demo scenarios, khatian notation, costs, anomaly model, AI assistant and document reading (mocked), API, tamper detection
 cd frontend && npx tsc --noEmit && npx eslint src && npm run build
 ```
 
