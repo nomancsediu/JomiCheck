@@ -21,7 +21,6 @@ const dict = {
   upload_cta: { bn: "খতিয়ানের ছবি থেকে পূরণ করুন", en: "Fill from a khatian photo" },
   nav_registry: { bn: "রেকর্ড প্যানেল", en: "Records panel" },
   start_verification: { bn: "যাচাই শুরু করুন", en: "Start verification" },
-  try_demo: { bn: "ডেমো কেস দেখুন", en: "See demo cases" },
 
   hero_title: { bn: "জমি কেনার আগে, একজন অভিজ্ঞ আইনজীবীর মতো যাচাই করুন", en: "Before you buy land, check it the way an experienced lawyer would" },
   hero_body: {
@@ -35,8 +34,8 @@ const dict = {
   section_checks: { bn: "যা যা যাচাই করা হয়", en: "What JomiCheck checks" },
   section_checks_sub: { bn: "একজন ভূমি আইনজীবী ক্রয়ের আগে যে বিষয়গুলো দেখেন, সবগুলো এক জায়গায়।", en: "Everything a land lawyer reviews before a purchase, in one place." },
   section_how: { bn: "কীভাবে কাজ করে", en: "How it works" },
-  section_demo: { bn: "ডেমো কেস", en: "Demo cases" },
-  section_demo_sub: { bn: "কৃত্রিম (সিনথেটিক) ডেটায় তৈরি ১৪টি পরিস্থিতি। যেকোনোটিতে ক্লিক করে পূর্ণ রিপোর্ট দেখুন।", en: "14 scenarios built on synthetic data. Click any of them to run a full verification." },
+  section_tools: { bn: "নিয়মের বাইরেও যা করে", en: "Beyond rule checks" },
+  section_tools_sub: { bn: "কৃত্রিম বুদ্ধিমত্তা, মেশিন লার্নিং ও ডিজিটাল সিল — যাতে যাচাই দ্রুত, গভীর ও বিশ্বাসযোগ্য হয়।", en: "AI, machine learning and a digital seal make each check faster, deeper and trustworthy." },
 
   form_title: { bn: "জমির তথ্য দিন", en: "Enter land details" },
   form_sub: { bn: "খতিয়ান বা দলিলে যেভাবে লেখা আছে সেভাবে দিন।", en: "Enter the details as written on the khatian or deed." },

@@ -3,23 +3,26 @@
 import {
   ArrowRight,
   Banknote,
+  BrainCircuit,
   Baby,
   Building2,
   Copy,
   FileCheck2,
+  FileScan,
   Gavel,
   GitBranch,
   Handshake,
   Landmark,
+  QrCode,
   Receipt,
   Scale,
   ScrollText,
+  Sparkles,
   TrendingDown,
   UserCheck,
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { DemoCaseGrid } from "@/components/DemoCases";
 import { LevelBadge, RiskGauge } from "@/components/RiskGauge";
 import { useLang } from "@/lib/i18n";
 
@@ -88,13 +91,44 @@ function SampleReport() {
   );
 }
 
+const TOOLS = [
+  {
+    icon: FileScan, href: "/upload",
+    en: "Read a khatian photo", bn: "খতিয়ানের ছবি থেকে পড়া",
+    body_en: "Upload a khatian or porcha. Gemma reads mouza, dag, owners and area in about 10 seconds and fills the form.",
+    body_bn: "খতিয়ান বা পর্চার ছবি দিন। Gemma প্রায় ১০ সেকেন্ডে মৌজা, দাগ, মালিক ও পরিমাণ পড়ে ফর্ম পূরণ করে দেয়।",
+    tag: "Gemma 4",
+  },
+  {
+    icon: BrainCircuit, href: "/verify",
+    en: "Machine-learning fraud signal", bn: "মেশিন লার্নিং দিয়ে প্রতারণা শনাক্ত",
+    body_en: "An Isolation Forest model flags unusual sales — quick flips, brokers, chain transfers — that no single rule catches.",
+    body_bn: "Isolation Forest মডেল অস্বাভাবিক বিক্রি ধরে — দ্রুত হাতবদল, দালাল, চেইন হস্তান্তর — যা একক কোনো নিয়মে ধরা পড়ে না।",
+    tag: "Isolation Forest",
+  },
+  {
+    icon: Sparkles, href: "/verify",
+    en: "Ask about your report", bn: "রিপোর্ট নিয়ে প্রশ্ন করুন",
+    body_en: "Ask in plain Bangla. Answers use only your report's facts and cite the law; nothing is invented.",
+    body_bn: "সহজ বাংলায় প্রশ্ন করুন। উত্তর শুধু আপনার রিপোর্টের তথ্য ও আইন থেকে আসে; কিছু বানানো হয় না।",
+    tag: "Gemma 4",
+  },
+  {
+    icon: QrCode, href: "/verify-report",
+    en: "Tamper-proof report", bn: "অপরিবর্তনযোগ্য রিপোর্ট",
+    body_en: "Every report is sealed with SHA-256 and a QR code, so a bank or lawyer can confirm it was not edited.",
+    body_bn: "প্রতিটি রিপোর্ট SHA-256 ও QR কোডে সিল করা, তাই ব্যাংক বা আইনজীবী যাচাই করতে পারেন যে এটি বদলানো হয়নি।",
+    tag: "SHA-256",
+  },
+];
+
 export default function Home() {
   const { t, lang, num } = useLang();
 
   return (
     <>
       <section className="border-b border-line bg-white">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:py-20">
+        <div className="page-x grid items-center gap-12 py-14 lg:grid-cols-[1.1fr_1fr] lg:py-20">
           <div>
             <p className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-800">
               LandTech 2026 · P5 {lang === "bn" ? "নাগরিক ক্রয়-পূর্ব যাচাই" : "Citizen Pre-Purchase Verification"}
@@ -108,9 +142,12 @@ export default function Home() {
               >
                 {t("start_verification")} <ArrowRight className="size-4" />
               </Link>
-              <a href="#demo" className="rounded-md border border-line bg-white px-5 py-3 font-semibold text-ink hover:border-brand-500">
-                {t("try_demo")}
-              </a>
+              <Link
+                href="/upload"
+                className="inline-flex items-center gap-2 rounded-md border border-line bg-white px-5 py-3 font-semibold text-ink hover:border-brand-500"
+              >
+                <FileScan className="size-4 text-brand-700" /> {t("upload_cta")}
+              </Link>
             </div>
             <dl className="mt-10 grid max-w-lg grid-cols-3 divide-x divide-line border-y border-line">
               {[
@@ -129,7 +166,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+      <section className="page-x py-16">
         <div className="max-w-2xl">
           <h2 className="text-3xl font-bold tracking-tight">{t("section_checks")}</h2>
           <p className="mt-2 text-muted">{t("section_checks_sub")}</p>
@@ -150,7 +187,7 @@ export default function Home() {
       </section>
 
       <section className="border-y border-line bg-brand-900 text-white">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+        <div className="page-x py-16">
           <h2 className="text-3xl font-bold tracking-tight">{t("section_how")}</h2>
           <ol className="mt-10 grid gap-8 md:grid-cols-4">
             {STEPS.map((s, i) => (
@@ -164,13 +201,32 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="demo" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-16 sm:px-6">
+      <section className="page-x py-16">
         <div className="max-w-2xl">
-          <h2 className="text-3xl font-bold tracking-tight">{t("section_demo")}</h2>
-          <p className="mt-2 text-muted">{t("section_demo_sub")}</p>
+          <h2 className="text-3xl font-bold tracking-tight">{t("section_tools")}</h2>
+          <p className="mt-2 text-muted">{t("section_tools_sub")}</p>
         </div>
-        <div className="mt-8">
-          <DemoCaseGrid />
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {TOOLS.map((tool) => (
+            <Link
+              key={tool.en}
+              href={tool.href}
+              className="group flex flex-col rounded-lg border border-line bg-white p-5 transition hover:border-brand-500 hover:shadow-sm"
+            >
+              <div className="flex items-center justify-between">
+                <span className="flex size-10 items-center justify-center rounded-md bg-brand-50 text-brand-700">
+                  <tool.icon className="size-5" />
+                </span>
+                <span className="rounded-full border border-line px-2 py-0.5 font-mono text-[11px] text-muted">{tool.tag}</span>
+              </div>
+              <h3 className="mt-4 font-semibold text-ink">{lang === "bn" ? tool.bn : tool.en}</h3>
+              <p className="mt-1 flex-1 text-sm leading-relaxed text-muted">{lang === "bn" ? tool.body_bn : tool.body_en}</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-700">
+                {lang === "bn" ? "খুলুন" : "Open"}
+                <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
+              </span>
+            </Link>
+          ))}
         </div>
       </section>
     </>
