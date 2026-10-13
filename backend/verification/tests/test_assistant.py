@@ -54,6 +54,20 @@ class AssistantTests(SimpleTestCase):
         self.assertEqual(urlopen.call_count, 1)
         self.assertEqual(out["source"], "built-in")
 
+    @override_settings(LLM_API_URL="https://generativelanguage.googleapis.com/v1beta/openai", LLM_API_KEY="k",
+                       LLM_MODEL="gemma-4-26b-a4b-it")
+    def test_google_ai_studio_uses_sdk_with_image_first(self):
+        with mock.patch("google.genai.Client") as client:
+            client.return_value.models.generate_content.return_value.text = '{"khatian_no": "300"}'
+            out = assistant.chat("Read it.", "Document:", image=(b"\xff\xd8jpeg", "image/jpeg"), json_output=True)
+        call = client.return_value.models.generate_content.call_args.kwargs
+        self.assertEqual(out, '{"khatian_no": "300"}')
+        self.assertEqual(call["contents"][0].inline_data.mime_type, "image/jpeg")
+        self.assertEqual(call["contents"][1], "Read it.\n\nDocument:")
+        self.assertIsNone(call["config"].system_instruction)
+        self.assertEqual(call["config"].response_mime_type, "application/json")
+        self.assertEqual(call["config"].thinking_config.thinking_level.name, "MINIMAL")
+
     @override_settings(LLM_API_URL="https://example.test/v1", LLM_API_KEY="k", LLM_MODEL="other-model")
     def test_other_models_get_system_message(self):
         with mock.patch("urllib.request.urlopen", return_value=_reply("ok")) as urlopen:

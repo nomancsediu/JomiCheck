@@ -44,7 +44,7 @@ class Command(BaseCommand):
                 "You are a Bangladeshi land-law assistant. Answer in simple Bangla in one sentence.",
                 "নামজারি কী?",
             )
-        except urllib.error.HTTPError as exc:
-            raise CommandError(f"HTTP {exc.code}: {exc.read().decode()[:300]}") from exc
+        except Exception as exc:
+            raise CommandError(f"LLM call failed: {str(exc)[:300]}") from exc
         self.stdout.write(self.style.SUCCESS(f"OK in {time.monotonic() - start:.1f}s"))
         self.stdout.write(reply)

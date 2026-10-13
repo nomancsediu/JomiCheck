@@ -7,6 +7,7 @@ bilingual glossary and the report's own flags are used, so the feature works
 offline.
 """
 
+import base64
 import json
 import logging
 import re
@@ -20,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 RETRIES = 2
 RETRY_DELAY = 2  # seconds; doubled on each retry
+GOOGLE_API_HOST = "generativelanguage.googleapis.com"
 
 GLOSSARY = [
     {
@@ -151,36 +153,73 @@ def llm_configured() -> bool:
     return bool(settings.LLM_API_URL and settings.LLM_MODEL)
 
 
-def chat(system: str, user: str, image_data_url: str | None = None, temperature: float = 0.2,
-         timeout: int | None = None) -> str:
-    """Call the configured OpenAI-compatible chat endpoint and return the reply text."""
+def uses_google_sdk() -> bool:
+    return GOOGLE_API_HOST in settings.LLM_API_URL
+
+
+def chat(system: str, user: str, image: tuple[bytes, str] | None = None, temperature: float = 0.2,
+         timeout: int | None = None, json_output: bool = False) -> str:
+    """Send one prompt (and optionally an image as (bytes, mime type)) to the configured model; return the reply text."""
+    timeout = timeout or settings.LLM_TIMEOUT
     if settings.LLM_MODEL.lower().startswith("gemma"):
         # Gemma on the Gemini API rejects system instructions, so they go in the user turn.
-        messages = [{"role": "user", "content": f"{system}\n\n{user}"}]
-    else:
-        messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
-    if image_data_url:
-        messages[-1]["content"] = [
-            {"type": "text", "text": messages[-1]["content"]},
-            {"type": "image_url", "image_url": {"url": image_data_url}},
-        ]
-    body = json.dumps({"model": settings.LLM_MODEL, "temperature": temperature, "messages": messages}).encode("utf-8")
-    req = urllib.request.Request(
-        settings.LLM_API_URL.rstrip("/") + "/chat/completions", data=body, method="POST",
-        headers={"Content-Type": "application/json", "Authorization": f"Bearer {settings.LLM_API_KEY}"},
-    )
+        system, user = None, f"{system}\n\n{user}"
+    send = _google_chat if uses_google_sdk() else _openai_chat
     for attempt in range(RETRIES + 1):
         try:
-            with urllib.request.urlopen(req, timeout=timeout or settings.LLM_TIMEOUT) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-            break
-        except urllib.error.HTTPError as exc:
+            return strip_reasoning(send(system, user, image, temperature, timeout, json_output))
+        except Exception as exc:
+            status = getattr(exc, "code", None)
             # The hosted API often answers "overloaded" (503) or "rate limited" (429) for a few seconds.
-            if (exc.code != 429 and exc.code < 500) or attempt == RETRIES:
-                logger.warning("LLM HTTP %s: %s", exc.code, exc.read()[:300])
+            if not isinstance(status, int) or (status != 429 and status < 500) or attempt == RETRIES:
+                logger.warning("LLM call failed (%s): %s", status, str(exc)[:300])
                 raise
             time.sleep(RETRY_DELAY * 2 ** attempt)
-    return strip_reasoning(data["choices"][0]["message"]["content"])
+
+
+def _google_chat(system, user, image, temperature, timeout, json_output) -> str:
+    """Google AI Studio through the google-genai SDK; minimal thinking keeps Gemma 4 fast."""
+    from google import genai
+    from google.genai import types
+
+    client = genai.Client(api_key=settings.LLM_API_KEY, http_options=types.HttpOptions(
+        timeout=timeout * 1000, retry_options=types.HttpRetryOptions(attempts=1),
+    ))
+    contents = []
+    if image:
+        # Gemma 4 reads images reliably only when the image part comes before the text.
+        contents.append(types.Part.from_bytes(data=image[0], mime_type=image[1]))
+    contents.append(user)
+    response = client.models.generate_content(
+        model=settings.LLM_MODEL,
+        contents=contents,
+        config=types.GenerateContentConfig(
+            system_instruction=system,
+            temperature=temperature,
+            thinking_config=types.ThinkingConfig(thinking_level="MINIMAL"),
+            response_mime_type="application/json" if json_output else None,
+        ),
+    )
+    return response.text or ""
+
+
+def _openai_chat(system, user, image, temperature, timeout, json_output) -> str:
+    """Any OpenAI-compatible server (e.g. a local Ollama)."""
+    content = user
+    if image:
+        data_url = f"data:{image[1]};base64," + base64.b64encode(image[0]).decode("ascii")
+        content = [{"type": "image_url", "image_url": {"url": data_url}}, {"type": "text", "text": user}]
+    messages = ([{"role": "system", "content": system}] if system else []) + [{"role": "user", "content": content}]
+    payload = {"model": settings.LLM_MODEL, "temperature": temperature, "messages": messages}
+    if json_output:
+        payload["response_format"] = {"type": "json_object"}
+    req = urllib.request.Request(
+        settings.LLM_API_URL.rstrip("/") + "/chat/completions", data=json.dumps(payload).encode("utf-8"),
+        method="POST",
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {settings.LLM_API_KEY}"},
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return json.loads(resp.read().decode("utf-8"))["choices"][0]["message"]["content"]
 
 
 def strip_reasoning(text: str) -> str:
