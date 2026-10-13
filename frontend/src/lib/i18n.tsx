@@ -111,6 +111,7 @@ const dict = {
   ask_title: { bn: "রিপোর্ট নিয়ে প্রশ্ন করুন", en: "Ask about this report" },
   ask_placeholder: { bn: "যেমন: হক-শুফা কী? আমি কি কিনব?", en: "e.g. What is pre-emption? Should I buy?" },
   ask_send: { bn: "জিজ্ঞেস করুন", en: "Ask" },
+  ask_source_builtin: { bn: "অফলাইন শব্দকোষ", en: "Built-in glossary" },
   integrity: { bn: "রিপোর্টের সত্যতা", en: "Report integrity" },
   integrity_body: { bn: "QR কোড স্ক্যান করে যে কেউ যাচাই করতে পারবেন রিপোর্টটি পরিবর্তন করা হয়েছে কিনা।", en: "Anyone can scan the QR code to confirm this report has not been altered." },
   report_id: { bn: "রিপোর্ট আইডি", en: "Report ID" },

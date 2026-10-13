@@ -5,7 +5,7 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 
-type Msg = { role: "user" | "assistant"; text: string; source?: string };
+type Msg = { role: "user" | "assistant"; text: string; source?: string; model?: string | null };
 
 const SUGGESTIONS = {
   bn: ["আমি কি এই জমি কিনব?", "নামজারি কী?", "হক-শুফা কী?", "ফারায়েজ অনুযায়ী অংশ কীভাবে হয়?"],
@@ -26,7 +26,7 @@ export function AskPanel({ reportId }: { reportId: string }) {
     setBusy(true);
     try {
       const res = await api.ask(reportId, q, lang);
-      setMessages((m) => [...m, { role: "assistant", text: res.answer, source: res.source }]);
+      setMessages((m) => [...m, { role: "assistant", text: res.answer, source: res.source, model: res.model }]);
     } catch {
       setMessages((m) => [...m, { role: "assistant", text: t("error_generic") }]);
     } finally {
@@ -62,6 +62,11 @@ export function AskPanel({ reportId }: { reportId: string }) {
               }`}
             >
               {m.text}
+              {m.source && (
+                <span className="mt-2 block border-t border-line pt-1.5 font-mono text-[10px] uppercase tracking-wide text-muted">
+                  {m.source === "llm" ? `AI · ${m.model ?? "LLM"}` : t("ask_source_builtin")}
+                </span>
+              )}
             </div>
           </div>
         ))}

@@ -221,7 +221,7 @@ export const api = {
   checkReport: (id: string, hash: string) =>
     request<ReportCheck>(`/reports/${id}/verify/?h=${encodeURIComponent(hash)}`),
   ask: (id: string, question: string, lang: "bn" | "en") =>
-    request<{ answer: string; source: "llm" | "built-in" }>(`/reports/${id}/ask/`, {
+    request<{ answer: string; source: "llm" | "built-in"; model?: string | null }>(`/reports/${id}/ask/`, {
       method: "POST",
       body: JSON.stringify({ question, lang }),
     }),
