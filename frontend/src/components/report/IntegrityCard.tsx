@@ -27,7 +27,7 @@ export function IntegrityCard({ report }: { report: Report }) {
           </Link>
         </div>
       </div>
-      <p className="mt-3 break-all rounded bg-paper px-2 py-1.5 font-mono text-[11px] leading-relaxed text-muted">
+      <p className="mt-3 break-all rounded bg-paper px-2 py-1.5 font-mono text-xs leading-relaxed text-muted">
         SHA-256 {report.sha256}
       </p>
     </section>

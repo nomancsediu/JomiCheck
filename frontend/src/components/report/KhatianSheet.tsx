@@ -8,7 +8,7 @@ const td = "border border-line px-2.5 py-2 align-top";
 
 function ColNo({ n }: { n: number }) {
   const { num } = useLang();
-  return <span className="block font-mono text-[10px] font-normal text-muted">({num(n)})</span>;
+  return <span className="block font-mono text-xs font-normal text-muted">({num(n)})</span>;
 }
 
 export function KhatianSheet({ ror, plot }: { ror: RecordOfRights; plot: VerificationResult["plot"] }) {

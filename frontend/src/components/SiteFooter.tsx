@@ -41,7 +41,7 @@ export function SiteFooter() {
           © {bn ? "২০২৬" : "2026"} · {bn ? "তৈরি করেছে" : "Built by"}{" "}
           <span className="font-bold text-brand-800">Team Semicolons</span>
         </p>
-        <p className="max-w-4xl text-[13px] font-medium text-muted">{t("disclaimer")}</p>
+        <p className="max-w-4xl text-xs font-medium text-muted">{t("disclaimer")}</p>
       </div>
     </footer>
   );

@@ -98,7 +98,7 @@ export default function VerifyReportResult({
               </dd>
             </div>
           </dl>
-          <p className="break-all border-t border-line px-5 py-3 font-mono text-[11px] text-muted">SHA-256 {check.sha256}</p>
+          <p className="break-all border-t border-line px-5 py-3 font-mono text-xs text-muted">SHA-256 {check.sha256}</p>
         </section>
       )}
 

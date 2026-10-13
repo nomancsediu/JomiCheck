@@ -178,7 +178,7 @@ export default function Home() {
                 <c.icon className="size-5" />
               </span>
               <div>
-                <p className="font-medium text-ink">{lang === "bn" ? c.bn : c.en}</p>
+                <p className="font-semibold text-ink">{lang === "bn" ? c.bn : c.en}</p>
                 <p className="mt-1 font-mono text-xs text-muted">{c.law}</p>
               </div>
             </div>
@@ -217,7 +217,7 @@ export default function Home() {
                 <span className="flex size-10 items-center justify-center rounded-md bg-brand-50 text-brand-700">
                   <tool.icon className="size-5" />
                 </span>
-                <span className="rounded-full border border-line px-2 py-0.5 font-mono text-[11px] text-muted">{tool.tag}</span>
+                <span className="rounded-full border border-line px-2 py-0.5 font-mono text-xs text-muted">{tool.tag}</span>
               </div>
               <h3 className="mt-4 font-semibold text-ink">{lang === "bn" ? tool.bn : tool.en}</h3>
               <p className="mt-1 flex-1 text-sm leading-relaxed text-muted">{lang === "bn" ? tool.body_bn : tool.body_en}</p>

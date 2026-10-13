@@ -63,7 +63,7 @@ export function AskPanel({ reportId }: { reportId: string }) {
             >
               {m.text}
               {m.source && (
-                <span className="mt-2 block border-t border-line pt-1.5 font-mono text-[10px] uppercase tracking-wide text-muted">
+                <span className="mt-2 block border-t border-line pt-1.5 font-mono text-xs uppercase tracking-wide text-muted">
                   {m.source === "llm" ? `AI · ${m.model ?? "LLM"}` : t("ask_source_builtin")}
                 </span>
               )}

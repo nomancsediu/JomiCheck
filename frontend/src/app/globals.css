@@ -7,7 +7,12 @@
 
   --color-paper: #f7f7f2;
   --color-ink: #15201a;
-  --color-muted: #5b675f;
+  --color-muted: #44514a;
+
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.25rem;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.5rem;
   --color-line: #e2e6df;
 
   --color-brand-50: #eef6f1;
@@ -44,6 +49,13 @@ html {
 
 body {
   font-family: var(--font-sans);
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+}
+
+/* Noto Sans Bengali at 400 looks thin next to Latin text; medium reads more clearly. */
+:lang(bn) body {
+  font-weight: 500;
 }
 
 :lang(bn) body,
