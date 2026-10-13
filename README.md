@@ -34,7 +34,7 @@ Problem statement: **P5 — Citizen Pre-Purchase Verification**, with **P3 — F
 | Khatian view | Latest record of rights in the official column layout: serial, owner and father's name, share in ana-gonda-kora-kranti, dag, land class, area, remarks, mutation case |
 | Purchase cost | Stamp duty, registration fee, local government tax, source tax and mutation fees by area type; flags deeds priced below the government mouza minimum |
 | Document upload | Upload up to five photos/PDFs (khatian or porcha, deed, land tax receipt); Gemma reads mouza, JL, khatian, dag, owners, deed parties and area into editable fields, matches them to records and starts verification. Files are processed in memory and not stored |
-| Forged paper detection | Every uploaded paper is compared with the records: khatian number, owners and shares, dag and area; deed number, cancelled deeds, sellers, buyers and date; tax receipt holding and paid-up year. A paper that contradicts the record raises a CRITICAL finding (Land Crime Prevention and Remedy Act 2023, s.5; Penal Code ss.467, 471) |
+| Forged paper detection | On `/check-documents`, every uploaded paper is compared with the records: khatian number, owners and shares, dag and area; deed number, cancelled deeds, sellers, buyers and date; tax receipt holding and paid-up year. A paper that contradicts the record raises a CRITICAL finding (Land Crime Prevention and Remedy Act 2023, s.5; Penal Code ss.467, 471) |
 | Plot watch | After verifying, a buyer can watch the plot. Any deed, mutation, case, mortgage, bainanama or power of attorney recorded later, or another buyer checking the same plot, appears on `/watch` until registration |
 | Mouza map | A map sheet of the mouza with the buyer's dag highlighted and every neighbouring dag coloured by the risk if its recorded owner sold it. The outlines are generated, not surveyed |
 | Unit converter | Decimal (shotok), katha, bigha, acre, ojutangsho, square feet, square metre, hectare |
@@ -90,7 +90,7 @@ backend/
   watch/           plot watch: snapshot of a plot's records, alerts for anything new, API, tests
   anomaly/         ML: transfer features, synthetic training data, Isolation Forest train/score, tests
 frontend/src/
-  app/             /, /verify, /upload, /report/[id], /watch, /verify-report, /inheritance, /costs
+  app/             /, /verify, /upload, /check-documents, /report/[id], /watch, /verify-report, /inheritance, /costs
   components/      gauge, findings, timeline, lineage, inheritance table, document check, watch, mouza map,
                    assistant, integrity
   lib/             API client, Bangla/English i18n

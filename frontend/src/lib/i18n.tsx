@@ -16,7 +16,7 @@ const dict = {
   nav_verify: { bn: "জমি যাচাই", en: "Verify land" },
   nav_inheritance: { bn: "ওয়ারিশ হিসাব", en: "Inheritance" },
   nav_check_report: { bn: "রিপোর্ট যাচাই", en: "Check a report" },
-  nav_watch: { bn: "নজরদারি", en: "Watchlist" },
+  nav_forgery: { bn: "জাল কাগজ", en: "Forged papers" },
   nav_how: { bn: "কীভাবে কাজ করে", en: "How it works" },
   hiw_title: { bn: "JomiCheck কীভাবে কাজ করে", en: "How JomiCheck works" },
   hiw_step: { bn: "ধাপ", en: "Step" },

@@ -225,6 +225,9 @@ export default function HowItWorks() {
               ? "তারপর জমিচেক প্রতিটি কাগজ সরকারি রেকর্ডের সাথে মেলায়: এই খতিয়ান নম্বর আছে কিনা, মালিকের নাম ও অংশ মেলে কিনা, দলিল নম্বর সাব রেজিস্ট্রি রেকর্ডে আছে কিনা বা বাতিল কিনা, দাতা ও গ্রহীতা ঠিক কিনা, দাখিলায় যে সাল পর্যন্ত খাজনা দেখানো আছে তা রেকর্ডের সাথে মেলে কিনা। কোনো কাগজ রেকর্ডের বিপরীত কথা বললে তা জাল হতে পারে, এবং রিপোর্টে গুরুতর সমস্যা হিসেবে আসে। এই মেলানো কোডে হয়, AI এখানে সিদ্ধান্ত নেয় না।"
               : "JomiCheck then compares each paper with the record: does this khatian number exist, do the owners and shares match, is the deed number in the sub-registry record or cancelled, are the sellers and buyers right, does the tax receipt's paid-up year match the record. A paper that contradicts the record may be forged and becomes a critical finding. This comparison is done by code; the AI does not decide it."}
           </p>
+          <Link href="/check-documents" className="inline-flex font-semibold text-brand-700 hover:underline">
+            {bn ? "জাল কাগজ শনাক্ত পেজ খুলুন →" : "Open the forged papers page →"}
+          </Link>
           <Link href="/upload" className="inline-flex font-semibold text-brand-700 hover:underline">
             {bn ? "ডকুমেন্ট আপলোড পেজ খুলুন →" : "Open the document upload page →"}
           </Link>

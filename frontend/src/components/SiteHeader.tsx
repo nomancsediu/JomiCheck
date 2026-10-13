@@ -12,10 +12,10 @@ function useLinks() {
   return [
     { href: "/verify", label: t("nav_verify") },
     { href: "/upload", label: t("nav_upload") },
+    { href: "/check-documents", label: t("nav_forgery") },
     { href: "/inheritance", label: t("nav_inheritance") },
     { href: "/costs", label: t("nav_costs") },
     { href: "/verify-report", label: t("nav_check_report") },
-    { href: "/watch", label: t("nav_watch") },
     { href: "/how-it-works", label: t("nav_how") },
   ];
 }
@@ -26,7 +26,7 @@ function NavLinks({ withActive }: { withActive: boolean }) {
 }
 
 function NavLink({ href, label, withActive }: { href: string; label: string; withActive: boolean }) {
-  const cls = "rounded-md px-3 py-2 text-sm font-medium transition-colors";
+  const cls = "whitespace-nowrap rounded-md px-2.5 py-2 text-sm font-medium transition-colors";
   if (!withActive) {
     return (
       <Link href={href} className={`${cls} text-ink hover:bg-paper`}>
