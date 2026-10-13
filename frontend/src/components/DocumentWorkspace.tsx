@@ -77,6 +77,7 @@ export function DocumentWorkspace({ mode }: { mode: WorkspaceMode }) {
   const [error, setError] = useState<string | null>(null);
   const [check, setCheck] = useState<DocumentCheck | null>(null);
   const [form, setForm] = useState({ dag: "", khatian: "", seller: "", area: "" });
+  const [showForm, setShowForm] = useState(!checking);
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
@@ -102,6 +103,7 @@ export function DocumentWorkspace({ mode }: { mode: WorkspaceMode }) {
     }));
     setItems((prev) => [...(replace ? [] : prev), ...fresh].slice(0, MAX_DOCS));
     setCheck(null);
+    setShowForm(!checking);
     setError(null);
   }
 
@@ -381,13 +383,23 @@ export function DocumentWorkspace({ mode }: { mode: WorkspaceMode }) {
                 </div>
               )}
 
-              {checking ? (
-                <p className="border-t border-line pt-4 text-sm text-muted">
-                  {bn ? "কাগজ ঠিক থাকলেও বিক্রেতার অধিকার, মামলা, বন্ধক ইত্যাদি যাচাই করতে " : "Even if the papers match, to check the seller's right, cases, mortgages and more, "}
-                  <Link href="/upload" className="font-semibold text-brand-700 hover:underline">
-                    {bn ? "পুরো যাচাই চালান →" : "run the full verification →"}
-                  </Link>
-                </p>
+              {!showForm ? (
+                <div className="space-y-3 border-t border-line pt-4">
+                  <p className="text-sm text-muted">
+                    {bn
+                      ? "কাগজ ঠিক থাকলেও বিক্রেতার অধিকার, ওয়ারিশ, মামলা, বন্ধক ইত্যাদি যাচাই করা দরকার।"
+                      : "Even if the papers match, the seller's right, heirs, cases, mortgages and more still need checking."}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowForm(true)}
+                    disabled={!location || reading}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand-700 py-2.5 font-semibold text-white hover:bg-brand-800 disabled:opacity-50"
+                  >
+                    <Search className="size-4" />
+                    {bn ? "এই কাগজ দিয়ে পুরো যাচাই করুন" : "Run the full verification with these papers"}
+                  </button>
+                </div>
               ) : (
               <form onSubmit={verify} className="space-y-3 border-t border-line pt-5">
                 <h2 className="font-semibold">{bn ? "পুরো যাচাই চালান" : "Run the full verification"}</h2>
