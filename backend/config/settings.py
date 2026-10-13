@@ -7,6 +7,21 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+def _load_env_file(path: Path) -> None:
+    """Read KEY=VALUE lines from backend/.env; real environment variables take precedence."""
+    if not path.is_file():
+        return
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
+
+
+_load_env_file(BASE_DIR / ".env")
+
 SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",
     "django-insecure-dev-only-change-me-in-production",
@@ -107,7 +122,8 @@ CORS_ALLOWED_ORIGINS = os.environ.get(
 # Public URL of the frontend, embedded in report QR codes.
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 
-# Optional LLM for richer explanations. Without it, deterministic templates are used.
+# Optional OpenAI-compatible LLM for the report assistant. Without it, the built-in glossary is used.
 LLM_API_URL = os.environ.get("LLM_API_URL", "")
 LLM_API_KEY = os.environ.get("LLM_API_KEY", "")
 LLM_MODEL = os.environ.get("LLM_MODEL", "")
+LLM_TIMEOUT = int(os.environ.get("LLM_TIMEOUT", "60"))

@@ -9,6 +9,7 @@ offline.
 
 import json
 import logging
+import re
 import urllib.request
 
 from django.conf import settings
@@ -129,19 +130,30 @@ def _llm(question: str, result: dict, lang: str) -> str:
         "general land-law knowledge. Never invent records, names or case numbers. Always end by reminding the user "
         "that this is decision support and official verification at the land office and a lawyer's advice are needed."
     )
-    body = json.dumps({
-        "model": settings.LLM_MODEL,
-        "temperature": 0.2,
-        "messages": [
-            {"role": "system", "content": system},
-            {"role": "user", "content": f"Report JSON:\n{json.dumps(_compact_facts(result), ensure_ascii=False)}\n\nQuestion: {question}"},
-        ],
-    }).encode("utf-8")
+    user = f"Report JSON:\n{json.dumps(_compact_facts(result), ensure_ascii=False)}\n\nQuestion: {question}"
+    return _plain_text(chat(system, user))
+
+
+def _plain_text(text: str) -> str:
+    """The chat panel shows plain text, so drop markdown emphasis and turn list markers into bullets."""
+    text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
+    text = re.sub(r"^\s*[*-]\s+", "• ", text, flags=re.MULTILINE)
+    return re.sub(r"^#+\s*", "", text, flags=re.MULTILINE).strip()
+
+
+def chat(system: str, user: str) -> str:
+    """Call the configured OpenAI-compatible chat endpoint and return the reply text."""
+    if settings.LLM_MODEL.lower().startswith("gemma"):
+        # Gemma on the Gemini API rejects system instructions, so they go in the user turn.
+        messages = [{"role": "user", "content": f"{system}\n\n{user}"}]
+    else:
+        messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
+    body = json.dumps({"model": settings.LLM_MODEL, "temperature": 0.2, "messages": messages}).encode("utf-8")
     req = urllib.request.Request(
         settings.LLM_API_URL.rstrip("/") + "/chat/completions", data=body, method="POST",
         headers={"Content-Type": "application/json", "Authorization": f"Bearer {settings.LLM_API_KEY}"},
     )
-    with urllib.request.urlopen(req, timeout=30) as resp:
+    with urllib.request.urlopen(req, timeout=settings.LLM_TIMEOUT) as resp:
         data = json.loads(resp.read().decode("utf-8"))
     return data["choices"][0]["message"]["content"].strip()
 
@@ -150,7 +162,7 @@ def answer(question: str, result: dict, lang: str = "bn") -> dict:
     lang = "en" if lang == "en" else "bn"
     if settings.LLM_API_URL and settings.LLM_MODEL:
         try:
-            return {"answer": _llm(question, result, lang), "source": "llm"}
+            return {"answer": _llm(question, result, lang), "source": "llm", "model": settings.LLM_MODEL}
         except Exception:  # network/LLM failure must not break the report
             logger.exception("LLM call failed; using built-in assistant")
-    return {"answer": _fallback(question, result, lang), "source": "built-in"}
+    return {"answer": _fallback(question, result, lang), "source": "built-in", "model": None}
