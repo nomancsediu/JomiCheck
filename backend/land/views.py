@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from . import mapsheet
 from .models import District, Mouza
 from .seed import DEMO_CASES
 
@@ -28,6 +29,11 @@ def mouza_plots(request, mouza_id):
         {"dag_no": p.dag_no, "area_acre": str(p.area_acre.normalize())}
         for p in mouza.plots.order_by("dag_no")
     ])
+
+
+@api_view(["GET"])
+def mouza_map(request, mouza_id):
+    return Response(mapsheet.build(get_object_or_404(Mouza, pk=mouza_id)))
 
 
 @api_view(["GET"])

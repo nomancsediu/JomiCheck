@@ -535,7 +535,7 @@ class Verifier:
             "land_class": p.get_land_class_display(),
             "land_class_bn": LAND_CLASS_BN.get(p.land_class, p.get_land_class_display()),
             "mouza_rate_per_acre": p.mouza_rate_per_acre,
-            "mouza": {"en": mz.name_en, "bn": mz.name_bn, "jl_no": mz.jl_no},
+            "mouza": {"id": mz.id, "en": mz.name_en, "bn": mz.name_bn, "jl_no": mz.jl_no},
             "upazila": {"en": mz.upazila.name_en, "bn": mz.upazila.name_bn},
             "district": {"en": mz.upazila.district.name_en, "bn": mz.upazila.district.name_bn},
         }

@@ -11,6 +11,7 @@ from watch import views as watch_views
 api = [
     path("locations/", land_views.locations),
     path("mouzas/<int:mouza_id>/plots/", land_views.mouza_plots),
+    path("mouzas/<int:mouza_id>/map/", land_views.mouza_map),
     path("demo-cases/", land_views.demo_cases),
     path("verify/", verification_views.verify_plot),
     path("inheritance/", verification_views.inheritance),

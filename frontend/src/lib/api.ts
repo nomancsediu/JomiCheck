@@ -107,7 +107,7 @@ export type VerificationResult = {
     land_class: string;
     land_class_bn: string;
     mouza_rate_per_acre: number;
-    mouza: Bi & { jl_no: number };
+    mouza: Bi & { id?: number; jl_no: number };
     upazila: Bi;
     district: Bi;
   };
@@ -200,6 +200,27 @@ export type PlotWatch = {
   alerts: WatchAlert[];
 };
 
+export type MapPlot = {
+  id: number;
+  dag_no: string;
+  area_acre: string;
+  land_class: string;
+  points: [number, number][];
+  label: [number, number];
+  level: Level;
+  score: number;
+  flags: Bi[];
+};
+
+export type MouzaMap = {
+  mouza: { id: number; name: Bi; jl_no: number };
+  width: number;
+  height: number;
+  road: [number, number][] | null;
+  road_label: [number, number] | null;
+  plots: MapPlot[];
+};
+
 export type DocumentFields = ExtractedDocument["fields"];
 
 export type DocumentCheck = {
@@ -272,6 +293,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   locations: () => request<District[]>("/locations/"),
+  mouzaMap: (mouzaId: number) => request<MouzaMap>(`/mouzas/${mouzaId}/map/`),
   plots: (mouzaId: number) => request<{ dag_no: string; area_acre: string }[]>(`/mouzas/${mouzaId}/plots/`),
   demoCases: () => request<DemoCase[]>("/demo-cases/"),
   verify: (payload: {

@@ -9,6 +9,7 @@ import { FlagCard } from "@/components/report/FlagCard";
 import { InheritanceTable } from "@/components/report/InheritanceTable";
 import { IntegrityCard } from "@/components/report/IntegrityCard";
 import { KhatianSheet } from "@/components/report/KhatianSheet";
+import { MouzaMap } from "@/components/report/MouzaMap";
 import { Lineage } from "@/components/report/Lineage";
 import { Timeline } from "@/components/report/Timeline";
 import { WatchCard } from "@/components/report/WatchCard";
@@ -233,6 +234,12 @@ export default function ReportPage({ params }: { params: Promise<{ id: string }>
           {r.document_check && (
             <Card title={t("document_check")}>
               <DocumentCheckCard check={r.document_check} />
+            </Card>
+          )}
+
+          {r.plot.mouza.id && (
+            <Card title={lang === "bn" ? "মৌজা নকশা" : "Mouza map"} icon={<MapPin className="size-5 text-brand-700" />}>
+              <MouzaMap mouzaId={r.plot.mouza.id} dagNo={r.plot.dag_no} />
             </Card>
           )}
 
