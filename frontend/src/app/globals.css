@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-plex), var(--font-bengali), ui-sans-serif, system-ui, sans-serif;
+  --font-bn: var(--font-bengali), var(--font-plex), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --color-paper: #f7f7f2;
+  --color-ink: #15201a;
+  --color-muted: #5b675f;
+  --color-line: #e2e6df;
+
+  --color-brand-50: #eef6f1;
+  --color-brand-100: #d4e9dc;
+  --color-brand-200: #a9d3ba;
+  --color-brand-500: #1f8a5a;
+  --color-brand-600: #0e6b45;
+  --color-brand-700: #0b5a3a;
+  --color-brand-800: #094a30;
+  --color-brand-900: #06331f;
+
+  --color-low: #15803d;
+  --color-low-bg: #ebf6ee;
+  --color-medium: #b45309;
+  --color-medium-bg: #fdf3e3;
+  --color-high: #b91c1c;
+  --color-high-bg: #fcebea;
+}
+
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+:lang(bn) body,
+.font-bn {
+  font-family: var(--font-bn);
+}
+
+::selection {
+  background: var(--color-brand-200);
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  html,
+  body {
+    background: white;
+  }
+  .print-break {
+    break-before: page;
+  }
+  .print-avoid {
+    break-inside: avoid;
+  }
+}
