@@ -10,6 +10,7 @@ offline.
 import json
 import logging
 import re
+import urllib.error
 import urllib.request
 
 from django.conf import settings
@@ -138,6 +139,7 @@ def _plain_text(text: str) -> str:
     """The chat panel shows plain text, so drop markdown emphasis and turn list markers into bullets."""
     text = re.sub(r"\*\*(.+?)\*\*", r"\1", text)
     text = re.sub(r"^\s*[*-]\s+", "• ", text, flags=re.MULTILINE)
+    text = text.replace("*", "")
     return re.sub(r"^#+\s*", "", text, flags=re.MULTILINE).strip()
 
 
@@ -163,8 +165,15 @@ def chat(system: str, user: str, image_data_url: str | None = None, temperature:
         settings.LLM_API_URL.rstrip("/") + "/chat/completions", data=body, method="POST",
         headers={"Content-Type": "application/json", "Authorization": f"Bearer {settings.LLM_API_KEY}"},
     )
-    with urllib.request.urlopen(req, timeout=timeout or settings.LLM_TIMEOUT) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
+    for attempt in range(2):
+        try:
+            with urllib.request.urlopen(req, timeout=timeout or settings.LLM_TIMEOUT) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            break
+        except urllib.error.HTTPError as exc:
+            # The hosted API returns occasional transient 5xx errors; one retry is enough in practice.
+            if exc.code < 500 or attempt == 1:
+                raise
     return strip_reasoning(data["choices"][0]["message"]["content"])
 
 

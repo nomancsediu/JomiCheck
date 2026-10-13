@@ -1,5 +1,6 @@
 import io
 import json
+import urllib.error
 from unittest import mock
 
 from django.test import SimpleTestCase, override_settings
@@ -33,6 +34,14 @@ class AssistantTests(SimpleTestCase):
         with mock.patch("urllib.request.urlopen", return_value=_reply(reply)):
             out = assistant.answer("নামজারি কী?", RESULT, "bn")
         self.assertEqual(out["answer"], "নামজারি হলো খতিয়ানে নাম তোলা।")
+
+    @override_settings(LLM_API_URL="https://example.test/v1", LLM_API_KEY="k", LLM_MODEL="gemma-4-26b-a4b-it")
+    def test_transient_server_error_is_retried_once(self):
+        error = urllib.error.HTTPError("https://example.test", 500, "Internal", {}, io.BytesIO(b""))
+        with mock.patch("urllib.request.urlopen", side_effect=[error, _reply("*সতর্কবার্তা: যাচাই করুন")]) as urlopen:
+            out = assistant.answer("?", RESULT, "bn")
+        self.assertEqual(urlopen.call_count, 2)
+        self.assertEqual(out["answer"], "সতর্কবার্তা: যাচাই করুন")
 
     @override_settings(LLM_API_URL="https://example.test/v1", LLM_API_KEY="k", LLM_MODEL="other-model")
     def test_other_models_get_system_message(self):
