@@ -18,7 +18,7 @@ class AskThrottle(AnonRateThrottle):
 @api_view(["GET"])
 def report_detail(request, public_id):
     report = get_object_or_404(Report, public_id=public_id.upper())
-    return Response(serialize_report(report))
+    return Response(serialize_report(report, request))
 
 
 @api_view(["GET"])

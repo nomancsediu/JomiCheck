@@ -34,7 +34,7 @@ def verify_plot(request):
             status=status.HTTP_404_NOT_FOUND,
         )
     report = create_report(result)
-    return Response(serialize_report(report), status=status.HTTP_201_CREATED)
+    return Response(serialize_report(report, request), status=status.HTTP_201_CREATED)
 
 
 @api_view(["POST"])

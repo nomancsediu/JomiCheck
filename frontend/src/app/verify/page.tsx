@@ -46,7 +46,7 @@ const inputCls =
 export default function VerifyPage() {
   const { t, lang, pick, num } = useLang();
   const router = useRouter();
-  const { cases } = useDemoCases();
+  const { cases, error: casesError } = useDemoCases();
 
   const [locations, setLocations] = useState<District[] | null>(null);
   const [plots, setPlots] = useState<{ dag_no: string; area_acre: string }[]>([]);
@@ -280,6 +280,7 @@ export default function VerifyPage() {
 
         <aside className="no-print">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">{t("quick_fill")}</h2>
+          {casesError && <p className="mt-3 text-sm text-high">{t("backend_down")}</p>}
           <ul className="mt-3 divide-y divide-line overflow-hidden rounded-xl border border-line bg-white">
             {cases?.map((c) => (
               <li key={c.key}>

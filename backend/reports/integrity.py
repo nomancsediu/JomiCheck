@@ -35,8 +35,9 @@ def check(report, presented_hash: str) -> dict:
     return {"authentic": True, "reason": "match"}
 
 
-def verify_url(report) -> str:
-    return f"{settings.FRONTEND_URL.rstrip('/')}/verify-report/{report.public_id}?h={report.sha256}"
+def verify_url(report, request=None) -> str:
+    base = settings.FRONTEND_URL or (request.build_absolute_uri("/") if request else "")
+    return f"{base.rstrip('/')}/verify-report/{report.public_id}?h={report.sha256}"
 
 
 def qr_svg(data: str) -> str:

@@ -16,8 +16,8 @@ def create_report(result: dict) -> Report:
     return report
 
 
-def serialize_report(report: Report) -> dict:
-    url = integrity.verify_url(report)
+def serialize_report(report: Report, request=None) -> dict:
+    url = integrity.verify_url(report, request)
     return {
         "id": report.public_id,
         "created_at": report.created_at.isoformat(),
