@@ -4,7 +4,7 @@
 
 **Enter a mouza, dag number and seller's name — or snap the seller's papers. Get a lawyer-grade risk report, with the law behind every finding, in under a minute.**
 
-[Live App](http://54.179.182.123) · [Demo Video](#) · [Concept Note](docs/JomiCheck-Concept-Note.pdf) · [Sample Papers](frontend/public/samples)
+[Live App](http://54.179.182.123) · [Demo Video](#) · [Sample Papers](frontend/public/samples)
 
 _LandTech Innovation Hackathon 2026 · Digital Land Records, Verification & Digitization · Problem P5 (Citizen Pre-Purchase Verification) with P3 (Fraud & Double-Selling Detection)_
 
