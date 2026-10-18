@@ -77,22 +77,7 @@ Gemma reads what humans hand over — photos of khatians, deeds and tax receipts
 
 ## Technical Architecture
 
-```mermaid
-flowchart LR
-    U[Citizen<br/>phone or laptop] --> N[nginx]
-    N --> W[Next.js 16<br/>Bangla / English UI]
-    N --> A[Django REST API]
-    A --> E[Verification engine]
-    E --> E1[Seller matching<br/>RapidFuzz Bangla/English]
-    E --> E2[25 legal rules<br/>+ law catalog]
-    E --> E3[Faraiz calculator]
-    E --> E4[Isolation Forest]
-    A --> G[Gemma 4<br/>reader + assistant]
-    A --> X[Document cross-check<br/>code, not AI]
-    A --> D[(Land records<br/>synthetic)]
-    A --> S[SHA-256 seal + QR]
-    A --> P[Plot watch]
-```
+![JomiCheck technical architecture](docs/architecture.png)
 
 **Risk scoring:** **Critical** findings (seller not the owner, double selling, khas land, acquisition, injunction, invalid POA, forged paper) add 35–40 points and force **HIGH**. **Major** findings (litigation, survey break, over-selling, minor's land, mortgage, rapid transfers, missing mutation, prior bainanama, ML signal) add 20–30. **Minor** findings (pre-emption, wrong khatian, under-priced deed, tax arrears, other buyers checking) add 5–10. LOW 0–30 · MEDIUM 31–60 · HIGH 61–100.
 
@@ -100,21 +85,7 @@ flowchart LR
 
 ## User Flow
 
-```mermaid
-flowchart TD
-    A[Buyer opens JomiCheck] --> B{Start from}
-    B -->|Land details| C[Mouza, dag, seller, area]
-    B -->|Khatian photo| D[Gemma reads it<br/>form fills itself]
-    B -->|Seller's papers| F[Forged paper check<br/>khatian, deed, dakhila]
-    D --> C
-    F --> C
-    C --> E[25 rules + Faraiz + ML]
-    E --> R[Sealed report<br/>LOW / MEDIUM / HIGH]
-    R --> Q[Ask in Bangla or English]
-    R --> M[Map, khatian, lineage, costs]
-    R --> V[Share, QR proves it's unedited]
-    R --> W[Watch plot until registration]
-```
+![JomiCheck user flow](docs/user-flow.png)
 
 ## Screenshots
 
