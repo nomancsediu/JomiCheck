@@ -12,7 +12,7 @@ from verification.engine import verify
 class WatchTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        seed()
+        seed(nationwide=False)
         cls.plot = Plot.objects.get(mouza__name_en="Rampur", dag_no="101")
 
     def setUp(self):

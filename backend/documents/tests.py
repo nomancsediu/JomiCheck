@@ -48,7 +48,7 @@ class ParseJsonTests(TestCase):
 class ExtractApiTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        seed()
+        seed(nationwide=False)
 
     def post(self, file):
         return APIClient().post("/api/documents/extract/", {"file": file}, format="multipart")

@@ -26,7 +26,7 @@ def receipt(holding, paid):
 class CrossCheckTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        seed()
+        seed(nationwide=False)
         cls.rampur = Mouza.objects.get(name_en="Rampur").id
 
     def statuses(self, docs, dag=None):

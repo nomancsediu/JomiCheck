@@ -45,6 +45,11 @@ const dict = {
   district: { bn: "জেলা", en: "District" },
   upazila: { bn: "উপজেলা", en: "Upazila" },
   mouza: { bn: "মৌজা", en: "Mouza" },
+  has_records: { bn: "ডেমো রেকর্ড আছে", en: "demo records" },
+  no_records: {
+    bn: "এই মৌজার ভূমি রেকর্ড এখনো যুক্ত হয়নি। ডেমোর জন্য ★ চিহ্নিত মৌজা বেছে নিন।",
+    en: "Land records for this mouza are not added yet. Pick a ★ mouza for the demo.",
+  },
   dag_no: { bn: "দাগ নম্বর", en: "Dag number" },
   khatian_no: { bn: "খতিয়ান নম্বর", en: "Khatian number" },
   optional: { bn: "ঐচ্ছিক", en: "optional" },

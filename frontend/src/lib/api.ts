@@ -4,7 +4,7 @@ export type Bi = { en: string; bn: string };
 export type Level = "LOW" | "MEDIUM" | "HIGH";
 export type Tier = "CRITICAL" | "MAJOR" | "MINOR";
 
-export type Mouza = { id: number; name: Bi; jl_no: number };
+export type Mouza = { id: number; name: Bi; jl_no: number; has_records: boolean };
 export type Upazila = { id: number; name: Bi; mouzas: Mouza[] };
 export type District = { id: number; name: Bi; upazilas: Upazila[] };
 

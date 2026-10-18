@@ -112,7 +112,7 @@ The forged khatian names Karim Mia sole owner of dag 118 with 16 ana. The record
 - **Prevents loss before it happens:** the check runs before the bainanama advance changes hands — the only moment fraud is still fully preventable.
 - **Explainable by design:** every point in the score traces to a named rule and its law, so a buyer, lawyer or bank officer can follow — and challenge — the reasoning.
 - **Tested on 14 planted fraud scenarios:** from a clean sale (LOW 6) to double selling (HIGH 91), khas land, injunction, revoked power of attorney, a widow selling a minor's share, and a broker pattern that only the ML model catches. All 14 are covered by automated tests.
-- **71 automated tests:** Faraiz, every demo scenario, khatian notation, costs, ML model, AI document reading and assistant (mocked), forged-paper cross-check, plot watch, mouza map, API and tamper detection.
+- **76 automated tests:** Faraiz, every demo scenario, khatian notation, costs, ML model, AI document reading and assistant (mocked), forged-paper cross-check, plot watch, mouza map, API and tamper detection.
 - **Tamper-evident sharing:** a bank, lawyer or family member abroad scans the QR to confirm the report is the original.
 - **Accessibility:** full Bangla interface and plain-language explanations; works on a low-cost phone over a mobile connection because the heavy work runs on the server.
 - **Who benefits:** first-time and rural buyers, migrant workers, banks and NGOs lending against land, lawyers and deed writers, and the courts through fewer land disputes.
@@ -205,7 +205,8 @@ For forged papers, open `/check-documents` and pick a sample set: a forged khati
 
 **Current limitations**
 
-- **All data is synthetic.** Every person, plot, khatian, deed, case and NID is fictional; only district and upazila names are real. No government portal is accessed or scraped.
+- **All land data is synthetic.** Every person, plot, khatian, deed, case and NID is fictional. No government portal is accessed or scraped.
+- **Locations cover all of Bangladesh:** all 64 districts and 495 upazilas, with their 4,800+ unions and pourashavas listed as mouzas (names from the MIT-licensed [bangladesh-geo-json](https://github.com/iqbalhasandev/bangladesh-geo-json)). No open dataset lists all ~56,000 mouzas with JL numbers, so JL numbers here are serial. Land records exist only in the four ★ demo mouzas.
 - JomiCheck is **decision support, not legal advice** — every report says so and directs the buyer to the AC Land office, sub-registry and a lawyer.
 - ML accuracy is measured on **synthetic transfers**; it must be retrained on real, authorised data. Under-valued deeds alone are hard for the model (recall 0.11), which is why a separate price rule handles them.
 - Mouza map outlines are **generated, not surveyed**.

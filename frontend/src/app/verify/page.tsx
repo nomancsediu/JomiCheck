@@ -3,9 +3,9 @@
 import { AlertCircle, Check, Loader2, ScanText, Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useDemoCases } from "@/components/DemoCases";
-import { ApiError, api, buyerToken, type DemoCase, type District } from "@/lib/api";
+import { ApiError, api, type Bi, buyerToken, type DemoCase, type District } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
 
 const STEPS = [
@@ -83,9 +83,20 @@ export default function VerifyPage() {
     return () => window.clearInterval(id);
   }, [loading]);
 
+  const byName = useCallback(
+    (a: { name: Bi }, b: { name: Bi }) => pick(a.name).localeCompare(pick(b.name), lang === "bn" ? "bn" : "en"),
+    [pick, lang],
+  );
+  const districts = useMemo(() => (locations ? [...locations].sort(byName) : []), [locations, byName]);
   const district = useMemo(() => locations?.find((d) => String(d.id) === form.district), [locations, form.district]);
+  const upazilas = useMemo(() => (district ? [...district.upazilas].sort(byName) : []), [district, byName]);
   const upazila = useMemo(() => district?.upazilas.find((u) => String(u.id) === form.upazila), [district, form.upazila]);
+  const mouzas = useMemo(
+    () => (upazila ? [...upazila.mouzas].sort((a, b) => Number(b.has_records) - Number(a.has_records) || byName(a, b)) : []),
+    [upazila, byName],
+  );
   const plotArea = plots.find((p) => p.dag_no === form.dag)?.area_acre;
+  const noRecords = mouzas.find((m) => String(m.id) === form.mouza)?.has_records === false;
 
   const set = (key: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const value = e.target.value;
@@ -189,7 +200,7 @@ export default function VerifyPage() {
               <Field label={t("district")}>
                 <select className={inputCls} value={form.district} onChange={set("district")} required>
                   <option value="">{t("select")}</option>
-                  {locations?.map((d) => (
+                  {districts.map((d) => (
                     <option key={d.id} value={d.id}>
                       {pick(d.name)}
                     </option>
@@ -199,7 +210,7 @@ export default function VerifyPage() {
               <Field label={t("upazila")}>
                 <select className={inputCls} value={form.upazila} onChange={set("upazila")} disabled={!district} required>
                   <option value="">{t("select")}</option>
-                  {district?.upazilas.map((u) => (
+                  {upazilas.map((u) => (
                     <option key={u.id} value={u.id}>
                       {pick(u.name)}
                     </option>
@@ -209,12 +220,14 @@ export default function VerifyPage() {
               <Field label={t("mouza")}>
                 <select className={inputCls} value={form.mouza} onChange={set("mouza")} disabled={!upazila} required>
                   <option value="">{t("select")}</option>
-                  {upazila?.mouzas.map((m) => (
+                  {mouzas.map((m) => (
                     <option key={m.id} value={m.id}>
-                      {pick(m.name)} (JL {num(m.jl_no)})
+                      {m.has_records ? "★ " : ""}
+                      {pick(m.name)} (JL {num(m.jl_no)}){m.has_records ? ` · ${t("has_records")}` : ""}
                     </option>
                   ))}
                 </select>
+                {noRecords && <span className="mt-1 block text-xs text-medium">{t("no_records")}</span>}
               </Field>
 
               <Field label={t("dag_no")} hint={plotArea ? `${t("total_area")}: ${num(plotArea)} ${t("acre")}` : undefined}>

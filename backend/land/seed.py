@@ -1,14 +1,18 @@
 """
 Synthetic land-record generator.
 
-Every person, plot, khatian, deed and case created here is fictional. Only the
-district and upazila names are real public administrative names. The planted
-scenarios in DEMO_CASES exercise each verification rule.
+Every person, plot, khatian, deed and case created here is fictional. The 64
+districts, 495 upazilas and their union and pourashava names are real public
+administrative names (data/bd_locations.json, from the MIT-licensed
+bangladesh-geo-json project); unions and pourashavas stand in for mouzas.
+The planted scenarios in DEMO_CASES exercise each verification rule.
 """
 
+import json
 import random
 from datetime import date, timedelta
 from decimal import Decimal
+from pathlib import Path
 
 from django.db import transaction
 
@@ -222,16 +226,47 @@ def clear():
         model.objects.all().delete()
 
 
+LOCATIONS_FILE = Path(__file__).with_name("data") / "bd_locations.json"
+
+
+def load_locations():
+    """Create every district and upazila of Bangladesh. JL numbers count up within each upazila."""
+    tree = json.loads(LOCATIONS_FILE.read_text(encoding="utf-8"))
+    districts = m.District.objects.bulk_create(m.District(name_en=en, name_bn=bn) for en, bn, _ in tree)
+    upazilas, children = [], []
+    for district, (_, _, ups) in zip(districts, tree):
+        for en, bn, areas in ups:
+            upazilas.append(m.Upazila(district=district, name_en=en, name_bn=bn))
+            children.append(areas or [[en, bn]])
+    upazilas = m.Upazila.objects.bulk_create(upazilas)
+    mouzas = []
+    for upazila, areas in zip(upazilas, children):
+        seen = set()
+        for en, bn in areas:
+            if en in seen:
+                continue
+            seen.add(en)
+            mouzas.append(m.Mouza(upazila=upazila, name_en=en, name_bn=bn, jl_no=len(seen)))
+    m.Mouza.objects.bulk_create(mouzas, batch_size=1000)
+
+
+def demo_upazila(district_en, district_bn, upazila_en, upazila_bn):
+    district, _ = m.District.objects.get_or_create(name_en=district_en, defaults={"name_bn": district_bn})
+    upazila, _ = m.Upazila.objects.get_or_create(district=district, name_en=upazila_en,
+                                                 defaults={"name_bn": upazila_bn})
+    return upazila
+
+
 @transaction.atomic
-def seed(random_seed: int = 42) -> dict:
+def seed(random_seed: int = 42, nationwide: bool = True) -> dict:
     clear()
     s = Seeder(random.Random(random_seed))
 
-    dhaka = m.District.objects.create(name_en="Dhaka", name_bn="ঢাকা")
-    gazipur = m.District.objects.create(name_en="Gazipur", name_bn="গাজীপুর")
-    savar = m.Upazila.objects.create(district=dhaka, name_en="Savar", name_bn="সাভার")
-    keraniganj = m.Upazila.objects.create(district=dhaka, name_en="Keraniganj", name_bn="কেরানীগঞ্জ")
-    kaliakair = m.Upazila.objects.create(district=gazipur, name_en="Kaliakair", name_bn="কালিয়াকৈর")
+    if nationwide:
+        load_locations()
+    savar = demo_upazila("Dhaka", "ঢাকা", "Savar", "সাভার")
+    keraniganj = demo_upazila("Dhaka", "ঢাকা", "Keraniganj", "কেরানীগঞ্জ")
+    kaliakair = demo_upazila("Gazipur", "গাজীপুর", "Kaliakair", "কালিয়াকৈর")
 
     rampur = m.Mouza.objects.create(upazila=savar, name_en="Rampur", name_bn="রামপুর", jl_no=101)
     charabag = m.Mouza.objects.create(upazila=savar, name_en="Charabag", name_bn="চরাবাগ", jl_no=102)
@@ -458,6 +493,7 @@ def seed(random_seed: int = 42) -> dict:
 
     return {
         "districts": m.District.objects.count(),
+        "upazilas": m.Upazila.objects.count(),
         "mouzas": m.Mouza.objects.count(),
         "plots": m.Plot.objects.count(),
         "people": m.Person.objects.count(),

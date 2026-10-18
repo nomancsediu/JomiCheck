@@ -10,7 +10,7 @@ from .models import Report
 class ApiTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        seed()
+        seed(nationwide=False)
 
     def setUp(self):
         self.client = APIClient()

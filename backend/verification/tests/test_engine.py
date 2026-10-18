@@ -32,7 +32,7 @@ def run_case(case, **overrides):
 class DemoScenarioTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        seed()
+        seed(nationwide=False)
 
     def test_every_demo_case_matches_expected_risk(self):
         self.assertEqual(set(EXPECTED), {c["key"] for c in DEMO_CASES})

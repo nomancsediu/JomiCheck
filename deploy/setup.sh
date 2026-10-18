@@ -56,7 +56,8 @@ set_env FRONTEND_URL ""
 (
   cd backend
   ../.venv/bin/python manage.py migrate --noinput
-  if [ "$(../.venv/bin/python manage.py shell -c 'from land.models import Mouza; print(Mouza.objects.count())')" = 0 ]; then
+  # Seed on a fresh database, or once more when it still holds only the old four demo mouzas.
+  if [ "$(../.venv/bin/python manage.py shell -v 0 -c 'from land.models import Mouza; print(Mouza.objects.count())')" -lt 1000 ]; then
     ../.venv/bin/python manage.py seed_demo
   fi
   ../.venv/bin/python manage.py train_anomaly

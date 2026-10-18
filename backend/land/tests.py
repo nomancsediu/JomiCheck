@@ -4,8 +4,8 @@ from fractions import Fraction
 from django.test import SimpleTestCase, TestCase
 
 from . import mapsheet
-from .models import Mouza
-from .seed import seed
+from .models import District, Mouza, Upazila
+from .seed import DEMO_CASES, seed
 from .units import share_to_ana
 
 
@@ -31,10 +31,45 @@ class ShareToAnaTests(SimpleTestCase):
         self.assertFalse(r["exact"])
 
 
-class MouzaMapTests(TestCase):
+class NationwideLocationTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         seed()
+
+    def test_every_district_and_upazila_is_loaded(self):
+        self.assertEqual(District.objects.count(), 64)
+        self.assertEqual(Upazila.objects.count(), 495)
+        self.assertGreater(Mouza.objects.count(), 4800)
+        self.assertFalse(Upazila.objects.filter(mouzas__isnull=True).exists())
+
+    def test_demo_mouzas_sit_in_the_real_upazilas(self):
+        rampur = Mouza.objects.get(name_en="Rampur", plots__isnull=False, plots__dag_no="101")
+        self.assertEqual((rampur.upazila.name_en, rampur.upazila.district.name_en), ("Savar", "Dhaka"))
+        self.assertGreater(Mouza.objects.filter(name_en="Rampur").count(), 1)
+
+    def test_demo_cases_point_to_the_seeded_mouzas(self):
+        cases = self.client.get("/api/demo-cases/").json()
+        self.assertEqual(len(cases), len(DEMO_CASES))
+        for case in cases:
+            self.assertTrue(Mouza.objects.get(pk=case["mouza_id"]).plots.filter(dag_no=case["dag_no"]).exists())
+
+    def test_document_location_picks_the_demo_rampur(self):
+        from documents.extract import match_location
+
+        loc = match_location({"mouza": "রামপুর", "jl_no": "101", "upazila": "সাভার", "district": "ঢাকা"})
+        rampur = Mouza.objects.get(pk=loc["mouza_id"])
+        self.assertEqual((rampur.upazila.name_en, rampur.jl_no), ("Savar", 101))
+
+    def test_locations_flag_mouzas_with_records(self):
+        tree = self.client.get("/api/locations/").json()
+        flagged = [mz for d in tree for u in d["upazilas"] for mz in u["mouzas"] if mz["has_records"]]
+        self.assertEqual(sorted(mz["name"]["en"] for mz in flagged), ["Charabag", "Notunhat", "Rampur", "Shantipur"])
+
+
+class MouzaMapTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        seed(nationwide=False)
         cls.mouza = Mouza.objects.get(name_en="Rampur")
 
     def test_every_dag_is_drawn_once_with_its_record_risk(self):

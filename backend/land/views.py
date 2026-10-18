@@ -9,13 +9,15 @@ from .seed import DEMO_CASES
 
 @api_view(["GET"])
 def locations(request):
+    with_records = set(Mouza.objects.filter(plots__isnull=False).values_list("id", flat=True))
     data = []
     for d in District.objects.prefetch_related("upazilas__mouzas"):
         data.append({
             "id": d.id, "name": {"en": d.name_en, "bn": d.name_bn},
             "upazilas": [{
                 "id": u.id, "name": {"en": u.name_en, "bn": u.name_bn},
-                "mouzas": [{"id": mz.id, "name": {"en": mz.name_en, "bn": mz.name_bn}, "jl_no": mz.jl_no}
+                "mouzas": [{"id": mz.id, "name": {"en": mz.name_en, "bn": mz.name_bn}, "jl_no": mz.jl_no,
+                            "has_records": mz.id in with_records}
                            for mz in u.mouzas.all()],
             } for u in d.upazilas.all()],
         })
@@ -38,7 +40,8 @@ def mouza_map(request, mouza_id):
 
 @api_view(["GET"])
 def demo_cases(request):
-    mouzas = {mz.name_en: mz for mz in Mouza.objects.select_related("upazila__district")}
+    demo_mouzas = Mouza.objects.filter(plots__isnull=False).distinct().select_related("upazila__district")
+    mouzas = {mz.name_en: mz for mz in demo_mouzas}
     cases = []
     for case in DEMO_CASES:
         mz = mouzas.get(case["mouza"])
