@@ -129,6 +129,9 @@ CORS_ALLOWED_ORIGINS = os.environ.get(
 
 CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
 
+# Gunicorn only listens on 127.0.0.1, so this header always comes from nginx.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 # Public URL of the frontend, embedded in report QR codes.
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
 

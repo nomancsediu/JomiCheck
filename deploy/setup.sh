@@ -1,11 +1,17 @@
 #!/usr/bin/env bash
 # Installs or updates JomiCheck on an Ubuntu server.
-# Run from /opt/jomicheck as the ubuntu user:  bash deploy/setup.sh <public-ip-or-domain>
+# Run from /opt/jomicheck as the ubuntu user:  bash deploy/setup.sh <public-ip-or-domain> [email]
+# With a domain and an email, a free Let's Encrypt certificate is set up and HTTP redirects to HTTPS.
 # backend/.env must already contain the LLM_* settings; production settings are added here.
 set -euo pipefail
 
-HOST="${1:?usage: bash deploy/setup.sh <public-ip-or-domain>}"
-URL="http://$HOST"
+HOST="${1:?usage: bash deploy/setup.sh <public-ip-or-domain> [email]}"
+EMAIL="${2:-}"
+if [ -n "$EMAIL" ] && [[ ! "$HOST" =~ ^[0-9.]+$ ]]; then
+  URL="https://$HOST"
+else
+  URL="http://$HOST"
+fi
 APP=/opt/jomicheck
 cd "$APP"
 
@@ -66,12 +72,19 @@ echo "== Frontend"
 
 echo "== Services"
 sudo cp deploy/jomicheck-api.service deploy/jomicheck-web.service /etc/systemd/system/
-sudo cp deploy/nginx.conf /etc/nginx/sites-available/jomicheck
+sed "s/server_name _;/server_name $HOST;/" deploy/nginx.conf | sudo tee /etc/nginx/sites-available/jomicheck >/dev/null
 sudo ln -sf /etc/nginx/sites-available/jomicheck /etc/nginx/sites-enabled/jomicheck
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t
 sudo systemctl daemon-reload
 sudo systemctl enable --now jomicheck-api jomicheck-web
 sudo systemctl restart jomicheck-api jomicheck-web nginx
+
+if [[ "$URL" == https://* ]]; then
+  echo "== HTTPS certificate"
+  sudo apt-get install -y certbot python3-certbot-nginx
+  # The nginx config was just replaced, so this also re-installs an existing certificate into it.
+  sudo certbot --nginx -d "$HOST" -m "$EMAIL" --agree-tos --non-interactive --redirect --keep-until-expiring
+fi
 
 echo "== Done: $URL"
