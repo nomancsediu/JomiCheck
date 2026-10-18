@@ -1,263 +1,211 @@
-# JomiCheck — কেনার আগে যাচাই করুন
+# JomiCheck — Check Before You Buy Land
 
-**Enter a mouza, dag number and seller's name. Get a lawyer-grade land risk report — with the law behind every finding — in under a minute.**
+**Enter a mouza, dag number and seller's name — or snap the seller's papers. Get a lawyer-grade risk report, with the law behind every finding, in under a minute.**
 
-[Live App](http://54.179.182.123) · [Demo Video](#) · [Concept Note (PDF)](docs/JomiCheck-Concept-Note.pdf) · [How It Works](http://54.179.182.123/how-it-works)
+[Live App](http://54.179.182.123) · [Demo Video](#) · [Concept Note](docs/JomiCheck-Concept-Note.pdf) · [Sample Papers](frontend/public/samples)
 
-_LandTech Innovation Hackathon 2026 · Track: Digital Land Records, Verification & Digitization · Problem **P5** Citizen Pre-Purchase Verification, with **P3** Fraud & Double-Selling Detection_
+_LandTech Innovation Hackathon 2026 · Digital Land Records, Verification & Digitization · Problem P5 (Citizen Pre-Purchase Verification) with P3 (Fraud & Double-Selling Detection)_
 
-![Django](https://img.shields.io/badge/Django-6-0C4B33?logo=django) ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js) ![Gemma](https://img.shields.io/badge/Gemma_4-Google_AI_Studio-4285F4?logo=google) ![scikit-learn](https://img.shields.io/badge/scikit--learn-Isolation_Forest-F7931E?logo=scikitlearn) ![AWS](https://img.shields.io/badge/Deploy-AWS_EC2-FF9900?logo=amazonaws) ![Tests](https://img.shields.io/badge/tests-71_passing-2ea44f)
+![Model](https://img.shields.io/badge/Model-Gemma_4-4285F4?logo=google) ![Backend](https://img.shields.io/badge/Backend-Django_6-0C4B33?logo=django) ![Frontend](https://img.shields.io/badge/Frontend-Next.js_16-black?logo=next.js) ![ML](https://img.shields.io/badge/ML-scikit--learn-F7931E?logo=scikitlearn) ![Deploy](https://img.shields.io/badge/Deploy-AWS_EC2-FF9900?logo=amazonaws) ![Tests](https://img.shields.io/badge/Tests-71_passing-2ea44f)
 
-![JomiCheck home page](docs/screenshots/home.png)
-
-> JomiCheck is a decision-support and risk-screening tool. It is not official legal verification or legal advice. **All data in this prototype is synthetic.**
-
----
+![JomiCheck thumbnail](docs/thumbnail.png)
 
 ## Problem Statement
 
-For most families in Bangladesh, buying land is the largest purchase of their lives — and one of the riskiest. The facts that decide whether a sale is safe are scattered across many offices:
+In Bangladesh, buying land is the largest purchase most families ever make — and one of the riskiest. The facts that decide whether a sale is safe are scattered across offices: the **khatian** from four surveys (CS, SA, RS, BS), **mutation** cases at the AC Land office, **deeds** at the sub-registry, court cases, **khas** and **acquisition** lists, bank **mortgages**, **powers of attorney** and the **land tax** record.
 
-- the **khatian** (record of rights) from four successive surveys — CS, SA, RS, BS
-- **mutation (namjari)** cases at the AC Land office
-- registered **deeds** at the sub-registry
-- civil suits, injunctions, **khas** and **acquisition** lists
-- bank **mortgages**, **powers of attorney**, and the **land tax (dakhila)** record
+What buyers actually do today:
 
-An ordinary buyer cannot read and cross-check all of this, so they rely on the seller's word and the papers the seller hands over. That gap is where fraud happens:
+- They **trust the seller's word** and the papers the seller hands over — because they cannot read and cross-check all of these records themselves.
+- They pay a **deed writer or broker** who often has an interest in the sale going through.
+- They pay the **bainanama advance first** and discover problems only after the money is gone.
+- Lawyers who do proper due diligence are **expensive and far away**, especially for rural buyers and migrant workers buying from abroad.
+
+That gap is exactly where land fraud happens:
 
 | Risk | What happens to the buyer |
 |---|---|
 | Seller is not the owner | Land recorded in someone else's name, or a deceased owner's land sold without the other heirs |
-| Double selling | The same dag was already sold by registered deed, or promised by bainanama to another buyer |
+| Double selling | The same dag was already sold by deed, or promised by bainanama to someone else |
 | Over-selling by heirs | An heir sells more than his Faraiz share; siblings and the widow later sue |
 | Forged papers | A fabricated khatian, a deed number that does not exist, a tax receipt for taxes never paid |
 | Restricted land | Khas, vested, waqf or forest land; acquisition notices; injunctions; mortgages |
-| Changes after checking | Between bainanama and registration the seller sells again, mortgages, or a case is filed |
 
-The result: lost savings, years in civil court, and broken families. **Citizens need a way to screen a plot before paying any money — in their own language, without being a lawyer.**
+The result: lost life savings, years in civil court, and broken families. **JomiCheck lets a citizen screen a plot before paying a single taka — in Bangla, without being a lawyer.**
 
 ## Solution Overview
 
-JomiCheck is a bilingual (বাংলা / English), mobile-friendly web app that checks a plot the way an experienced land lawyer would and returns a transparent **Low / Medium / High** risk score.
+JomiCheck is a web application (works in any phone browser, no install) that checks a plot the way an experienced land lawyer would and returns a transparent **Low / Medium / High** risk report:
 
-| Feature | What you get |
+| Output | What you get |
 |---|---|
-| **Verify land** | District → Upazila → Mouza → Dag + seller's name → full risk report |
-| **25 legal checks** | Ownership, double selling, mutation, khas/vested land, acquisition, litigation, injunction, mortgage, bainanama, power of attorney, minor's share, pre-emption (Hak-e-Shufa), survey lineage, fraud patterns |
-| **Law on every finding** | Each finding cites the Act and section, explains it in plain language, and says what to do and what to ask the seller |
-| **Faraiz calculator** | Each heir's share under Muslim personal law ('awl, radd, Umariyyatan) and detection of heirs selling more than their share |
-| **Forged paper detection** | Upload khatian, deed and dakhila photos — Gemma reads them, code compares every field with the record |
-| **Document upload** | Photograph a khatian or porcha and the form fills itself |
-| **ML anomaly detection** | An Isolation Forest flags unusual transfer patterns (quick flips, broker reselling) that no single rule catches |
-| **Mouza map** | The buyer's dag highlighted, neighbouring dags coloured by risk |
-| **Khatian view** | Latest record of rights in the official column layout, shares in ana-gonda-kora-kranti |
-| **Sealed report** | SHA-256 hash + QR code — anyone can scan to confirm the report was not edited |
-| **Ask the report** | Ask questions in Bangla or English; Gemma answers using only the report's facts |
-| **Plot watch** | After verifying, get alerts for any new deed, case, mortgage or buyer interest until registration |
-| **Purchase cost** | Stamp duty, registration fee, local government tax, source tax and mutation fees in one place |
-| **Unit converter** | Shotok, katha, bigha, acre, ojutangsho, sq ft, sq m, hectare |
+| **Risk Score** | 0–100 with LOW / MEDIUM / HIGH — every point comes from a named rule, never a black box |
+| **25 Legal Checks** | Ownership, double selling, mutation, khas/vested land, acquisition, litigation, injunction, mortgage, bainanama, power of attorney, minor's share, pre-emption, survey lineage, fraud patterns |
+| **Law on Every Finding** | The Act and section, a plain-language explanation, what to do, and a question to ask the seller |
+| **Faraiz Shares** | Each heir's share under Muslim law ('awl, radd, Umariyyatan) and detection of heirs selling more than their share |
+| **Forged Paper Check** | Upload khatian, deed and dakhila photos — Gemma reads them, code compares every field with the record |
+| **ML Fraud Signal** | An Isolation Forest flags unusual transfer patterns — quick flips, brokers reselling — that no single rule catches |
+| **Khatian & Lineage** | Latest record of rights in the official layout, plus the CS → SA → RS → BS → mutation chain |
+| **Mouza Map** | The buyer's dag highlighted, neighbouring dags coloured by risk |
+| **Sealed Report** | SHA-256 hash + QR code — a bank or family member scans it to confirm the report was not edited |
+| **Ask the Report** | Questions in Bangla or English, answered only from the report's facts |
+| **Plot Watch** | Alerts for any new deed, case, mortgage or buyer interest until registration |
+| **Purchase Cost** | Stamp duty, registration fee, local tax, source tax and mutation fees, plus a land unit converter |
 | **Print / PDF** | A clean printable report for the family, bank or lawyer |
 
-## How AI and ML Are Used
+The whole interface is available in **বাংলা and English**.
 
-JomiCheck uses three layers, each doing only what it is trustworthy at:
+This is **not a chatbot that guesses legal answers**. The core value is a deterministic _records → 25 legal rules → explainable score_ engine. AI only reads papers and explains results; it never decides whether land is safe.
 
-| Layer | Role | Decides the risk? |
-|---|---|---|
-| **Rule engine** (Python) | 25 legal checks, Faraiz, scoring | **Yes** — every point comes from a named rule |
-| **Gemma 4** (Google AI Studio) | Reads uploaded papers; answers questions about a report | **No** — it reads and explains, never scores |
-| **Isolation Forest** (scikit-learn) | Flags statistically unusual transfers | Adds evidence or one Major finding, never declares land unsafe alone |
+## How Gemma Is Used
 
-### Gemma 4
+Gemma reads what humans hand over — photos of khatians, deeds and tax receipts — and explains the report in plain language.
 
-- **Model:** `gemma-4-26b-a4b-it` — open-weight Gemma 4 vision model (Mixture-of-Experts, ~4B active parameters), called through the official `google-genai` SDK. Any OpenAI-compatible server (e.g. local Ollama) works by changing two env vars.
-- **Document reading:** the image is sent **before** the prompt and the model returns **strict JSON** (mouza, JL, khatian, dag, owners and shares, deed parties, area). Bangla numerals and units (ana-gonda, shotok, katha) are parsed by code. A khatian is read in about 10 seconds.
-- **The comparison is done by code, not the AI.** `documents/crosscheck.py` checks: does this khatian number exist in this mouza; do owners and shares match; is the deed number in the sub-registry record or cancelled; are sellers, buyers and date correct; does the tax receipt's paid-up year match. A contradiction raises a **Critical** finding (Land Crime Prevention and Remedy Act 2023, s.5; Penal Code ss.467, 471).
-- **Grounded assistant:** "Ask about this report" receives only the computed report, answers in Bangla or English, and the UI shows which source answered. Without an API key, a built-in bilingual legal glossary answers instead.
-- **Reliability:** minimal thinking for speed, automatic retry with backoff on 503/429, and a cap on total wait time.
-- **Privacy:** uploaded files are processed in memory and never stored. Because Gemma is open-weight, it can later run on government servers so citizen documents never leave the country.
+- **Model:** `gemma-4-26b-a4b-it` — Gemma 4 vision, Mixture-of-Experts with **~4B active parameters**: fast enough to read a khatian in about 10 seconds, capable enough for Bangla land documents. Swappable via the `LLM_MODEL` env var.
+- **Access:** Google AI Studio through the official `google-genai` SDK. Any OpenAI-compatible server (e.g. self-hosted Gemma on Ollama) works by changing `LLM_API_URL` — so citizen documents can later stay on government servers.
 
-### Machine learning: unusual transfer detection
+**Design decisions that make it trustworthy:**
 
-Each land sale is described by five features:
+1. **Image part placed _before_ the text prompt**, with **JSON output** — each paper comes back as structured fields: document type, mouza, JL, khatian, dag, owners and shares, deed number, parties, date, area, tax year.
+2. **Code parses Bangla, not the model** — Bangla numerals, ana-gonda-kora-kranti shares and shotok/katha/acre units are converted by tested Python, so a misread digit can't silently change a share.
+3. **The forgery decision is made by code, not AI.** `documents/crosscheck.py` checks whether the khatian number exists in that mouza, whether owners and shares match, whether the deed number is in the sub-registry record or was cancelled, and whether the tax receipt's paid-up year matches. A contradiction raises a **Critical** finding under the Land Crime Prevention and Remedy Act 2023 (s.5) and Penal Code (ss.467, 471).
+4. **The user stays in control** — extracted fields are shown in an editable form before verification runs.
+5. **Grounded assistant** — "Ask about this report" receives only the computed report, answers in the user's language, and the UI labels which source answered. With no API key, a built-in bilingual legal glossary answers instead.
+6. **Built for real networks** — minimal thinking for speed, automatic retry with backoff on 503/429, and a hard cap on total wait time. Uploaded files are processed in memory and never stored.
 
-| Feature | Meaning |
-|---|---|
-| `price_ratio` | Deed price ÷ government mouza value |
-| `log_holding_days` | How long the seller held the land |
-| `plot_transfers_365` | Sales of the same dag within one year |
-| `area_fraction` | Share of the dag being sold |
-| `seller_plots_365` | Different dags the same seller sold within one year |
-
-Trained on 20,000 synthetic transfers with 5% planted fraud patterns (quick flip, broker, chain, under-valued deed). On a separate synthetic test set of 5,000:
-
-| Precision | Recall | F1 | False-positive rate |
-|---|---|---|---|
-| 0.745 | 0.712 | 0.728 | 0.013 |
-
-Recall by pattern: flip 0.93, broker 1.00, chain 1.00, under-valued 0.11 — under-valued deeds are handled by a separate price rule. These numbers prove the pipeline on synthetic data, not real-world accuracy.
+**Machine learning layer.** An Isolation Forest (scikit-learn) scores every sale of the plot in the last ten years plus the proposed sale on five features: price ÷ mouza rate, holding period, sales of the dag within a year, share of the dag sold, and dags sold by the same seller within a year. Trained on 20,000 synthetic transfers with 5% planted fraud, it reaches **precision 0.745, recall 0.712, F1 0.728, false-positive rate 0.013** on a separate synthetic test set of 5,000. It never declares land unsafe on its own — it adds evidence to a rule or raises one Major finding with plain-language reasons.
 
 ## Technical Architecture
 
 ```mermaid
 flowchart LR
     U[Citizen<br/>phone or laptop] --> N[nginx]
-    N --> W[Next.js 16 web app<br/>Bangla / English]
+    N --> W[Next.js 16<br/>Bangla / English UI]
     N --> A[Django REST API]
     A --> E[Verification engine]
-    E --> E1[Seller resolution<br/>RapidFuzz Bangla/English]
+    E --> E1[Seller matching<br/>RapidFuzz Bangla/English]
     E --> E2[25 legal rules<br/>+ law catalog]
     E --> E3[Faraiz calculator]
-    E --> E4[Isolation Forest<br/>anomaly model]
-    E --> E5[Guidance<br/>documents, questions, steps]
-    A --> D[(Land records DB<br/>synthetic)]
-    A --> G[Gemma 4<br/>document reader + assistant]
+    E --> E4[Isolation Forest]
+    A --> G[Gemma 4<br/>reader + assistant]
     A --> X[Document cross-check<br/>code, not AI]
+    A --> D[(Land records<br/>synthetic)]
     A --> S[SHA-256 seal + QR]
-    A --> P[Plot watch alerts]
+    A --> P[Plot watch]
 ```
 
-| Layer | Technology |
-|---|---|
-| Frontend | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, lucide-react |
-| Backend | Python 3.12+, Django 6, Django REST Framework |
-| AI | Gemma 4 via Google AI Studio (`google-genai` SDK), pypdfium2 for PDFs |
-| ML & matching | scikit-learn Isolation Forest, NumPy, RapidFuzz |
-| Integrity | SHA-256 (hashlib), QR code (qrcode, SVG) |
-| Database | SQLite in the prototype, PostgreSQL-ready |
-| Hosting | AWS EC2 (Ubuntu), nginx, gunicorn, systemd — one-command `deploy/setup.sh` |
+**Risk scoring:** **Critical** findings (seller not the owner, double selling, khas land, acquisition, injunction, invalid POA, forged paper) add 35–40 points and force **HIGH**. **Major** findings (litigation, survey break, over-selling, minor's land, mortgage, rapid transfers, missing mutation, prior bainanama, ML signal) add 20–30. **Minor** findings (pre-emption, wrong khatian, under-priced deed, tax arrears, other buyers checking) add 5–10. LOW 0–30 · MEDIUM 31–60 · HIGH 61–100.
 
-### Risk scoring
-
-| Tier | Examples | Effect |
-|---|---|---|
-| **Critical** | Seller not the owner, double selling, khas/vested land, acquisition, injunction, invalid POA, uploaded paper contradicts the record | +35 to +40; result is **HIGH** regardless of score |
-| **Major** | Litigation, survey break, heir over-selling, minor's land, mortgage, rapid transfers, mutation missing, prior bainanama, ML-detected unusual transfer | +20 to +30 |
-| **Minor** | Conflicting deeds, pre-emption, wrong khatian number, under-priced deed, tax arrears, other buyers checking the plot | +5 to +10 |
-
-Score is capped at 100: **LOW** 0–30 · **MEDIUM** 31–60 · **HIGH** 61–100. Because every point comes from a named rule, the result is never a black box.
+**Stack summary:** Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 (frontend) · Django 6 + Django REST Framework, Python 3.12+ (backend) · Gemma 4 via Google AI Studio (document reading, assistant) · scikit-learn + RapidFuzz (ML, name matching) · SHA-256 + QR (integrity) · SQLite, PostgreSQL-ready · AWS EC2 with nginx, gunicorn and systemd, installed by one script.
 
 ## User Flow
 
 ```mermaid
 flowchart TD
-    A[Buyer opens JomiCheck] --> B{How to start?}
-    B -->|Type details| C[Mouza, dag, seller, area]
-    B -->|Upload khatian photo| D[Gemma reads it<br/>form fills itself]
-    B -->|Upload seller's papers| F[Forged paper check<br/>khatian, deed, dakhila]
+    A[Buyer opens JomiCheck] --> B{Start from}
+    B -->|Land details| C[Mouza, dag, seller, area]
+    B -->|Khatian photo| D[Gemma reads it<br/>form fills itself]
+    B -->|Seller's papers| F[Forged paper check<br/>khatian, deed, dakhila]
     D --> C
     F --> C
-    C --> E[Verification engine<br/>rules + Faraiz + ML]
-    E --> R[Sealed risk report<br/>LOW / MEDIUM / HIGH]
-    R --> Q[Ask questions<br/>in Bangla or English]
-    R --> M[Mouza map, khatian,<br/>lineage, cost estimate]
-    R --> V[Share report<br/>QR proves it is unedited]
-    R --> W[Watch the plot<br/>alerts until registration]
+    C --> E[25 rules + Faraiz + ML]
+    E --> R[Sealed report<br/>LOW / MEDIUM / HIGH]
+    R --> Q[Ask in Bangla or English]
+    R --> M[Map, khatian, lineage, costs]
+    R --> V[Share, QR proves it's unedited]
+    R --> W[Watch plot until registration]
 ```
 
 ## Screenshots
 
-| **Verify land — 14 one-click demo cases** | **High risk: seller is not the owner, land already sold** |
+| **Verify Land** | **High Risk: Seller Not the Owner** |
 |---|---|
-| ![Verify page](docs/screenshots/verify.png) | ![High-risk report](docs/screenshots/report-high-risk.png) |
-| **Heir over-selling his Faraiz share** | **Only the ML model catches this broker** |
-| ![Inheritance report](docs/screenshots/report-inheritance.png) | ![ML finding](docs/screenshots/report-ml.png) |
-| **Mouza map — neighbours coloured by risk** | **Faraiz shares of every heir** |
-| ![Mouza map](docs/screenshots/mouza-map.png) | ![Faraiz table](docs/screenshots/faraiz.png) |
-| **Latest khatian in the official layout** | **Forged khatian that contradicts it (sample)** |
-| ![Khatian view](docs/screenshots/khatian.png) | ![Forged khatian sample](frontend/public/samples/khatian-rampur-118-forged.png) |
-| **QR check — the report is genuine and unedited** | **Purchase cost calculator** |
-| ![Report verification](docs/screenshots/verify-report.png) | ![Cost calculator](docs/screenshots/costs.png) |
+| ![Verify](docs/screenshots/verify.png) | ![High risk report](docs/screenshots/report-high-risk.png) |
+| **Heir Over-Selling Faraiz Share** | **Only the ML Model Catches This Broker** |
+| ![Inheritance](docs/screenshots/report-inheritance.png) | ![ML finding](docs/screenshots/report-ml.png) |
+| **Latest Khatian (Official Record)** | **Forged Khatian Handed Over (Sample)** |
+| ![Khatian](docs/screenshots/khatian.png) | ![Forged khatian](frontend/public/samples/khatian-rampur-118-forged.png) |
+| **Mouza Map** | **Faraiz Shares** |
+| ![Mouza map](docs/screenshots/mouza-map.png) | ![Faraiz](docs/screenshots/faraiz.png) |
+| **QR Check: Report Is Genuine** | **Purchase Cost** |
+| ![Verify report](docs/screenshots/verify-report.png) | ![Costs](docs/screenshots/costs.png) |
 
-The forged khatian names Karim Mia as sole owner of dag 118 with 16 ana. The record shows the land is still in his late father Abdul Majid's name, with four heirs. JomiCheck raises a Critical finding.
-
-## Demo Scenarios
-
-All 14 are on the home page and in the one-click list on `/verify`.
-
-| # | Scenario | Dag / Mouza | Seller | Result |
-|---|---|---|---|---|
-| 1 | Clean property | 101 Rampur | Jamal Hossain | LOW 6 |
-| 2 | Ownership mismatch + double selling | 125 Rampur | Rahim Uddin | HIGH 91 |
-| 3 | Heir selling more than Faraiz share | 118 Rampur | Karim Mia | MEDIUM 55 |
-| 4 | Bought by deed, mutation rejected | 132 Rampur | Shafiq Ahmed | MEDIUM 34 |
-| 5 | Khas land | 140 Charabag | Bashir Ahmed | HIGH 80 |
-| 6 | Government acquisition | 150 Charabag | Liton Das | HIGH 40 |
-| 7 | Suit with injunction | 160 Charabag | Habib Ullah | HIGH 70 |
-| 8 | Bank mortgage | 170 Charabag | Sumon Ali | MEDIUM 31 |
-| 9 | Revoked power of attorney | 180 Charabag | Faruk Ahmed | HIGH 35 |
-| 10 | Prior bainanama by co-owner | 190 Notunhat | Delwar Hossain | MEDIUM 36 |
-| 11 | Break in survey records | 205 Notunhat | Rafiq Mondol | MEDIUM 36 |
-| 12 | Rapid low-price transfers | 215 Notunhat | Imran Hossain | MEDIUM 33 |
-| 13 | Widow selling minor heir's land | 225 Shantipur | Nasima Begum | HIGH 80 |
-| 14 | Broker reselling quickly — only ML catches it | 235 Charabag | Selim Reza | LOW 20 + ML flag |
-
-Critical findings force HIGH even when the score is below 61 (cases 6 and 9).
-
-**Sample papers** on `/check-documents`: genuine khatian and deed for dag 101; a forged khatian for dag 118; and for dag 125 a deed whose number is not in the sub-registry record plus a tax receipt showing tax paid two years beyond the record. All are watermarked as synthetic and carry no government emblem.
+The forged khatian names Karim Mia sole owner of dag 118 with 16 ana. The record shows the land is still in his late father Abdul Majid's name with four heirs — JomiCheck raises a Critical finding.
 
 ## Impact & Validation
 
-- **Who benefits:** first-time and rural buyers, migrant workers buying from abroad, banks and NGOs lending against land, lawyers and deed writers, and the government through fewer land disputes in court.
-- **Before paying, not after:** the check runs before the bainanama money changes hands — the moment fraud is still preventable.
-- **Explainable:** every point in the score comes from a named rule with its law, so a buyer, lawyer or judge can follow the reasoning.
-- **Tamper-evident:** the SHA-256 seal and QR let a bank or family member confirm a shared report was not edited.
-- **Tested:** 71 automated tests cover Faraiz, all 14 demo scenarios, khatian notation, costs, the ML model, AI document reading and assistant (mocked), forged-paper cross-check, plot watch, mouza map, API and tamper detection.
-- **Deployed:** running on AWS EC2 behind nginx, installed by one script.
-- **Path to real use:** the engine already uses the same structure as the national records (mouza, JL, dag, survey khatians, mutation case, deed). Connecting authorised e-Porcha, e-Mutation, land development tax and sub-registry APIs replaces the synthetic database without changing the rules. First target: a pilot in one upazila with the AC Land office, free for citizens.
+- **Prevents loss before it happens:** the check runs before the bainanama advance changes hands — the only moment fraud is still fully preventable.
+- **Explainable by design:** every point in the score traces to a named rule and its law, so a buyer, lawyer or bank officer can follow — and challenge — the reasoning.
+- **Tested on 14 planted fraud scenarios:** from a clean sale (LOW 6) to double selling (HIGH 91), khas land, injunction, revoked power of attorney, a widow selling a minor's share, and a broker pattern that only the ML model catches. All 14 are covered by automated tests.
+- **71 automated tests:** Faraiz, every demo scenario, khatian notation, costs, ML model, AI document reading and assistant (mocked), forged-paper cross-check, plot watch, mouza map, API and tamper detection.
+- **Tamper-evident sharing:** a bank, lawyer or family member abroad scans the QR to confirm the report is the original.
+- **Accessibility:** full Bangla interface and plain-language explanations; works on a low-cost phone over a mobile connection because the heavy work runs on the server.
+- **Who benefits:** first-time and rural buyers, migrant workers, banks and NGOs lending against land, lawyers and deed writers, and the courts through fewer land disputes.
+- **Path to real use:** the engine already uses the national record structure (mouza, JL, dag, survey khatians, mutation case, deed). Connecting authorised e-Porcha, e-Mutation, land tax and sub-registry APIs replaces the synthetic database without changing the rules.
 
 ## Run It Yourself
 
-**Requirements:** Python 3.12+, Node.js 20+. Optional: a free Gemma API key from [Google AI Studio](https://aistudio.google.com/apikey) for document reading and the AI assistant.
+### Prerequisite
+
+Python 3.12+ and Node.js 20+. Optional: a free Gemma API key from [Google AI Studio](https://aistudio.google.com/apikey) for document reading and the AI assistant — everything else works without it.
 
 ### Option A — Local development
 
 ```bash
 # 1. Backend
 cd backend
-python3 -m venv ../.venv
-source ../.venv/bin/activate
+python3 -m venv ../.venv && source ../.venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env                  # optional: paste your Gemma key into LLM_API_KEY
+cp .env.example .env                  # optional: paste your key into LLM_API_KEY
 python manage.py migrate
-python manage.py seed_demo            # loads the synthetic dataset
+python manage.py seed_demo            # load the synthetic dataset
 python manage.py runserver 8000
 
 # 2. Frontend (new terminal)
 cd frontend
 cp .env.example .env.local            # NEXT_PUBLIC_API_URL=http://localhost:8000/api
-npm install
-npm run dev                           # open http://localhost:3000
+npm install && npm run dev            # open http://localhost:3000
 ```
 
-Useful commands:
+### Option B — Deploy on AWS EC2 (one command)
 
 ```bash
-python manage.py check_llm --list                         # Gemma models your key can use
-python manage.py check_llm                                # send a test question
-python manage.py train_anomaly                            # retrain the ML model, writes anomaly/artifacts/metrics.json
-python manage.py make_sample_docs                         # regenerate the sample khatians, deeds and dakhilas
-python manage.py simulate_watch_event 101 --kind injunction   # demo a plot-watch alert (also: mortgage, bainanama; --clear)
-python manage.py createsuperuser                          # records panel at /admin
+# copy the project to /opt/jomicheck on an Ubuntu server, add LLM_* to backend/.env, then:
+cd /opt/jomicheck && bash deploy/setup.sh <public-ip-or-domain>
 ```
 
-### Option B — Deploy on an Ubuntu server (AWS EC2)
+Installs Python, Node and nginx, generates a secret key, migrates and seeds an empty database, trains the ML model, builds the frontend and starts everything under systemd. Open port 80 in the security group.
+
+### Option C — Useful commands
 
 ```bash
-# copy the project to /opt/jomicheck, put LLM_* settings in backend/.env, then:
-cd /opt/jomicheck
-bash deploy/setup.sh <public-ip-or-domain>
+python manage.py check_llm --list                            # Gemma models your key can use
+python manage.py train_anomaly                               # retrain the ML model
+python manage.py make_sample_docs                            # regenerate sample khatians, deeds, dakhilas
+python manage.py simulate_watch_event 101 --kind injunction  # demo a plot-watch alert
+python manage.py test                                        # run the 71 backend tests
 ```
 
-The script installs Python, Node and nginx, generates a secret key, migrates and seeds the database if it is empty, trains the ML model, builds the frontend and starts everything under systemd. The frontend calls `/api` on its own origin, so the site keeps working if the server's IP changes. Open port 80 in the security group.
+Try it immediately with the one-click demo cases on `/verify`:
 
-### Tests
+| Scenario | Dag / Mouza | Seller | Result |
+|---|---|---|---|
+| Clean property | 101 Rampur | Jamal Hossain | LOW 6 |
+| Ownership mismatch + double selling | 125 Rampur | Rahim Uddin | HIGH 91 |
+| Heir selling more than Faraiz share | 118 Rampur | Karim Mia | MEDIUM 55 |
+| Bought by deed, mutation rejected | 132 Rampur | Shafiq Ahmed | MEDIUM 34 |
+| Khas land | 140 Charabag | Bashir Ahmed | HIGH 80 |
+| Government acquisition | 150 Charabag | Liton Das | HIGH 40 |
+| Suit with injunction | 160 Charabag | Habib Ullah | HIGH 70 |
+| Bank mortgage | 170 Charabag | Sumon Ali | MEDIUM 31 |
+| Revoked power of attorney | 180 Charabag | Faruk Ahmed | HIGH 35 |
+| Prior bainanama by co-owner | 190 Notunhat | Delwar Hossain | MEDIUM 36 |
+| Break in survey records | 205 Notunhat | Rafiq Mondol | MEDIUM 36 |
+| Rapid low-price transfers | 215 Notunhat | Imran Hossain | MEDIUM 33 |
+| Widow selling minor heir's land | 225 Shantipur | Nasima Begum | HIGH 80 |
+| Broker reselling quickly (only ML catches it) | 235 Charabag | Selim Reza | LOW 20 + ML flag |
 
-```bash
-cd backend && python manage.py test        # 71 tests
-cd frontend && npx tsc --noEmit && npx eslint src && npm run build
-```
+For forged papers, open `/check-documents` and pick a sample set: a forged khatian for dag 118, or a forged deed and tax receipt for dag 125.
 
 ## API Reference
 
@@ -265,79 +213,42 @@ cd frontend && npx tsc --noEmit && npx eslint src && npm run build
 |---|---|---|
 | `/api/locations/` | GET | District → Upazila → Mouza tree |
 | `/api/mouzas/<id>/plots/` | GET | Dag numbers in a mouza |
-| `/api/mouzas/<id>/map/` | GET | Mouza map sheet with each dag's record risk |
-| `/api/demo-cases/` | GET | The 14 planted demo scenarios |
+| `/api/mouzas/<id>/map/` | GET | Mouza map with each dag's record risk |
+| `/api/demo-cases/` | GET | The 14 demo scenarios |
 | `/api/verify/` | POST | Run verification and store a sealed report |
 | `/api/inheritance/` | POST | Standalone Faraiz calculator |
-| `/api/documents/extract/` | POST | Read a khatian, deed or tax receipt image/PDF with Gemma (multipart `file`) |
-| `/api/documents/check/` | POST | Compare read documents with the records (`mouza_id`, `documents`, optional `dag_no`) |
-| `/api/watch/` | GET, POST | List watched plots with alerts / start watching (`buyer_token`, `plot_id`, `report_id`) |
-| `/api/watch/<id>/?buyer_token=` | DELETE | Stop watching |
-| `/api/costs/estimate/` | POST | Purchase cost estimate (`price_bdt`, `area_type`, optional `area_acre` + `mouza_rate_per_acre`) |
+| `/api/documents/extract/` | POST | Read a khatian, deed or tax receipt image/PDF with Gemma |
+| `/api/documents/check/` | POST | Compare read documents with the records |
+| `/api/watch/` | GET, POST | List watched plots with alerts / start watching |
+| `/api/watch/<id>/` | DELETE | Stop watching |
+| `/api/costs/estimate/` | POST | Purchase cost estimate |
 | `/api/reports/<id>/` | GET | Report with QR code |
 | `/api/reports/<id>/verify/?h=<sha256>` | GET | Authenticity check |
 | `/api/reports/<id>/ask/` | POST | Ask the report assistant |
 
-## Project Structure
+## Limitations & Future Work
 
-```
-backend/
-  land/            land record models, synthetic data generator, mouza map, location & demo APIs
-  verification/    engine, rule catalog (law + bilingual text), Faraiz, name matching, guidance, assistant
-  reports/         sealed reports, SHA-256 + QR integrity, report APIs
-  documents/       Gemma document reading (extract.py), record cross-check (crosscheck.py)
-  anomaly/         ML features, synthetic training data, Isolation Forest train/score
-  watch/           plot watch snapshots and alerts
-  costs/           purchase-cost rates and calculator
-frontend/src/
-  app/             /, /verify, /upload, /check-documents, /report/[id], /watch,
-                   /verify-report, /inheritance, /costs, /how-it-works
-  components/      risk gauge, findings, timeline, lineage, Faraiz table, khatian sheet,
-                   mouza map, document check, watch, assistant, integrity
-  lib/             API client, Bangla/English i18n, unit conversion
-deploy/            nginx, systemd units, setup.sh for Ubuntu
-docs/              concept note (HTML + PDF), screenshots
-```
+**Current limitations**
 
-## Data, Ethics & Limitations
+- **All data is synthetic.** Every person, plot, khatian, deed, case and NID is fictional; only district and upazila names are real. No government portal is accessed or scraped.
+- JomiCheck is **decision support, not legal advice** — every report says so and directs the buyer to the AC Land office, sub-registry and a lawyer.
+- ML accuracy is measured on **synthetic transfers**; it must be retrained on real, authorised data. Under-valued deeds alone are hard for the model (recall 0.11), which is why a separate price rule handles them.
+- Mouza map outlines are **generated, not surveyed**.
+- Automatic inheritance covers **Muslim law only**; for other owners JomiCheck asks for a lawyer's review instead of guessing.
+- Purchase-cost rates were compiled from public information in October 2026 and are indicative.
 
-- **All data is synthetic.** Every person, plot, khatian, deed, case, mortgage and NID is fictional (NIDs are dummy numbers like `0000000001`). Only district and upazila names are real. No government portal is accessed, scraped or queried.
-- **Decision support, not legal advice.** Every report says so and directs the buyer to the AC Land office, sub-registry and a lawyer.
-- **The AI never decides the risk.** Rules do, and every rule is visible. Uploaded documents are processed in memory and never stored.
-- **ML accuracy is synthetic.** The model must be retrained on real, authorised transaction data.
-- **Mouza map outlines are generated**, not surveyed; real deployment needs digital cadastral maps from DLRS.
-- **Inheritance** is automatic for Muslim law only; for other owners JomiCheck asks for a lawyer's review instead of guessing.
-- Purchase-cost rates in `backend/costs/rates.py` were compiled from public information in October 2026 and are indicative.
+**Future work**
 
-## Future Work
+- **Connect authorised government APIs** — e-Porcha, e-Mutation, land development tax and sub-registry deed records — in place of the synthetic database.
+- **Self-hosted Gemma** on government servers so citizen documents never leave the country, with an offline reader as fallback.
+- **Hindu (Dayabhaga) and Christian inheritance**, and more documents (DCR, mutation order, heirship certificate).
+- **SMS alerts** for plot watch, HTTPS with a domain, and a Bangla report format tuned for banks.
+- **Real cadastral maps** from DLRS and retraining the anomaly model on real transfers.
+- **Legal review** of every rule with a practising land lawyer, and user testing with buyers and deed writers; a pilot in one upazila with the AC Land office.
 
-- Connect authorised **e-Porcha, e-Mutation, land tax and sub-registry** APIs in place of the synthetic database
-- **Hindu (Dayabhaga) and Christian** inheritance rules; more documents (DCR, mutation order, heirship certificate)
-- **SMS alerts** for plot watch, HTTPS with a domain, a Bangla report format tuned for banks
-- **Self-hosted Gemma** for privacy, and an offline reader when the cloud model is unavailable
-- Real **cadastral maps** and retraining the anomaly model on real transfers
-- Legal review of every rule with a practising land lawyer; user testing with buyers and deed writers
+**Legal sources:** Registration Act 1908, Transfer of Property Act 1882, State Acquisition and Tenancy Act 1950, Land Crime Prevention and Remedy Act 2023, Land Development Tax Act 2023, Power of Attorney Act 2012, Acquisition and Requisition of Immovable Property Act 2017, Vested Property Return Act 2001, Guardians and Wards Act 1890, CPC Order XXXIX, Penal Code 1860 and Muslim personal law (Faraiz).
 
-## Legal References
-
-The rule catalog (`backend/verification/catalog.py`) cites the Registration Act 1908 (s.17A, s.52A), Transfer of Property Act 1882 (s.53C, s.58), State Acquisition and Tenancy Act 1950 (s.96, s.145A), Land Crime Prevention and Remedy Act 2023, Land Development Tax Act 2023, Power of Attorney Act 2012, Acquisition and Requisition of Immovable Property Act 2017, Vested Property Return Act 2001, Guardians and Wards Act 1890, Code of Civil Procedure Order XXXIX, Penal Code 1860 (ss.467, 471) and Muslim personal law (Faraiz).
-
-## AI Tools Used
-
-- **Cursor (AI coding assistant)** helped scaffold the Django and Next.js projects, draft code for the engine, data generator, API and UI, and write tests and documentation. All code was reviewed, run and tested by the team.
-- **Gemma 4 (Google AI Studio)** is part of the product: it reads uploaded documents and answers questions about a report, using synthetic data only. It never sets the risk score.
-
-## Open-Source Libraries
-
-Django (BSD-3), Django REST Framework (BSD-3), django-cors-headers (MIT), qrcode (BSD), RapidFuzz (MIT), Pillow (MIT-CMU), google-genai (Apache-2.0), pypdfium2 (Apache-2.0/BSD-3), scikit-learn (BSD-3), NumPy (BSD-3), joblib (BSD-3), Next.js (MIT), React (MIT), Tailwind CSS (MIT), lucide-react (ISC), IBM Plex and Noto Sans Bengali fonts (SIL OFL 1.1).
-
-## Team
-
-| Role | Name |
-|---|---|
-| Team Leader | _[Name]_ |
-| Member | _[Name]_ |
-| Faculty Mentor | _[Name], [University]_ |
+**AI tools used:** Cursor helped scaffold the projects, draft code and write tests and documentation; all code was reviewed, run and tested by the team. Gemma 4 is part of the product and only ever sees synthetic data.
 
 ---
 
