@@ -3,7 +3,7 @@
 import { AlertCircle, Check, Loader2, ScanText, Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { useDemoCases } from "@/components/DemoCases";
 import { ApiError, api, buyerToken, type DemoCase, type District } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
@@ -67,6 +67,15 @@ export default function VerifyPage() {
       cancelled = true;
     };
   }, [form.mouza]);
+
+  // Cache Components keeps this page alive after router.push; clear the progress view when it is hidden.
+  useLayoutEffect(
+    () => () => {
+      setLoading(false);
+      setStep(0);
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!loading) return;

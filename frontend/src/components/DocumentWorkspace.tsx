@@ -3,7 +3,7 @@
 import { AlertTriangle, CheckCircle2, FileImage, FileSearch, Loader2, ScanText, Search, Upload, X, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { DocumentCheckCard } from "@/components/report/DocumentCheckCard";
 import { api, buyerToken, type DocumentCheck, type DocumentFields, type ExtractedDocument } from "@/lib/api";
 import { useLang } from "@/lib/i18n";
@@ -79,6 +79,9 @@ export function DocumentWorkspace({ mode }: { mode: WorkspaceMode }) {
   const [form, setForm] = useState({ dag: "", khatian: "", seller: "", area: "" });
   const [showForm, setShowForm] = useState(!checking);
   const [elapsed, setElapsed] = useState(0);
+
+  // Cache Components keeps this page alive after router.push; clear the progress state when it is hidden.
+  useLayoutEffect(() => () => setVerifying(false), []);
 
   useEffect(() => {
     if (!reading) return;
