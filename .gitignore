@@ -20,6 +20,3 @@ frontend/out/
 .vscode/
 .idea/
 .DS_Store
-
-# Build previews
-build/*.png
