@@ -1,3 +1,5 @@
+<div align="center">
+
 # JomiCheck — Check Before You Buy Land
 
 **Enter a mouza, dag number and seller's name — or snap the seller's papers. Get a lawyer-grade risk report, with the law behind every finding, in under a minute.**
@@ -9,6 +11,8 @@ _LandTech Innovation Hackathon 2026 · Digital Land Records, Verification & Digi
 ![Model](https://img.shields.io/badge/Model-Gemma_4-4285F4?logo=google) ![Backend](https://img.shields.io/badge/Backend-Django_6-0C4B33?logo=django) ![Frontend](https://img.shields.io/badge/Frontend-Next.js_16-black?logo=next.js) ![ML](https://img.shields.io/badge/ML-scikit--learn-F7931E?logo=scikitlearn) ![Deploy](https://img.shields.io/badge/Deploy-AWS_EC2-FF9900?logo=amazonaws) ![Tests](https://img.shields.io/badge/Tests-71_passing-2ea44f)
 
 ![JomiCheck thumbnail](docs/thumbnail.png)
+
+</div>
 
 ## Problem Statement
 
