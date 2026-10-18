@@ -4,11 +4,11 @@
 
 **Enter a mouza, dag number and seller's name — or snap the seller's papers. Get a lawyer-grade risk report, with the law behind every finding, in under a minute.**
 
-[Live App](http://13.229.100.183) · [Demo Video](#) · [Sample Papers](frontend/public/samples)
+[Live App](https://jomicheck.abdnoman.com) · [Demo Video](#) · [Sample Papers](frontend/public/samples)
 
 _LandTech Innovation Hackathon 2026 · Digital Land Records, Verification & Digitization · Problem P5 (Citizen Pre-Purchase Verification) with P3 (Fraud & Double-Selling Detection)_
 
-![Model](https://img.shields.io/badge/Model-Gemma_4-4285F4?logo=google) ![Backend](https://img.shields.io/badge/Backend-Django_6-0C4B33?logo=django) ![Frontend](https://img.shields.io/badge/Frontend-Next.js_16-black?logo=next.js) ![ML](https://img.shields.io/badge/ML-scikit--learn-F7931E?logo=scikitlearn) ![Deploy](https://img.shields.io/badge/Deploy-AWS_EC2-FF9900?logo=amazonaws) ![Tests](https://img.shields.io/badge/Tests-71_passing-2ea44f)
+![Model](https://img.shields.io/badge/Model-Gemma_4-4285F4?logo=google) ![Backend](https://img.shields.io/badge/Backend-Django_6-0C4B33?logo=django) ![Frontend](https://img.shields.io/badge/Frontend-Next.js_16-black?logo=next.js) ![ML](https://img.shields.io/badge/ML-scikit--learn-F7931E?logo=scikitlearn) ![Deploy](https://img.shields.io/badge/Deploy-AWS_EC2-FF9900?logo=amazonaws) ![Tests](https://img.shields.io/badge/Tests-76_passing-2ea44f)
 
 ![JomiCheck thumbnail](docs/thumbnail.png)
 
@@ -85,7 +85,7 @@ Gemma reads what humans hand over — photos of khatians, deeds and tax receipts
 
 **Risk scoring:** **Critical** findings (seller not the owner, double selling, khas land, acquisition, injunction, invalid POA, forged paper) add 35–40 points and force **HIGH**. **Major** findings (litigation, survey break, over-selling, minor's land, mortgage, rapid transfers, missing mutation, prior bainanama, ML signal) add 20–30. **Minor** findings (pre-emption, wrong khatian, under-priced deed, tax arrears, other buyers checking) add 5–10. LOW 0–30 · MEDIUM 31–60 · HIGH 61–100.
 
-**Stack summary:** Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 (frontend) · Django 6 + Django REST Framework, Python 3.12+ (backend) · Gemma 4 via Google AI Studio (document reading, assistant) · scikit-learn + RapidFuzz (ML, name matching) · SHA-256 + QR (integrity) · SQLite, PostgreSQL-ready · AWS EC2 with nginx, gunicorn and systemd, installed by one script.
+**Stack summary:** Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 (frontend) · Django 6 + Django REST Framework, Python 3.12+ (backend) · Gemma 4 via Google AI Studio (document reading, assistant) · scikit-learn + RapidFuzz (ML, name matching) · SHA-256 + QR (integrity) · SQLite, PostgreSQL-ready · AWS EC2 with nginx, gunicorn, systemd and Let's Encrypt HTTPS, installed by one script.
 
 ## User Flow
 
@@ -146,10 +146,10 @@ npm install && npm run dev            # open http://localhost:3000
 
 ```bash
 # copy the project to /opt/jomicheck on an Ubuntu server, add LLM_* to backend/.env, then:
-cd /opt/jomicheck && bash deploy/setup.sh <public-ip-or-domain>
+cd /opt/jomicheck && bash deploy/setup.sh <public-ip-or-domain> [email]
 ```
 
-Installs Python, Node and nginx, generates a secret key, migrates and seeds an empty database, trains the ML model, builds the frontend and starts everything under systemd. Open port 80 in the security group.
+Installs Python, Node and nginx, generates a secret key, migrates and seeds an empty database, trains the ML model, builds the frontend and starts everything under systemd. With a domain and an email it also gets a free Let's Encrypt certificate and redirects HTTP to HTTPS. Open ports 80 and 443 in the security group, and attach an Elastic IP so the address never changes.
 
 ### Option C — Useful commands
 
@@ -218,7 +218,7 @@ For forged papers, open `/check-documents` and pick a sample set: a forged khati
 - **Connect authorised government APIs** — e-Porcha, e-Mutation, land development tax and sub-registry deed records — in place of the synthetic database.
 - **Self-hosted Gemma** on government servers so citizen documents never leave the country, with an offline reader as fallback.
 - **Hindu (Dayabhaga) and Christian inheritance**, and more documents (DCR, mutation order, heirship certificate).
-- **SMS alerts** for plot watch, HTTPS with a domain, and a Bangla report format tuned for banks.
+- **SMS alerts** for plot watch and a Bangla report format tuned for banks.
 - **Real cadastral maps** from DLRS and retraining the anomaly model on real transfers.
 - **Legal review** of every rule with a practising land lawyer, and user testing with buyers and deed writers; a pilot in one upazila with the AC Land office.
 
