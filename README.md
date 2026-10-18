@@ -227,4 +227,8 @@ For forged papers, open `/check-documents` and pick a sample set: a forged khati
 
 ---
 
+<div align="center">
+
 Developed by **Team Semicolons** · Built for land buyers of Bangladesh · **LandTech Innovation Hackathon 2026**
+
+</div>
